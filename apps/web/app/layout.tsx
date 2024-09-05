@@ -24,7 +24,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        {children}
+        <div className="mt-12 flex flex-col justify-center items-center">
+          {children}
+        </div>
       </body>
     </html>
   );
