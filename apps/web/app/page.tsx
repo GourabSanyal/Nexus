@@ -1,10 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Moon, Sun, Copy, Eye, EyeOff, Plus, Trash, Edit2 } from "lucide-react";
+import { Copy, Eye, EyeOff, Plus, Trash, Edit2 } from "lucide-react";
 import { Button } from "./components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
-import { Switch } from "./components/ui/switch";
 import {
   Dialog,
   DialogContent,
@@ -18,6 +17,7 @@ import { Wallet } from "./types/wallet";
 import { ThemeProvider, useTheme } from "./lib/utils/ThemeContext";
 import { Keypair } from "@solana/web3.js";
 import nacl from "tweetnacl";
+import { Toaster, toast } from 'sonner'
 
 
 const CryptoWalletContent = () => {
@@ -25,7 +25,7 @@ const CryptoWalletContent = () => {
   const [showPrivateKey, setShowPrivateKey] = useState<Record<number, boolean>>(
     {}
   );
-  const { isDarkMode, toggleTheme } = useTheme(); 
+  const { isDarkMode } = useTheme(); 
 
   useEffect(() => {
     document.body.classList.toggle("dark", isDarkMode);
@@ -51,6 +51,7 @@ const CryptoWalletContent = () => {
 
   const deleteWallet = (id: number) => {
     setWallets(wallets.filter((wallet) => wallet.id !== id));
+    toast.success("Wallet deleted successfully");
   };
 
   const editWalletName = (id: number, newName: string) => {
@@ -59,10 +60,13 @@ const CryptoWalletContent = () => {
         wallet.id === id ? { ...wallet, name: newName } : wallet
       )
     );
+    toast.success("Wallet name updated successfully");
   };
 
-  const copyToClipboard = (text: string) => {
+  const copyToClipboard = (text: string, keyType: string) => {
+    console.log("copyToClipboard", text);
     navigator.clipboard.writeText(text);
+    toast.success(`Copied ${keyType} to clipboard`);
   };
 
   const togglePrivateKey = (id: number) => {
@@ -79,7 +83,7 @@ const CryptoWalletContent = () => {
 
           <Button
             onClick={generateWallet} 
-            className="w-full sm:w-auto mb-6 py-3 px-6 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-500 transition-colors duration-300"
+            className="w-full sm:w-auto mb-6 py-3 px-6 bg-gray-200 text-black font-semibold rounded-lg hover:bg-gray-350 transition-colors duration-300"
           >
             <Plus className="inline-block mr-2 h-5 w-5" /> Generate Wallet
           </Button>
@@ -128,7 +132,7 @@ const CryptoWalletContent = () => {
                         variant="ghost"
                         size="icon"
                         className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
-                        onClick={() => copyToClipboard(wallet.publicKey)}
+                        onClick={() => copyToClipboard(wallet.publicKey, "public key")}
                       >
                         <Copy className="h-5 w-5" />
                       </Button>
@@ -183,7 +187,7 @@ const CryptoWalletContent = () => {
                           variant="ghost"
                           size="icon"
                           className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
-                          onClick={() => copyToClipboard(wallet.privateKey)}
+                          onClick={() => copyToClipboard(wallet.privateKey, "private key")}
                         >
                           <Copy className="h-5 w-5" />
                         </Button>
@@ -210,6 +214,7 @@ const CryptoWalletContent = () => {
 const CryptoWallet = () => {
   return (
     <ThemeProvider>
+      <Toaster />
       <CryptoWalletContent />
     </ThemeProvider>
   );
