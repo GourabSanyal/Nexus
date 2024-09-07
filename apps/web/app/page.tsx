@@ -1,7 +1,7 @@
-"use client";
+"use client"
 
 import React, { useState, useEffect } from "react";
-import { Copy, Eye, EyeOff, Plus, Trash, Edit2 } from "lucide-react";
+import { Copy, Eye, EyeOff, Plus, Trash, Edit2, Moon, Sun } from "lucide-react";
 import { Button } from "./components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
 import {
@@ -16,27 +16,20 @@ import {
 import { Wallet } from "./types/wallet";
 import { ThemeProvider, useTheme } from "./lib/utils/ThemeContext";
 import { Keypair } from "@solana/web3.js";
-import nacl from "tweetnacl";
 import { Toaster, toast } from 'sonner'
-
+import { motion, AnimatePresence } from 'framer-motion';
 
 const CryptoWalletContent = () => {
   const [wallets, setWallets] = useState<Wallet[]>([]);
-  const [showPrivateKey, setShowPrivateKey] = useState<Record<number, boolean>>(
-    {}
-  );
-  const { isDarkMode } = useTheme(); 
+  const [showPrivateKey, setShowPrivateKey] = useState<Record<number, boolean>>({});
+  const { isDarkMode, toggleTheme } = useTheme();
 
   useEffect(() => {
     document.body.classList.toggle("dark", isDarkMode);
   }, [isDarkMode]);
 
- 
   const generateWallet = () => {
-    // Generate a new keypair
     const keypair = Keypair.generate();
-
-    // Extract the public and private keys
     const publicKey = keypair.publicKey.toBase58();
     const secretKey = Buffer.from(keypair.secretKey).toString('base64');
 
@@ -47,6 +40,7 @@ const CryptoWalletContent = () => {
       privateKey: secretKey,
     };
     setWallets([...wallets, newWallet]);
+    toast.success("New wallet generated");
   };
 
   const deleteWallet = (id: number) => {
@@ -64,7 +58,6 @@ const CryptoWalletContent = () => {
   };
 
   const copyToClipboard = (text: string, keyType: string) => {
-    console.log("copyToClipboard", text);
     navigator.clipboard.writeText(text);
     toast.success(`Copied ${keyType} to clipboard`);
   };
@@ -74,34 +67,45 @@ const CryptoWalletContent = () => {
   };
 
   return (
-    <>
-      <div className="container flex flex-col justify-start">
-        <div className="max-w-3xl w-full mx-auto">
-          <div className="flex flex-col sm:flex-row justify-between items-center mb-8">
-            <h1 className="text-2xl font-bold mb-4 sm:mb-0">Nexus</h1>
-          </div>
-
+    <div className="container flex flex-col justify-start min-h-screen transition-colors duration-300">
+      <div className="max-w-3xl w-full mx-auto">
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-8">
+          <h1 className="text-2xl font-bold mb-4 sm:mb-0">Nexus</h1>
           <Button
-            onClick={generateWallet} 
-            className="w-full sm:w-auto mb-6 py-3 px-6 bg-gray-200 text-black font-semibold rounded-lg hover:bg-gray-350 transition-colors duration-300"
+            onClick={toggleTheme}
+            variant="outline"
+            size="icon"
+            className="rounded-full p-2"
           >
-            <Plus className="inline-block mr-2 h-5 w-5" /> Generate Wallet
+            {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </Button>
-          <div className="grid grid-cols-1 gap-6">
-            {wallets.map((wallet) => (
-              <Card
-                key={wallet.id}
-                className="w-full border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm transition-shadow hover:shadow-lg dark:bg-gray-800"
-              >
+        </div>
+
+        <Button
+          onClick={generateWallet} 
+          className="w-full sm:w-auto mb-6 py-3 px-6 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-colors duration-300"
+        >
+          <Plus className="inline-block mr-2 h-5 w-5" /> Generate Wallet
+        </Button>
+        <AnimatePresence>
+          {wallets.map((wallet) => (
+            <motion.div
+              key={wallet.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Card className="w-full mb-6 border border-border rounded-lg shadow-sm transition-shadow hover:shadow-lg bg-card text-card-foreground">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                  <CardTitle className="text-md font-semibold text-gray-900 dark:text-gray-100">
+                  <CardTitle className="text-md font-semibold">
                     {wallet.name}
                   </CardTitle>
                   <div className="flex space-x-3">
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+                      className="text-muted-foreground hover:text-foreground"
                       onClick={() => {
                         const newName = prompt(
                           "Enter new wallet name:",
@@ -115,7 +119,7 @@ const CryptoWalletContent = () => {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400"
+                      className="text-muted-foreground hover:text-destructive"
                       onClick={() => deleteWallet(wallet.id)}
                     >
                       <Trash className="h-5 w-5" />
@@ -125,25 +129,25 @@ const CryptoWalletContent = () => {
                 <CardContent>
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <span className="text-sm font-medium text-muted-foreground">
                         Public Key:
                       </span>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+                        className="text-muted-foreground hover:text-foreground"
                         onClick={() => copyToClipboard(wallet.publicKey, "public key")}
                       >
                         <Copy className="h-5 w-5" />
                       </Button>
                     </div>
-                    <div className="bg-gray-100 dark:bg-gray-700 p-3 rounded-md overflow-x-auto">
-                      <code className="text-xs text-gray-800 dark:text-gray-200">
+                    <div className="bg-muted p-3 rounded-md overflow-x-auto">
+                      <code className="text-xs text-muted-foreground">
                         {wallet.publicKey}
                       </code>
                     </div>  
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <span className="text-sm font-medium text-muted-foreground">
                         Private Key:
                       </span>
                       <div className="flex space-x-3">
@@ -152,7 +156,7 @@ const CryptoWalletContent = () => {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+                              className="text-muted-foreground hover:text-foreground"
                             >
                               {showPrivateKey[wallet.id] ? (
                                 <EyeOff className="h-5 w-5" />
@@ -163,10 +167,10 @@ const CryptoWalletContent = () => {
                           </DialogTrigger>
                           <DialogContent>
                             <DialogHeader>
-                              <DialogTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                              <DialogTitle className="text-lg font-semibold">
                                 Warning
                               </DialogTitle>
-                              <DialogDescription className="text-sm text-gray-600 dark:text-gray-400">
+                              <DialogDescription className="text-sm text-muted-foreground">
                                 Sharing your private key with anyone might risk
                                 your funds. Are you sure you want to view it?
                               </DialogDescription>
@@ -175,7 +179,7 @@ const CryptoWalletContent = () => {
                               <DialogClose asChild>
                                 <Button
                                   onClick={() => togglePrivateKey(wallet.id)}
-                                  className="py-2 px-4 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-500 transition-colors duration-300"
+                                  className="py-2 px-4 bg-destructive text-destructive-foreground font-semibold rounded-lg hover:bg-destructive/90 transition-colors duration-300"
                                 >
                                   {showPrivateKey[wallet.id] ? "Hide Private Key" : "View Private Key"}
                                 </Button>
@@ -186,15 +190,15 @@ const CryptoWalletContent = () => {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+                          className="text-muted-foreground hover:text-foreground"
                           onClick={() => copyToClipboard(wallet.privateKey, "private key")}
                         >
                           <Copy className="h-5 w-5" />
                         </Button>
                       </div>
                     </div>
-                    <div className="bg-gray-100 dark:bg-gray-700 p-3 rounded-md overflow-x-auto">
-                      <code className="text-xs text-gray-800 dark:text-gray-200">
+                    <div className="bg-muted p-3 rounded-md overflow-x-auto">
+                      <code className="text-xs text-muted-foreground">
                         {showPrivateKey[wallet.id]
                           ? wallet.privateKey
                           : "••••••••••••••••"}
@@ -203,11 +207,11 @@ const CryptoWalletContent = () => {
                   </div>
                 </CardContent>
               </Card>
-            ))}
-          </div>
-        </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
-    </>
+    </div>
   );
 };
 
