@@ -84,7 +84,7 @@ body,
 .card,
 .button,
 .dialog {
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  transition: background-color 0.3s ease, color 0.01s ease, border-color 0.3s ease;
 }
 
 /* Animation for wallet generation and deletion */
@@ -111,9 +111,9 @@ body,
 }
 
 .wallet-card {
-  animation: fadeInUp 0.3s ease-out;
+  animation: fadeInUp 0.1s ease-out;
 }
 
 .wallet-card.deleting {
-  animation: fadeOutDown 0.3s ease-in;
+  animation: fadeOutDown 0.1s ease-in;
 }
