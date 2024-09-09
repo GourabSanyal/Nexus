@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "../button";
+import { Button } from "../button/button";
 import { Sun, Moon } from "lucide-react";
 
 interface WalletHeaderProps {

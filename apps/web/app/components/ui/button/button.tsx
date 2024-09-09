@@ -1,5 +1,5 @@
 import * as React from "react"
-import { cn } from "../../lib/utils/cn"
+import { cn } from "../../../lib/utils/cn"
 
 const Button = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: "default" | "ghost"

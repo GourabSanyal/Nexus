@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Copy, Eye, EyeOff, Trash, Edit2, } from "lucide-react";
-import { Button } from "../button";
-import { Card, CardContent, CardHeader, CardTitle } from "../card";
+import { Button } from "../button/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../card/card";
 import {
   Dialog,
   DialogContent,
@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogClose,
-} from "../dialog";
+} from "../dialog/dialog";
 import { Wallet } from "../../../types/wallet";
 import { useTheme } from "../../../lib/utils/ThemeContext";
 import { Keypair } from "@solana/web3.js";
