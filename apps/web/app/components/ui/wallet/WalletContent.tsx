@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Copy, Eye, EyeOff, Trash, Edit2, } from "lucide-react";
+import { Copy, Eye, EyeOff, Trash, Edit2 } from "lucide-react";
 import { Button } from "../button/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../card/card";
 import {
@@ -14,31 +14,53 @@ import {
 import { Wallet } from "../../../types/wallet";
 import { useTheme } from "../../../lib/utils/ThemeContext";
 import { Keypair } from "@solana/web3.js";
-import {  toast } from 'sonner'
-import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
 import WalletHeader from "../header/WalletHeader";
 import { WalletActions } from "../actions/WalletActions";
-
+import { generateMnemonic, mnemonicToSeed } from "bip39";
+import { derivePath } from "ed25519-hd-key";
+import nacl from "tweetnacl";
 
 export const CryptoWalletContent = () => {
   const [wallets, setWallets] = useState<Wallet[]>([]);
-  const [showPrivateKey, setShowPrivateKey] = useState<Record<number, boolean>>({});
+  const [showPrivateKey, setShowPrivateKey] = useState<Record<number, boolean>>(
+    {}
+  );
   const { isDarkMode, toggleTheme } = useTheme();
+  const [mneumonic, setMneumonic] = useState<string>("");
 
   useEffect(() => {
     document.body.classList.toggle("dark", isDarkMode);
   }, [isDarkMode]);
 
-  const generateWallet = () => {
-    const keypair = Keypair.generate();
+  const generateWallet = async () => {
+    // genearate a mneumonic
+    const mneumonic = generateMnemonic();
+
+    // convert mneumonic to seed
+    const seed = await mnemonicToSeed(mneumonic);
+
+    //derivation path fopr solana
+    const path = "m/44'/501'/0'";
+
+    // drived seed using bip44 path
+    const derivedSeed = derivePath(path, seed.toString("hex")).key;
+
+    // use nacl to generate keypair
+    const secret = nacl.sign.keyPair.fromSeed(derivedSeed).secretKey;
+
+    const keypair = Keypair.fromSecretKey(secret);
     const publicKey = keypair.publicKey.toBase58();
-    const secretKey = Buffer.from(keypair.secretKey).toString('base64');
+    const secretKey = Buffer.from(keypair.secretKey).toString("base64");
 
     const newWallet = {
       id: Date.now(),
       name: `Wallet ${wallets.length + 1}`,
       publicKey: publicKey,
       privateKey: secretKey,
+      mneumonic: mneumonic,
+      path: path,
     };
     setWallets([...wallets, newWallet]);
     toast.success("New wallet generated");
@@ -121,7 +143,9 @@ export const CryptoWalletContent = () => {
                         variant="ghost"
                         size="icon"
                         className="text-muted-foreground hover:text-foreground"
-                        onClick={() => copyToClipboard(wallet.publicKey, "public key")}
+                        onClick={() =>
+                          copyToClipboard(wallet.publicKey, "public key")
+                        }
                       >
                         <Copy className="h-5 w-5" />
                       </Button>
@@ -130,7 +154,7 @@ export const CryptoWalletContent = () => {
                       <code className="text-xs text-muted-foreground">
                         {wallet.publicKey}
                       </code>
-                    </div>  
+                    </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm font-medium text-muted-foreground">
                         Private Key:
@@ -166,7 +190,9 @@ export const CryptoWalletContent = () => {
                                   onClick={() => togglePrivateKey(wallet.id)}
                                   className="py-2 px-4 bg-destructive text-destructive-foreground font-semibold rounded-lg hover:bg-destructive/90 transition-colors duration-300"
                                 >
-                                  {showPrivateKey[wallet.id] ? "Hide Private Key" : "View Private Key"}
+                                  {showPrivateKey[wallet.id]
+                                    ? "Hide Private Key"
+                                    : "View Private Key"}
                                 </Button>
                               </DialogClose>
                             </div>
@@ -176,7 +202,9 @@ export const CryptoWalletContent = () => {
                           variant="ghost"
                           size="icon"
                           className="text-muted-foreground hover:text-foreground"
-                          onClick={() => copyToClipboard(wallet.privateKey, "private key")}
+                          onClick={() =>
+                            copyToClipboard(wallet.privateKey, "private key")
+                          }
                         >
                           <Copy className="h-5 w-5" />
                         </Button>
