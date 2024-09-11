@@ -5,6 +5,7 @@ interface Wallet {
     privateKey: string;
     mneumonic: string;
     path: string;
+    type: 'solana' | 'ethereum';
   }
 
 export type { Wallet }
