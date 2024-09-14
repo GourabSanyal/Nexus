@@ -1,4 +1,12 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
+import NodePolyfillPlugin from 'node-polyfill-webpack-plugin'
+
+const nextConfig = {
+    webpack:(config) => {
+        config.plugins.push(new NodePolyfillPlugin())
+
+        return config
+    }
+};
 
 export default nextConfig;
