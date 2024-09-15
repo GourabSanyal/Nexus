@@ -1,20 +1,18 @@
-import React from 'react'
-import { Wallet } from '@/app/types/wallet'
-import { SingleWallet } from './SingleWallet';
+import React from "react";
+import SingleWallet from "./SingleWallet";
 
 interface SolanaWalletProps {
-    mneumonic: string
+  mnemonic: string;
+  generateWallet?: () => void;
 }
 
-const SolanaWallet = ({ mneumonic} : SolanaWalletProps) => {
-  return (    
-    <div>SolanaWallet
-
-    <div className="div">
-    <SingleWallet mneumonic={mneumonic} />
+const SolanaWallet = ({ mnemonic }: SolanaWalletProps) => {
+  const solanaPath: string = "60";
+  return (
+    <div>
+      <SingleWallet mnemonic={mnemonic} path={solanaPath} />
     </div>
-    </div>
-  )
-}
+  );
+};
 
-export default SolanaWallet
+export default SolanaWallet;
