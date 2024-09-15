@@ -1,20 +1,16 @@
-import React from 'react'
+import React from "react";
+import SingleWallet from "./SingleWallet";
 
 interface EthereumWalletProps {
-  mneumonic: string
+  mnemonic: string;
 }
-const EthereumWallet = ({ mneumonic }: EthereumWalletProps) => {
-
-return (
-    <div>EthereumWallet
-    <div className="div">
-    
-    {/* <SingleWallet /> */}
+const EthereumWallet = ({ mnemonic }: EthereumWalletProps) => {
+  const ethPath : string = "501";
+  return (
+    <div>
+      <SingleWallet mnemonic={mnemonic} path={ethPath} />
     </div>
-    </div>
-        
-  )
-}
+  );
+};
 
-
-export default EthereumWallet
+export default EthereumWallet;
