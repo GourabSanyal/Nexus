@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { Button } from "../button/button";
 import { Card, CardHeader, CardTitle, CardContent } from "../card/card";
 import {
@@ -12,22 +12,25 @@ import {
   DialogTrigger,
   DialogClose,
 } from "../dialog/dialog";
-import { Edit2, Trash, Copy, Eye, EyeOff } from "lucide-react";
+import { Edit2, Trash, Copy, Eye, EyeOff, Plus } from "lucide-react";
 import { Wallet } from "@/app/types/wallet";
 import { toast } from "sonner";
 
 interface SingleWalletProps {
-  mneumonic: string;
+  mnemonic: string;
   path: string;
 }
 
-const SingleWallet = ({ mneumonic, path }: SingleWalletProps) => {
+const SingleWallet = ({ mnemonic, path }: SingleWalletProps) => {
   const [wallets, setWallets] = useState<Wallet[]>([]);
   const [showPrivateKey, setShowPrivateKey] = useState<Record<number, boolean>>(
     {}
   );
 
-  console.log("mneumonic in single wallet -> ", mneumonic);
+  //   console.log("mnemonic in single wallet -> ", mnemonic);
+  const generateWallet = () => {
+    console.log("gen wallet called");
+  };
 
   const deleteWallet = (id: number) => {
     setWallets(wallets.filter((wallet: Wallet) => wallet.id !== id));
@@ -53,6 +56,14 @@ const SingleWallet = ({ mneumonic, path }: SingleWalletProps) => {
   };
   return (
     <>
+      {mnemonic ? (
+          <Button
+            onClick={generateWallet}
+            className="w-full sm:w-auto mb-6 py-3 px-6 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-colors duration-300"
+          >
+            <Plus className="inline-block mr-2 h-5 w-5" /> Generate SOL Wallet
+          </Button>
+      ) : null}
       {wallets.map((wallet) => (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
