@@ -5,7 +5,7 @@ interface EthereumWalletProps {
   mnemonic: string;
 }
 const EthereumWallet = ({ mnemonic }: EthereumWalletProps) => {
-  const ethPath : string = "501";
+  const ethPath : string = "60";
   return (
     <div>
       <SingleWallet mnemonic={mnemonic} path={ethPath} />
