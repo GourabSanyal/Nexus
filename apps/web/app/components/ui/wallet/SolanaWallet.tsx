@@ -7,7 +7,7 @@ interface SolanaWalletProps {
 }
 
 const SolanaWallet = ({ mnemonic }: SolanaWalletProps) => {
-  const solanaPath: string = "60";
+  const solanaPath: string = "501";
   return (
     <div>
       <SingleWallet mnemonic={mnemonic} path={solanaPath} />
