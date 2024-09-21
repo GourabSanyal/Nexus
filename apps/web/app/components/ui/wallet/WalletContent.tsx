@@ -14,6 +14,8 @@ import { generateMnemonic } from "bip39";
 
 import SolanaWallet from "./SolanaWallet";
 import EthereumWallet from "./EthereumWallet";
+import SeedPhraseContainer from "./SeedPhraseContainer";
+
 export const CryptoWalletContent = () => {
   const [showSeedPhrase, setShowSeedPhrase] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<"solana" | "ethereum">("solana");
@@ -24,9 +26,17 @@ export const CryptoWalletContent = () => {
     document.body.classList.toggle("dark", isDarkMode);
   }, [isDarkMode]);
 
+  useEffect(() => {
+    const storedMnemonic = localStorage.getItem("mnemonic")
+    if (storedMnemonic) {
+      setMnemonic(storedMnemonic); // Set the mnemonic from localStorage if it exists
+    }
+  }, [])
+
   const generateWallet = async () => {
     const newMnemonic = generateMnemonic();
     setMnemonic(newMnemonic);
+    localStorage.setItem("mnemonic", mnemonic);
     toast.success("New wallet generated");
   };
 
@@ -40,72 +50,7 @@ export const CryptoWalletContent = () => {
       <div className="max-w-3xl w-full mx-auto">
         <WalletHeader toggleTheme={toggleTheme} isDarkMode={isDarkMode} />
         {!mnemonic ? <WalletActions generateWallet={generateWallet} /> : null}
-        {mnemonic ? (
-          <AnimatePresence mode="wait">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Card className="mb-6 bg-card text-card-foreground">
-                <CardHeader>
-                  <CardTitle>Crypto Wallet Generator</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="mb-4">
-                    {mnemonic && (
-                      <div className="mb-4 p-4 bg-muted rounded-md">
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="font-semibold">Seed Phrase:</span>
-                          <Button
-                            variant="ghost"
-                            // size="sm"
-                            onClick={() => setShowSeedPhrase(!showSeedPhrase)}
-                          >
-                            {showSeedPhrase ? (
-                              <EyeOff size={16} />
-                            ) : (
-                              <Eye size={16} />
-                            )}
-                          </Button>
-                        </div>
-                        <div
-                          className="text-sm cursor-pointer"
-                          onClick={() =>
-                            copyToClipboard(mnemonic, "seed phrase")
-                          }
-                        >
-                          {showSeedPhrase
-                            ? mnemonic
-                            : "••••• ••••• ••••• •••••"}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* <SeedPhraseDisplay
-              seedPhrase={seedPhrase}
-              showSeedPhrase={showSeedPhrase}
-              setShowSeedPhrase={setShowSeedPhrase}
-              copyToClipboard={copyToClipboard}
-            /> */}
-                  <Tabs
-                    value={activeTab}
-                    onValueChange={(value: string) =>
-                      setActiveTab(value as "solana" | "ethereum")
-                    }
-                  >
-                    <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="solana">Solana</TabsTrigger>
-                      <TabsTrigger value="ethereum">Ethereum</TabsTrigger>
-                    </TabsList>
-                  </Tabs>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </AnimatePresence>
-        ) : null}
+        {mnemonic ? <SeedPhraseContainer mnemonic={mnemonic} /> : null}
         <AnimatePresence mode="wait">
           {activeTab === "solana" && <SolanaWallet mnemonic={mnemonic} />}
           {activeTab === "ethereum" && <EthereumWallet mnemonic={mnemonic} />}
