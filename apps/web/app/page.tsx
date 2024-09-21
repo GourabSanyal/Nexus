@@ -1,14 +1,18 @@
-"use client"
+"use client";
 
-import { ThemeProvider} from "./lib/utils/ThemeContext";
-import { Toaster } from 'sonner'
+import React from "react";
+import { RecoilRoot } from "recoil";
+import { ThemeProvider } from "./lib/utils/ThemeContext";
+import { Toaster } from "sonner";
 import { CryptoWalletContent } from "./components/ui/wallet/WalletContent";
 
 const CryptoWallet = () => {
   return (
     <ThemeProvider>
-      <Toaster />
-      <CryptoWalletContent />
+      <RecoilRoot>
+        <Toaster />
+        <CryptoWalletContent />
+      </RecoilRoot>
     </ThemeProvider>
   );
 };

@@ -1,0 +1,11 @@
+{
+  "name": "@my-org/store",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "types": "src/index.js",
+  "private": true,
+  "dependencies": {
+    "@types/recoil": "^0.0.9",
+    "recoil": "^0.7.7"
+  }
+}
