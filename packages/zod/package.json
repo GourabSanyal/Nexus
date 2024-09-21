@@ -1,0 +1,9 @@
+{
+    "name": "@my-org/zod",
+    "version": "1.0.0",
+    "main": "src/index.ts",
+    "private": true,
+    "dependencies": {
+        "zod": "^3.23.8"
+    }
+}
