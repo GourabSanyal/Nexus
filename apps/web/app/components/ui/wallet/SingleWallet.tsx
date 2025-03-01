@@ -20,11 +20,7 @@ import { derivePath } from "ed25519-hd-key";
 import nacl from "tweetnacl";
 import { ethers } from "ethers";
 import { Keypair } from "@solana/web3.js";
-
-interface SingleWalletProps {
-  mnemonic: string;
-  path: string;
-}
+import { SingleWalletProps } from "@/app/types/singleWallet";
 
 const SingleWallet = ({ mnemonic, path }: SingleWalletProps) => {
   const [solanaWallets, setSolanaWallets] = useState<Wallet[]>([]);
