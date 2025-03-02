@@ -1,9 +1,7 @@
 import React from "react";
 import SingleWallet from "./SingleWallet";
+import { EthereumWalletProps } from "@/app/types/ethWallet";
 
-interface EthereumWalletProps {
-  mnemonic: string;
-}
 const EthereumWallet = ({ mnemonic }: EthereumWalletProps) => {
   const ethPath : string = "60";
   return (
