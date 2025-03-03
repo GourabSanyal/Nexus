@@ -60,7 +60,7 @@ const SingleWallet = ({ mnemonic, path }: SingleWalletProps) => {
       const ethPrivateKey = Buffer.from(derivedSeed).toString("hex");
       const wallet = new ethers.Wallet(ethPrivateKey);
       const ethPublicKey = wallet.address;
-      addWallet("ethereum", ethPublicKey, ethPublicKey);
+      addWallet("ethereum", ethPublicKey, ethPrivateKey);
     } else {
       toast.warning("There was an issue, please try again after some time");
     }
