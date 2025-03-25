@@ -49,6 +49,7 @@
     "store": "*",
     "tailwindcss": "^3.4.10",
     "typescript": "^5",
+    "webpack": "^5.0.0",
     "zod": "*"
   }
 }
