@@ -180,17 +180,17 @@ const SingleWallet = ({ mnemonic, path }: SingleWalletProps) => {
                 size="icon"
                 className="text-muted-foreground hover:text-foreground"
                 onClick={() => {
-                  const newName = prompt("Enter new wallet name:", wallet.name);
-                  if (newName) editWalletName(wallet.id, newName);
+                  // const newName = prompt("Enter new wallet name:", wallet.name);
+                  // if (newName) editWalletName(wallet.id, newName);
                 }}
               >
-                <Edit2 className="h-5 w-5" />
+             <Edit2 className="h-5 w-5" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
                 className="text-muted-foreground hover:text-destructive"
-                onClick={() => deleteWallet(wallet.id)}
+                // onClick={() => deleteWallet(wallet.id)}
               >
                 <Trash className="h-5 w-5" />
               </Button>
