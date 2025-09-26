@@ -7,10 +7,13 @@ const ThemeContext = createContext({
 
 export const ThemeProvider = ({ children } : { children: React.ReactNode }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     const isDark = localStorage.getItem('darkMode') === 'true';
     setIsDarkMode(isDark);
+    setIsInitialized(true);
+    document.documentElement.classList.toggle('dark', isDark);
   }, []);
 
   const toggleTheme = () => {
