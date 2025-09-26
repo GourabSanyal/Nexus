@@ -23,6 +23,20 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                const isDark = localStorage.getItem('darkMode') === 'true';
+                if (isDark) {
+                  document.documentElement.classList.add('dark');
+                }
+              })();
+            `,
+          }}
+        />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <div className="mt-12 flex flex-col justify-center items-center">
           {children}
