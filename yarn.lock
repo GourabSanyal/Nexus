@@ -8094,6 +8094,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"recoil-persist@npm:^5.1.0":
+  version: 5.1.0
+  resolution: "recoil-persist@npm:5.1.0"
+  peerDependencies:
+    recoil: ^0.7.2
+  checksum: 10c0/76cf9c0a41511d50d5f7b5b8feaf5d1df275617aa9c4980a8517a1f364a83df63ac159d002e1da8d5dba402b138cb38cc196c44b010ebf3f5b4943945d008687
+  languageName: node
+  linkType: hard
+
 "recoil@npm:*, recoil@npm:^0.7.7":
   version: 0.7.7
   resolution: "recoil@npm:0.7.7"
@@ -9905,6 +9914,7 @@ __metadata:
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
     recoil: "npm:^0.7.7"
+    recoil-persist: "npm:^5.1.0"
     sonner: "npm:^1.5.0"
     store: "npm:*"
     tailwind-merge: "npm:^2.5.2"
