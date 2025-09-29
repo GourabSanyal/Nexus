@@ -14,6 +14,7 @@ const nextConfig = {
         '.json',
       ],
     },
+    suppressHydrationWarning: true,
   },
   reactStrictMode: true,
   transpilePackages: ["store", "zod"],
