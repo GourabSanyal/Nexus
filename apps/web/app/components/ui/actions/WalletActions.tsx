@@ -1,17 +1,11 @@
-import { Button } from "../button/button";
-import { Plus } from "lucide-react";
+import { WalletActionButton } from "./WalletActionButton";
+import { WalletActionsProps } from "@/app/types/wallet/WalletActionTypes";
 
-interface WalletActionsProps {
-  generateWallet: () => void;
-}
-
-export const WalletActions = ({ generateWallet }: WalletActionsProps) => {
+export const WalletActions = ({ generateWallet, importWallet }: WalletActionsProps) => {
   return (
-    <Button
-      onClick={generateWallet}
-      className="w-full sm:w-auto mb-6 py-3 px-6 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-colors duration-300"
-    >
-      <Plus className="inline-block mr-2 h-5 w-5" /> Generate Wallet
-    </Button>
+    <div className="flex flex-col sm:flex-row justify-center items-center w-full gap-4 sm:gap-6 mb-6 sm:mb-8">
+      <WalletActionButton actionType="generate" onClick={generateWallet} />
+      <WalletActionButton actionType="import" onClick={importWallet} />
+    </div>
   );
 };
