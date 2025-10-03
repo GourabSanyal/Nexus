@@ -1,12 +1,12 @@
 import React from "react";
 import SingleWallet from "./SingleWallet";
-import { EthereumWalletProps } from "@/app/types/ethWallet";
+import {WalletPath} from "@/app/constants/wallet"
 
-const EthereumWallet = ({ mnemonic }: EthereumWalletProps) => {
-  const ethPath : string = "60";
+const EthereumWallet = () => {
+  const ethPath : string = WalletPath.ETHEREUM;
   return (
     <div>
-      <SingleWallet mnemonic={mnemonic} path={ethPath} />
+      <SingleWallet path={ethPath} />
     </div>
   );
 };
