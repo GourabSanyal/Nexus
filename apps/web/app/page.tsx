@@ -2,7 +2,7 @@
 
 import React from "react";
 import { RecoilRoot } from "recoil";
-import { ThemeProvider } from "./lib/utils/ThemeContext";
+import { ThemeProvider } from "./lib/contexts/ThemeContext";
 import { Toaster } from "sonner";
 import { CryptoWalletContent } from "./components/ui/wallet/WalletContent";
 
