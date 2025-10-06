@@ -4,14 +4,18 @@
       "module": "ESNext",
       "moduleResolution": "Node",
       "outDir": "dist",
-      "rootDir": "src",
       "strict": true,
       "esModuleInterop": true,
       "skipLibCheck": true,
       "forceConsistentCasingInFileNames": true,
       "declaration": true,
       "declarationMap": true,
-      "emitDeclarationOnly": true
+      "emitDeclarationOnly": true,
+      "baseUrl": ".",
+      "paths": {
+        "@/*": ["../../apps/web/app/*"],
+        "@/constants/*": ["../../apps/web/app/constants/*"]
+      }
     },
     "include": ["src"],
     "exclude": ["node_modules"]
