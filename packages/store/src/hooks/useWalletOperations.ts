@@ -1,6 +1,7 @@
 import { useRecoilState } from 'recoil';
 import { walletState } from '../atoms/walletState';
 import { toast } from 'sonner';
+import { WalletPath } from '@/constants/wallet';
 
 export const useWalletOperations = () => {
   const [walletStateValue, setWalletState] = useRecoilState(walletState);
@@ -30,7 +31,7 @@ export const useWalletOperations = () => {
         privateKey,
         type: "solana" as const,
         mnemonic: walletStateValue.mnemonicState,
-        path: '501'
+        path: WalletPath.SOLANA
       };
       
       setWalletState(prev => ({
@@ -46,7 +47,7 @@ export const useWalletOperations = () => {
         privateKey,
         type: "ethereum" as const,
         mnemonic: walletStateValue.mnemonicState,
-        path: '60'
+        path: WalletPath.ETHEREUM
       };
       
       setWalletState(prev => ({
