@@ -18,13 +18,7 @@ import {
   TooltipTrigger,
 } from "@components/ui/tooltip";
 
-interface SendModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  chain: "solana" | "ethereum";
-  walletId: number;
-  network: "solana" | "ethereum";
-}
+import { SendModalProps } from "@/app/types/wallet";
 
 const SendModal = ({ isOpen, onClose, chain, walletId, network }: SendModalProps) => {
   const { getBalance } = useWalletBalances();
