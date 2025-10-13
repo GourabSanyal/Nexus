@@ -7,10 +7,7 @@ import { Button } from "../button/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "../card/card";
 import {
-  Tooltip,
-  TooltipContent,
   TooltipProvider,
-  TooltipTrigger,
 } from "../tooltip";
 import { copyToClipboard } from "@/app/lib/utils/clipboard";
 import { SeedPhraseContainerPropTypes } from "@/app/types/components";
