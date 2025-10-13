@@ -5,7 +5,8 @@
     "jsx": "preserve",
     "paths": {
       "@/*": ["./*"],
-      "@repo/*": ["../../packages/*"]
+      "@repo/*": ["../../packages/*"],
+      "@components/*": ["./app/components/*"]
     },
     "plugins": [
       {
