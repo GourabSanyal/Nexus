@@ -2,19 +2,15 @@
 
 import { Button } from "../button/button";
 import { Sun, Moon } from "lucide-react";
+import { AppHeaderProps } from "@/app/types/common/AppHeaderProps";
 
-interface WalletHeaderProps {
-  toggleTheme: () => void;
-  isDarkMode: boolean;
-}
-
-function WalletHeader({ toggleTheme, isDarkMode }: WalletHeaderProps) {
+function AppHeader({ toggleTheme, isDarkMode }: AppHeaderProps) {
   return (
     <div className="flex flex-row justify-between items-center w-full mb-6 sm:mb-8">
       <h1 className="text-xl sm:text-2xl font-bold">Nexus</h1>
-      <Button 
-        onClick={toggleTheme} 
-        size="icon" 
+      <Button
+        onClick={toggleTheme}
+        size="icon"
         className="rounded-full p-2 w-10 h-10 sm:w-12 sm:h-12"
       >
         {isDarkMode ? (
@@ -27,4 +23,4 @@ function WalletHeader({ toggleTheme, isDarkMode }: WalletHeaderProps) {
   );
 }
 
-export default WalletHeader;
+export default AppHeader;
