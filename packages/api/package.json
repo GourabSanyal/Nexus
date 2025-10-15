@@ -1,0 +1,7 @@
+{
+  "name": "api",
+  "packageManager": "yarn@4.5.3",
+  "dependencies": {
+    "axios": "^1.12.2"
+  }
+}
