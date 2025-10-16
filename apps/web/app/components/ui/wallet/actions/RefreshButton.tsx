@@ -2,9 +2,9 @@
 
 import { Button } from "../../button/button";
 import { RotateCw } from "lucide-react";
-import { RefreshIconButtonProps } from "@/app/types/wallet/RefreshButtonTypes";
+import { RefreshButtonProps } from "@/app/types/wallet/RefreshButtonTypes";
 
-const RefreshButton = ({ onClick, className, isRefreshing }: RefreshIconButtonProps) => {
+const RefreshButton = ({ onClick, className, isRefreshing }: RefreshButtonProps) => {
   return (
     <Button
       aria-label="Refresh"
