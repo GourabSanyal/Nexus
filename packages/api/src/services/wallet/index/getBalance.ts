@@ -1,6 +1,7 @@
 import { BalanceParams } from "@api-types/BalanceParams";
-import { getSolBalance } from "../solana/getSolBalance";
-import { checkMissingParams } from "@api-utils/checkMissingParams"
+import { getSolBalance } from "@api-service/solana/getSolBalance";
+import { checkMissingParams } from "@api-utils/checkMissingParams";
+import { getEthBalance } from "@api-service/ethereum/getEthBalance";
 
 export const getSolanaBalance = async (params: BalanceParams) => {
   try {
@@ -8,9 +9,9 @@ export const getSolanaBalance = async (params: BalanceParams) => {
 
     if (params.chain === "solana") {
       return getSolBalance(params);
+    } else if (params.chain === "ethereum") {
+      return getEthBalance(params);
     } else {
-
-
       throw new Error("Unsupported chain: " + params.chain);
     }
   } catch (error) {
