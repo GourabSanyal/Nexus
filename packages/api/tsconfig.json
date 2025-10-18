@@ -20,7 +20,8 @@
     "baseUrl": ".",
     "paths":{
       "@api-types/*": ["src/types/*"],
-      "@api-utils/*": ["src/utils/*"]
+      "@api-utils/*": ["src/utils/*"],
+      "@api-service/*": ["src/services/wallet/*"],
     }
   },
   "include": ["src"],
