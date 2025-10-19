@@ -6,7 +6,8 @@
     "paths": {
       "@/*": ["./*"],
       "@repo/*": ["../../packages/*"],
-      "@components/*": ["./app/components/*"]
+      "@components/*": ["./app/components/*"],
+      "@api/*": ["../../packages/api/*"]
     },
     "plugins": [
       {
