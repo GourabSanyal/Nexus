@@ -2,9 +2,13 @@ export { walletState } from "./atoms/walletState";
 
 export * from "./atoms/solanaWalletState";
 export * from "./atoms/ethereumWalletState";
+export * from "./atoms/walletBalancesState";
+export * from "./atoms/networkState";
+export * from "./enums/network";
 
-// Wallet operations hook
 export * from "./hooks/useWalletOperations";
+export * from "./hooks/useWalletBalances";
+export * from "./hooks/useNetwork";
+export * from "./utils/validateAddress";
 
-// Persistence configuration
 export * from "./persistence/recoilPersistConfig";
