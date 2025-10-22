@@ -1,4 +1,4 @@
-import { WalletPath } from "@/app/constants/wallet";
+import { WalletPath } from "@repo/constants/WalletPaths";
 import { generateSolanaWallet } from "@/app/lib/utils/generateSolanaWallet";
 import { generateEthWallet } from "@/app/lib/utils/generateEthWallet";
 
@@ -9,14 +9,22 @@ export const generateWallet = async (mnemonic: string, path: string) => {
         mnemonic,
         path,
       });
-      return { type: "solana" as const, publicKey: solPublicKey, privateKey: solSecretKey };
+      return {
+        type: "solana" as const,
+        publicKey: solPublicKey,
+        privateKey: solSecretKey,
+      };
     }
     case WalletPath.ETHEREUM: {
       const { ethPublicKey, ethPrivateKey } = await generateEthWallet({
         mnemonic,
         path,
       });
-      return { type: "ethereum" as const, publicKey: ethPublicKey, privateKey: ethPrivateKey };
+      return {
+        type: "ethereum" as const,
+        publicKey: ethPublicKey,
+        privateKey: ethPrivateKey,
+      };
     }
     default:
       throw new Error("Invalid wallet path provided");
