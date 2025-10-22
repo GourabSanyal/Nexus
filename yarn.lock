@@ -1447,6 +1447,12 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@repo/constants@workspace:packages/constants":
+  version: 0.0.0-use.local
+  resolution: "@repo/constants@workspace:packages/constants"
+  languageName: unknown
+  linkType: soft
+
 "@repo/eslint-config@npm:*, @repo/eslint-config@workspace:packages/eslint-config":
   version: 0.0.0-use.local
   resolution: "@repo/eslint-config@workspace:packages/eslint-config"

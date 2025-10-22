@@ -17,7 +17,7 @@ const nextConfig = {
     suppressHydrationWarning: true,
   },
   reactStrictMode: true,
-  transpilePackages: ["store", "zod"],
+  transpilePackages: ["store", "zod", "constants"],
   webpack: (config) => {
     config.plugins.push(new NodePolyfillPlugin());
     config.devtool = "source-map";

@@ -7,7 +7,8 @@
       "@/*": ["./*"],
       "@repo/*": ["../../packages/*"],
       "@components/*": ["./app/components/*"],
-      "@api/*": ["../../packages/api/*"]
+      "@api/*": ["../../packages/api/*"],
+      "@repo/constants/*" : ["../../packages/constants/*"]
     },
     "plugins": [
       {
