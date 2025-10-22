@@ -1,6 +1,6 @@
 import React from "react";
 import SingleWallet from "./SingleWallet";
-import { WalletPath } from "@/app/constants/wallet";
+import {WalletPath} from "@repo/constants/WalletPaths"
 
 const SolanaWallet = () => {
   const solanaPath = WalletPath.SOLANA;
