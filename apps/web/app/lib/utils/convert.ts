@@ -1,5 +1,6 @@
 import { formatEther } from "ethers";
 import { WalletPath } from "@repo/constants/src/WalletPaths";
+import { toast } from "sonner";
 
 export const LAMPORTS_TO_SOL = 1_000_000_000;
 
@@ -9,13 +10,13 @@ export const convertToDisplayBalance = (
 ): number => {
   const raw = BigInt(balance);
 
-  if (chain == WalletPath.SOLANA) {
-    return Number(raw) / LAMPORTS_TO_SOL;
+  switch (chain) {
+    case WalletPath.SOLANA:
+      return Number(raw) / LAMPORTS_TO_SOL;
+    case WalletPath.ETHEREUM:
+      return Number(formatEther(raw.toString()));
+    default:
+      toast.error(`Unsupported chain ${chain}`);
+      throw new Error(`Unsupported chain ${chain}`);
   }
-
-  if (chain == WalletPath.ETHEREUM) {
-    return Number(formatEther(raw.toString()));
-  }
-
-  throw new Error(`Unsupported chain ${chain}`);
 };
