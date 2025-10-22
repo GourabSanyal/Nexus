@@ -1,7 +1,7 @@
 import { useRecoilState } from 'recoil';
 import { walletState } from '../atoms/walletState';
 import { toast } from 'sonner';
-import { WalletPath } from '@/constants/wallet';
+import { WalletPath } from '@repo/constants/src/WalletPaths';
 
 export const useWalletOperations = () => {
   const [walletStateValue, setWalletState] = useRecoilState(walletState);

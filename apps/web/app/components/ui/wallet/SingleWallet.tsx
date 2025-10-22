@@ -4,7 +4,7 @@ import { Button } from "../button/button";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { SingleWalletProps } from "@/app/types/wallet/SingleWalletProps";
-import { WalletPath } from "@repo/constants/WalletPaths";
+import { WalletPath } from "@repo/constants/src/WalletPaths";
 import { useWalletOperations } from "@my-org/store";
 import { generateWallet } from "@/app/lib/utils/walletGeneration";
 import { WalletRenderer } from "./WalletRenderer";

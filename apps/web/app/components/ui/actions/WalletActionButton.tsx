@@ -1,6 +1,6 @@
 import { Button } from "../button/button";
 import { WalletActionButtonProps } from "@/app/types/wallet/WalletActionTypes";
-import { WALLET_ACTION_CONFIG } from "@repo/constants/WalletActionConfig";
+import { WALLET_ACTION_CONFIG } from "@repo/constants/src/WalletActionConfig";
 
 export const WalletActionButton = ({
   actionType,

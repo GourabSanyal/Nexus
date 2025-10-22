@@ -2,7 +2,7 @@ import { EthereumWallet, SolanaWallet } from "@my-org/zod";
 
 export interface WalletHeaderProps {
   wallet: SolanaWallet | EthereumWallet;
-  balance: number;
+  balance: string;
   isRefreshing: boolean;
   onRefresh: () => void;
   onEditName: (newName: string) => void;
