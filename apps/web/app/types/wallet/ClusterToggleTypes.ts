@@ -1,6 +1,6 @@
 import { ChainEnum } from "@my-org/store";
 
 export interface ClusterToggleProps {
-  chainEnum: ChainEnum;
+  chain: ChainEnum.Ethereum | ChainEnum.Solana;
   walletId: number;
 }
