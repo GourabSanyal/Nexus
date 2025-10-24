@@ -2,56 +2,85 @@
 
 import React, { useState, useEffect } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
-import { walletState } from "@my-org/store"
-import { useTheme } from "../../../lib/utils/ThemeContext";
+import { walletState } from "@my-org/store";
+import { useTheme } from "../../../lib/contexts/ThemeContext";
 import { toast } from "sonner";
 import { AnimatePresence } from "framer-motion";
-import WalletHeader from "../header/WalletHeader";
+import AppHeader from "../header/AppHeader";
 import { WalletActions } from "../actions/WalletActions";
 import { generateMnemonic } from "bip39";
 
 import SolanaWallet from "./SolanaWallet";
 import EthereumWallet from "./EthereumWallet";
 import SeedPhraseContainer from "./SeedPhraseContainer";
+import { WalletLoadingSkeleton } from "../loading";
 
 export const CryptoWalletContent = () => {
-  const [activeTab, setActiveTab] = useState<"solana" | "ethereum">("solana");
+  const [isHydrated, setIsHydrated] = useState<boolean>(false);
   const { isDarkMode, toggleTheme } = useTheme();
-  const [mnemonic, setMnemonic] = useState<string>("");
+  const walletStateValue = useRecoilValue(walletState);
+  const setWallet = useSetRecoilState(walletState);
+  const { mnemonicState: mnemonic, activeTab = "solana" } = walletStateValue;
 
-  const walletStateFromRecoiil = useRecoilValue(walletState)
+  const setMnemonic = (newMnemonic: string) => {
+    setWallet((prev) => ({
+      ...prev,
+      mnemonicState: newMnemonic,
+    }));
+  };
 
-  console.log("mneumonic state", walletStateFromRecoiil);
-  
+  const setActiveTab = (tab: "solana" | "ethereum") => {
+    setWallet((prev) => ({
+      ...prev,
+      activeTab: tab,
+    }));
+  };
 
-  useEffect(() => { 
-    document.body.classList.toggle("dark", isDarkMode);
-  }, [isDarkMode]);
+  useEffect(() => setIsHydrated(true), []);
 
   useEffect(() => {
-    const storedMnemonic = localStorage.getItem("mnemonic");
-    if (storedMnemonic) {
-      setMnemonic(storedMnemonic); 
-    }
-  }, []);
+    document.body.classList.toggle("dark", isDarkMode);
+  }, [isDarkMode]);
 
   const generateWallet = async () => {
     const newMnemonic = generateMnemonic();
     setMnemonic(newMnemonic);
-    localStorage.setItem("mnemonic", mnemonic);
     toast.success("New wallet generated");
   };
 
+  const importWallet = () => {
+    toast.info("Import wallet functionality coming soon!");
+  };
+
   return (
-    <div className="container flex flex-col justify-start min-h-screen transition-colors duration-300">
-      <div className="max-w-3xl w-full mx-auto">
-        <WalletHeader toggleTheme={toggleTheme} isDarkMode={isDarkMode} />
-        {!mnemonic ? <WalletActions generateWallet={generateWallet} /> : null}
-        {mnemonic ? <SeedPhraseContainer mnemonic={mnemonic} /> : null}
-        <AnimatePresence mode="wait">
-          {activeTab === "solana" && <SolanaWallet mnemonic={mnemonic} />}
-          {activeTab === "ethereum" && <EthereumWallet mnemonic={mnemonic} />}
-        </AnimatePresence>
+    <div className="min-h-screen w-full px-4 sm:px-6 lg:px-8 transition-colors duration-300">
+      <div className="max-w-4xl mx-auto py-6 sm:py-8">
+        <AppHeader toggleTheme={toggleTheme} isDarkMode={isDarkMode} />
+
+        {!isHydrated ? (
+          <WalletLoadingSkeleton />
+        ) : (
+          <>
+            {!mnemonic ? (
+              <WalletActions
+                generateWallet={generateWallet}
+                importWallet={importWallet}
+              />
+            ) : (
+              <>
+                <SeedPhraseContainer
+                  mnemonic={mnemonic}
+                  activeTab={activeTab}
+                  setActiveTab={setActiveTab}
+                />
+                <AnimatePresence mode="wait">
+                  {activeTab === "solana" && <SolanaWallet />}
+                  {activeTab === "ethereum" && <EthereumWallet />}
+                </AnimatePresence>
+              </>
+            )}
+          </>
+        )}
       </div>
     </div>
   );
