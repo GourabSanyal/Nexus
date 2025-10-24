@@ -14,7 +14,8 @@
       "baseUrl": ".",
       "paths": {
         "@/*": ["../../apps/web/app/*"],
-        "@/constants/*": ["../../apps/web/app/constants/*"]
+        "@repo/*": ["../../packages/*"],
+        "@constants/*": ["../../packages/constants/*"]
       }
     },
     "include": ["src"],
