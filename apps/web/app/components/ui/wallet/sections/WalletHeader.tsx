@@ -9,6 +9,8 @@ import RefreshButton from "../actions/RefreshButton";
 import { InlineActions } from "./header/InlineActions";
 import { SmallScreenMenu } from "./header/SmallScreenMenu";
 import { WalletHeaderProps } from "@/app/types/wallet/WalletHeaderTypes";
+import { WalletPath } from "@repo/constants/src/WalletPaths";
+import { convertToDisplayBalance } from "@/app/lib/utils/convert";
 
 export const WalletHeader = ({
   wallet,
@@ -18,14 +20,23 @@ export const WalletHeader = ({
   onEditName,
   onDelete,
 }: WalletHeaderProps) => {
-  const chainEnum = wallet.type === "solana" ? ChainEnum.Solana : ChainEnum.Ethereum;
+  const chain =
+    wallet.type === "solana" ? ChainEnum.Solana : ChainEnum.Ethereum;
+
+  const balanceToShow =
+    balance !== undefined
+      ? wallet.type === "solana"
+        ? convertToDisplayBalance(balance, WalletPath.SOLANA)
+        : convertToDisplayBalance(balance, WalletPath.ETHEREUM)
+      : "0";
+
   return (
     <CardHeader className="flex flex-row items-start sm:items-center justify-between space-y-0 pb-4">
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
         <WalletTitle name={wallet.name} />
         <div className="flex items-center gap-2">
-          <BalancePill text={`Balance: ${balance}`} />
-          <ClusterToggle chainEnum={chainEnum} walletId={wallet.id} />
+          <BalancePill text={`Balance: ${balanceToShow}`} />
+          <ClusterToggle chain={chain} walletId={wallet.id} />
           <RefreshButton
             onClick={onRefresh}
             isRefreshing={isRefreshing}
@@ -41,7 +52,11 @@ export const WalletHeader = ({
         onDelete={onDelete}
       />
 
-      <InlineActions wallet={wallet} onEditName={onEditName} onDelete={onDelete} />
+      <InlineActions
+        wallet={wallet}
+        onEditName={onEditName}
+        onDelete={onDelete}
+      />
     </CardHeader>
   );
 };
