@@ -1,10 +1,8 @@
-import { SOLANA_RPC_ENDPOINTS } from "@api-configs/solanaRpcConfigs"
-
-export type Chain = "solana" | "ethereum";
+import { ChainEnum } from "@repo/store/src/enums/network"
+import { NetworkEnum } from "@repo/store/src/enums/network";export type Chain = "solana" | "ethereum";
 
 export interface BalanceParams {
-  chain: Chain;
+  chain: ChainEnum.Solana | ChainEnum.Ethereum;
   address: string;
-  cluster: keyof typeof SOLANA_RPC_ENDPOINTS;
-  network: string;
+  cluster: NetworkEnum.Devnet | NetworkEnum.Mainnet | NetworkEnum.Sepolia | NetworkEnum.Holesky;
 }
