@@ -3,7 +3,7 @@ import { getSolBalance } from "@api-service/solana/getSolBalance";
 import { checkMissingParams } from "@api-utils/checkMissingParams";
 import { getEthBalance } from "@api-service/ethereum/getEthBalance";
 
-export const getSolanaBalance = async (params: BalanceParams) => {
+export const getBalance = async (params: BalanceParams) => {
   try {
     checkMissingParams(params);
 
