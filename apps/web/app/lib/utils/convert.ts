@@ -5,10 +5,10 @@ import { toast } from "sonner";
 export const LAMPORTS_TO_SOL = 1_000_000_000;
 
 export const convertToDisplayBalance = (
-  balance: string | bigint,
+  balance: string | BigInt,
   chain: WalletPath.SOLANA | WalletPath.ETHEREUM
 ): number => {
-  const raw = BigInt(balance);
+  const raw = BigInt(balance.toString());
 
   switch (chain) {
     case WalletPath.SOLANA:
