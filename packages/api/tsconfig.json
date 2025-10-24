@@ -19,8 +19,10 @@
     "sourceMap": true,
     "baseUrl": ".",
     "paths":{
+      "@repo/*": ["../../packages/*"],
       "@api-types/*": ["src/types/*"],
       "@api-utils/*": ["src/utils/*"],
+      "@api-configs/*": ["src/configs/*"],
       "@api-service/*": ["src/services/wallet/*"],
     }
   },
