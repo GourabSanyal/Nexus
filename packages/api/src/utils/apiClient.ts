@@ -1,6 +1,11 @@
 import axios, { AxiosInstance } from "axios";
 import { RPC_ENDPOINTS } from "../configs/rpcConfigs";
-import { ChainEnum, NetworkEnum } from "@repo/store/src/enums/network";
+import {
+  ChainEnum,
+  NetworkEnum,
+  NetworkConnectionEnum,
+} from "@repo/store/src/enums/network";
+import { checkInternet } from "@repo/api/src/services/shared/checkInternet";
 
 export const apiClient = (
   chain: ChainEnum.Solana | ChainEnum.Ethereum,
@@ -10,14 +15,26 @@ export const apiClient = (
     | NetworkEnum.Sepolia
     | NetworkEnum.Holesky
 ): AxiosInstance => {
-  const baseURL =
-    chain === ChainEnum.Solana
-      ? RPC_ENDPOINTS.solana[cluster as keyof typeof RPC_ENDPOINTS.solana]
-      : RPC_ENDPOINTS.ethereum[cluster as keyof typeof RPC_ENDPOINTS.ethereum];
-  return axios.create({
-    baseURL,
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+  try {
+    const baseURL =
+      chain === ChainEnum.Solana
+        ? RPC_ENDPOINTS.solana[cluster as keyof typeof RPC_ENDPOINTS.solana]
+        : RPC_ENDPOINTS.ethereum[
+            cluster as keyof typeof RPC_ENDPOINTS.ethereum
+          ];
+
+    if (checkInternet()) {
+      return axios.create({
+        baseURL,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+    }
+
+    throw new Error(NetworkConnectionEnum.NoInternet + " haha");
+  } catch (error) {
+    throw new Error(`${error}`);
+  }
 };
+
