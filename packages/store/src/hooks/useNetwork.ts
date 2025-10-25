@@ -2,8 +2,9 @@ import { useRecoilState } from "recoil";
 import {
   globalNetworkState,
   walletNetworkOverrideState,
-} from "../atoms/networkState";
-import { ChainEnum, NetworkEnum } from "../enums/network";
+} from "@repo/store/src/atoms/networkState";
+import { ChainEnum, NetworkEnum } from "@repo/store/src/enums/network";
+import { getBalance } from "@repo/api/src/services/wallet/index/getBalance";
 
 const keyFor = (chain: ChainEnum, walletId?: number) =>
   walletId != null ? `${chain}:${walletId}` : "";
@@ -31,10 +32,31 @@ export const useNetwork = () => {
 
   const toggleNetwork = (chain: ChainEnum, walletId?: number) => {
     const current = getEffectiveNetwork(chain, walletId);
-    const next: NetworkEnum =
-      current === NetworkEnum.Mainnet
-        ? NetworkEnum.Devnet
-        : NetworkEnum.Mainnet;
+    let next: NetworkEnum;
+
+    if (chain === ChainEnum.Solana) {
+      next =
+        current === NetworkEnum.Mainnet
+          ? NetworkEnum.Devnet
+          : NetworkEnum.Mainnet;
+    } else if (chain === ChainEnum.Ethereum) {
+      switch (current) {
+        case NetworkEnum.Sepolia:
+          next = NetworkEnum.Holesky;
+          break;
+        case NetworkEnum.Holesky:
+          next = NetworkEnum.Mainnet;
+          break;
+        case NetworkEnum.Mainnet:
+          next = NetworkEnum.Sepolia;
+          break;
+        default:
+          next = NetworkEnum.Sepolia;
+      }
+    } else {
+      next = current;
+    }
+
     if (walletId != null) {
       const k = keyFor(chain, walletId);
       setOverrides((prev) => ({ ...prev, [k]: next }));
@@ -64,6 +86,23 @@ export const useNetwork = () => {
     console.log("sendSol placeholder", { network, ...params });
   };
 
+  const fetchBalanceFromAPI = async (params: {
+    walletId: string;
+    chain: ChainEnum.Solana | ChainEnum.Ethereum;
+    cluster:
+      | NetworkEnum.Devnet
+      | NetworkEnum.Mainnet
+      | NetworkEnum.Holesky
+      | NetworkEnum.Sepolia;
+    address: string;
+  }) => {
+    return getBalance({
+      chain: params.chain,
+      cluster: params.cluster,
+      address: params.address,
+    });
+  };
+
   return {
     globalNetworks,
     overrides,
@@ -74,5 +113,6 @@ export const useNetwork = () => {
     sendSol,
     ChainEnum,
     NetworkEnum,
+    fetchBalanceFromAPI,
   };
 };
