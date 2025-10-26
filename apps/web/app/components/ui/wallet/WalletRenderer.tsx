@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "../card/card";
 import { useWalletOperations } from "@my-org/store";
 import { useNetwork } from "@my-org/store";
-import { ChainEnum } from "@repo/store/src/enums/network";
+import { ChainEnum, NetworkConnectionEnum } from "@repo/store/src/enums/network";
 
 import WalletHeader from "./sections/WalletHeader";
 import ReceiveModal from "./modals/ReceiveModal";
@@ -54,8 +54,12 @@ export const WalletRenderer = ({ wallets }: WalletRendererProps) => {
       if (res) {
         setBalance(wallet.id, wallet.type, res.toString(), currentCluster);
       }
-    } catch (error) {
-      toast.error("Error fetching balance");
+    } catch (error: any) {
+      if (error?.message?.includes(NetworkConnectionEnum.NoInternet)) {
+        toast.warning("Refresh failed, please check your internet connection");
+      } else {
+        toast.error("Error fetching balance");
+      }
     } finally {
       setTimeout(
         () => setRefreshingById((p) => ({ ...p, [wallet.id]: false })),
