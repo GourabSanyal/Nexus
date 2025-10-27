@@ -6,15 +6,11 @@ import { copyToClipboard } from "@/app/lib/utils/clipboard";
 import ReceiveButton from "../actions/ReceiveButton";
 import SendButton from "../actions/SendButton";
 import HistoryButton from "../actions/HistoryButton";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "../../dialog/dialog";
+import { Dialog } from "../../dialog/dialog";
 import { useState, useCallback } from "react";
+import WarningModal from "@components/ui/wallet/sections/password/WarningModal";
+
+import PasswordInput from "./password/PasswordInput";
 
 type Wallet = SolanaWallet | EthereumWallet;
 
@@ -33,7 +29,14 @@ export default function WalletMainSection({
 }: WalletMainSectionProps) {
   const [isPrivateVisible, setIsPrivateVisible] = useState<boolean>(false);
   const [warnOpen, setWarnOpen] = useState<boolean>(false);
+  const [step, setStep] = useState<"warn" | "password">("warn");
 
+  const onPasswordSubmit = (data: { password: string }) => {
+    console.log("password data", data);
+    setIsPrivateVisible(true);
+    setWarnOpen(false);
+    setStep("warn");
+  };
   const handleTogglePrivate = useCallback(() => {
     if (isPrivateVisible) {
       setIsPrivateVisible(false);
@@ -41,6 +44,10 @@ export default function WalletMainSection({
     }
     setWarnOpen(true);
   }, [isPrivateVisible]);
+
+  const openPasswordCoursal = useCallback(() => {
+    setStep("password");
+  }, []);
 
   const confirmViewPrivate = useCallback(() => {
     setIsPrivateVisible(true);
@@ -64,7 +71,9 @@ export default function WalletMainSection({
           </Button>
         </div>
         <div className="bg-muted p-3 rounded-md overflow-x-auto">
-          <code className="text-xs text-muted-foreground">{wallet.publicKey}</code>
+          <code className="text-xs text-muted-foreground">
+            {wallet.publicKey}
+          </code>
         </div>
         <div className="flex justify-between items-center">
           <span className="text-sm font-medium text-muted-foreground">
@@ -85,26 +94,19 @@ export default function WalletMainSection({
             </Button>
             <Dialog
               open={warnOpen}
-              onOpenChange={(open) => !open && setWarnOpen(false)}
+              onOpenChange={(open) => {
+                if (!open) {
+                  setWarnOpen(false);
+                  setStep("warn");
+                  setIsPrivateVisible(false);
+                }
+              }}
             >
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle className="text-lg font-semibold">Warning</DialogTitle>
-                  <DialogDescription className="text-sm text-muted-foreground">
-                    Sharing your private key with anyone might risk your funds. Are you sure you want to view it?
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="flex justify-end">
-                  <DialogClose asChild>
-                    <Button
-                      onClick={confirmViewPrivate}
-                      className="py-2 px-4 bg-destructive text-destructive-foreground font-semibold rounded-lg hover:bg-destructive/90 transition-colors duration-300"
-                    >
-                      View Private Key
-                    </Button>
-                  </DialogClose>
-                </div>
-              </DialogContent>
+              {step === "warn" ? (
+                <WarningModal onClick={openPasswordCoursal} />
+              ) : (
+                <PasswordInput onSubmit={onPasswordSubmit} />
+              )}
             </Dialog>
             <Button
               variant="ghost"
@@ -131,5 +133,3 @@ export default function WalletMainSection({
     </CardContent>
   );
 }
-
-
