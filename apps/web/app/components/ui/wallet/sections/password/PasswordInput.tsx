@@ -16,10 +16,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../../../dialog/dialog";
+import { PasswordInputProps } from "@/app/types/components/PasswordInputProps";
 
-type PasswordInputProps = {
-  onSubmit: (data: { password: string }) => void;
-};
+
 
 const PasswordInput = ({ onSubmit }: PasswordInputProps) => {
   const form = useForm({
