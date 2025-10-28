@@ -6,10 +6,9 @@ import {
   DialogTitle,
 } from "../../../dialog/dialog";
 import { Button } from "../../../button/button";
+import {WalletButtonProps} from "@/app/types/wallet/CommonWalletTypes"
 
-type WarningModalProps = {
-  onClick: () => void;
-};
+interface WarningModalProps extends WalletButtonProps {};
 
 const WarningModal = ({ onClick }: WarningModalProps) => {
   const openPasswordCoursal = () => {
