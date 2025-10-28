@@ -14,10 +14,9 @@ const nextConfig = {
         '.json',
       ],
     },
-    suppressHydrationWarning: true,
   },
   reactStrictMode: true,
-  transpilePackages: ["store", "zod", "constants"],
+  transpilePackages: ["store", "zod", "constants", "api", "rust-apis"],
   webpack: (config) => {
     config.plugins.push(new NodePolyfillPlugin());
     config.devtool = "source-map";

@@ -8,7 +8,11 @@
       "@repo/*": ["../../packages/*"],
       "@components/*": ["./app/components/*"],
       "@api/*": ["../../packages/api/*"],
-      "@repo/constants/*" : ["../../packages/constants/*"]
+      "@repo/constants/*" : ["../../packages/constants/*"],
+      "@api-service/solana/*": ["../../packages/api/src/services/wallet/solana/*"],
+      "@api-service/ethereum/*": ["../../packages/api/src/services/wallet/ethereum/*"],
+      "@api-utils/*": ["../../packages/api/src/utils/*"],
+      "@api-types/*": ["../../packages/api/src/types/*"]
     },
     "plugins": [
       {
