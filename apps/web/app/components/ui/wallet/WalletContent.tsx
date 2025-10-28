@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRecoilValue, useSetRecoilState } from "recoil";
+import { useRecoilValue, useSetRecoilState, useRecoilState } from "recoil";
 import { walletState } from "@my-org/store";
+import { walletFlowState } from "@repo/store/src/atoms/walletFlowState";
 import { useTheme } from "../../../lib/contexts/ThemeContext";
 import { toast } from "sonner";
 import { AnimatePresence } from "framer-motion";
@@ -14,12 +15,14 @@ import SolanaWallet from "./SolanaWallet";
 import EthereumWallet from "./EthereumWallet";
 import SeedPhraseContainer from "./SeedPhraseContainer";
 import { WalletLoadingSkeleton } from "../loading";
+import ImportWallet from "./sections/import/ImportWallet";
 
 export const CryptoWalletContent = () => {
   const [isHydrated, setIsHydrated] = useState<boolean>(false);
   const { isDarkMode, toggleTheme } = useTheme();
   const walletStateValue = useRecoilValue(walletState);
   const setWallet = useSetRecoilState(walletState);
+  const [currentFlow, setCurrentFlow] = useRecoilState(walletFlowState);
   const { mnemonicState: mnemonic, activeTab = "solana" } = walletStateValue;
 
   const setMnemonic = (newMnemonic: string) => {
@@ -45,12 +48,23 @@ export const CryptoWalletContent = () => {
   const generateWallet = async () => {
     const newMnemonic = generateMnemonic();
     setMnemonic(newMnemonic);
+    setCurrentFlow('generate');
     toast.success("New wallet generated");
   };
 
   const importWallet = () => {
-    toast.info("Import wallet functionality coming soon!");
+    setCurrentFlow('import');
   };
+
+  const handleBackToEntry = () => {
+    setCurrentFlow('entry');
+  };
+
+  useEffect(() => {
+    if (!mnemonic && currentFlow !== 'import') {
+      setCurrentFlow('entry');
+    }
+  }, [mnemonic, currentFlow, setCurrentFlow]);
 
   return (
     <div className="min-h-screen w-full px-4 sm:px-6 lg:px-8 transition-colors duration-300">
@@ -62,10 +76,14 @@ export const CryptoWalletContent = () => {
         ) : (
           <>
             {!mnemonic ? (
-              <WalletActions
-                generateWallet={generateWallet}
-                importWallet={importWallet}
-              />
+              currentFlow === 'import' ? (
+                <ImportWallet onBack={handleBackToEntry} />
+              ) : (
+                <WalletActions
+                  generateWallet={generateWallet}
+                  importWallet={importWallet}
+                />
+              )
             ) : (
               <>
                 <SeedPhraseContainer
