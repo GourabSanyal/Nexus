@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Eye, EyeOff, Copy } from "lucide-react";
+import { Eye, EyeOff, Copy, LogOut } from "lucide-react";
 import { Button } from "../button/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "../card/card";
@@ -11,7 +11,11 @@ import {
 } from "../tooltip";
 import { copyToClipboard } from "@/app/lib/utils/clipboard";
 import { SeedPhraseContainerPropTypes } from "@/app/types/components";
+import { useSetRecoilState } from "recoil";
+import { walletState } from "@repo/store/src/atoms/walletState";
 
+import { Dialog } from "../dialog/dialog";
+import LogoutConfirmationModal from "@components/ui/wallet/sections/password/LogoutConfirmationModal";
 
 const SeedPhraseContainer = ({
   mnemonic,
@@ -19,6 +23,18 @@ const SeedPhraseContainer = ({
   setActiveTab,
 }: SeedPhraseContainerPropTypes) => {
   const [showSeedPhrase, setShowSeedPhrase] = useState<boolean>(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState<boolean>(false);
+  const setWalletState = useSetRecoilState(walletState);
+
+  const handleLogout = () => {
+    setWalletState({
+      mnemonicState: "",
+      solanaWallets: [],
+      ethereumWallets: [],
+      activeTab: "solana",
+    });
+    setIsLogoutModalOpen(false);
+  };
 
   return (
     <TooltipProvider>
@@ -31,9 +47,25 @@ const SeedPhraseContainer = ({
         >
           <Card className="mb-6 bg-card text-card-foreground">
             <CardHeader>
-              <CardTitle>Crypto Wallet Generator</CardTitle>
+              <CardTitle className="flex justify-between items-center">
+                <span>Crypto Wallet Generator</span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-red-500 hover:text-red-700"
+                  onClick={() => setIsLogoutModalOpen(true)}
+                >
+                  <LogOut size={20} />
+                </Button>
+              </CardTitle>
             </CardHeader>
             <CardContent>
+              <Dialog open={isLogoutModalOpen} onOpenChange={setIsLogoutModalOpen}>
+                <LogoutConfirmationModal
+                  onConfirm={handleLogout}
+                  onCancel={() => setIsLogoutModalOpen(false)}
+                />
+              </Dialog>
               <div className="mb-4">
                 {mnemonic && (
                   <div className="mb-4 p-4 bg-muted rounded-md">
