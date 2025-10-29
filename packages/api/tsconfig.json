@@ -23,7 +23,8 @@
       "@api-types/*": ["src/types/*"],
       "@api-utils/*": ["src/utils/*"],
       "@api-configs/*": ["src/configs/*"],
-      "@api-service/*": ["src/services/wallet/*"],
+      "@api-service/solana/*": ["src/services/wallet/solana/*"],
+      "@api-service/ethereum/*": ["src/services/wallet/ethereum/*"]
     }
   },
   "include": ["src"],
