@@ -1,19 +1,44 @@
 import React from "react";
 import { useFormContext } from "react-hook-form";
-import { Button } from "../../../../button/button";
-import SeedPhraseInput from "@components/ui/input/SeedPhraseInput";
-import { AlertCircle } from "lucide-react";
 import type { ImportWalletSchema } from "@repo/zod/src/walletSchemas/importWalletSchema";
+import { SeedPhraseGrid } from "./SeedPhraseGrid";
+import { SeedPhraseErrors } from "./SeedPhraseErrors";
+import { ImportButton } from "./ImportButton";
 
 interface SeedPhraseFormProps {
-  handlePaste: (e: React.ClipboardEvent) => void;
   handleKeyDown: (e: React.KeyboardEvent, index: number) => void;
 }
 
 export const SeedPhraseForm: React.FC<SeedPhraseFormProps> = ({
-  handlePaste,
   handleKeyDown,
 }) => {
+  const handlePaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pastedText = e.clipboardData.getData("text");
+
+    // Split by spaces, commas, or newlines and clean up
+    const words = pastedText
+      .toLowerCase()
+      .replace(/[\n,]+/g, " ") // replace newlines and commas with spaces
+      .split(" ")
+      .filter((word) => word.trim().length > 0) // remove if value is empty
+      .slice(0, 12); // takes only first 12 words
+
+    if (words.length > 0) {
+      setValue(
+        "inputData",
+        {
+          ...watch("inputData"),
+          seedPhraseWords: Array(12)
+            .fill("")
+            .map((_, i) => words[i] || ""),
+        },
+        {
+          shouldValidate: true,
+        }
+      );
+    }
+  };
   const [isImporting, setIsImporting] = React.useState(false);
   const {
     formState: { errors },
@@ -24,11 +49,13 @@ export const SeedPhraseForm: React.FC<SeedPhraseFormProps> = ({
 
   const handleImport = async (data: ImportWalletSchema) => {
     setIsImporting(true);
-    // Simulating import process with setTimeout
-    await new Promise(resolve => setTimeout(() => {
-      console.log('Importing wallet with data:', data);
-      resolve(true);
-    }, 2000));
+    // temporary - simulating import process with setTimeout
+    await new Promise((resolve) =>
+      setTimeout(() => {
+        console.log("Importing wallet with data:", data);
+        resolve(true);
+      }, 2000)
+    );
     setIsImporting(false);
   };
 
@@ -38,114 +65,74 @@ export const SeedPhraseForm: React.FC<SeedPhraseFormProps> = ({
     seedPhraseWords.length === 12 &&
     seedPhraseWords.every((word) => word?.length > 0);
 
-  const validationErrors = errors.inputData?.seedPhraseWords;
-  const individualErrors = validationErrors
-    ? Array.isArray(validationErrors)
-      ? validationErrors
-      : [validationErrors]
-    : [];
+  const rawValidationErrors = errors.inputData?.seedPhraseWords;
+  const validationErrors = rawValidationErrors || null;
 
-  const [inputErrors, setInputErrors] = React.useState<{ [key: number]: boolean }>({});
+  const individualErrors = (() => {
+    if (!rawValidationErrors) return [];
+    if (Array.isArray(rawValidationErrors)) {
+      return rawValidationErrors.map((error) =>
+        error ? { message: error.message, type: error.type } : undefined
+      );
+    }
+    return [
+      { message: rawValidationErrors.message, type: rawValidationErrors.type },
+    ];
+  })();
+
+  const [inputErrors, setInputErrors] = React.useState<{
+    [key: number]: boolean;
+  }>({});
 
   const handleInputError = (hasError: boolean, index: number) => {
-    setInputErrors(prev => ({
+    setInputErrors((prev) => ({
       ...prev,
-      [index]: hasError
+      [index]: hasError,
     }));
   };
 
-  // Check for numbers in seed phrase words
-  const numberErrors = seedPhraseWords.map((word, idx) => {
-    if (word && /[^a-z]/.test(word.toLowerCase())) {
-      return { index: idx, message: "Numbers or special characters are not allowed" };
-    }
-    return null;
-  }).filter((error): error is { index: number; message: string } => error !== null);
-
+  const numberErrors = seedPhraseWords
+    .map((word, idx) => {
+      if (word && /[^a-z]/.test(word.toLowerCase())) {
+        return {
+          index: idx,
+          message: "Numbers or special characters are not allowed",
+        };
+      }
+      return null;
+    })
+    .filter(
+      (error): error is { index: number; message: string } => error !== null
+    );
 
   return (
     <div className="w-full max-w-md flex flex-col gap-6">
-      <div className="grid grid-cols-3 gap-4">
-        {Array(12)
-          .fill(0)
-          .map((_, index) => (
-            <SeedPhraseInput
-              key={index}
-              index={index}
-              setValue={setValue}
-              watch={watch}
-              onPaste={handlePaste}
-              onKeyDown={handleKeyDown}
-              error={!!individualErrors[index]?.message || inputErrors[index]}
-              onError={handleInputError}
-            />
-          ))}
-      </div>
+      <SeedPhraseGrid
+        setValue={setValue}
+        watch={watch}
+        handleKeyDown={handleKeyDown}
+        handlePaste={handlePaste}
+        individualErrors={individualErrors}
+        inputErrors={inputErrors}
+        onError={handleInputError}
+      />
 
-      <Button
-        type="submit"
-        className={`w-full px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200
-          ${isImporting ||
-          !isComplete ||
-          Boolean(validationErrors) ||
-          individualErrors.length > 0 ||
-          numberErrors.length > 0 ||
-          seedPhraseWords.length !== 12
-            ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed opacity-50 hover:bg-gray-400 dark:hover:bg-gray-600 text-white'
-            : 'bg-primary text-primary-foreground hover:bg-primary/90 border border-primary/20'
-          }`}
-        onClick={handleSubmit(handleImport)}
-        disabled={
-          isImporting ||
-          !isComplete ||
-          Boolean(validationErrors) ||
-          individualErrors.length > 0 ||
-          numberErrors.length > 0 ||
-          seedPhraseWords.length !== 12
-        }
-      >
-        {isImporting ? "Importing..." : "Import"}
-      </Button>
+      <ImportButton
+        isImporting={isImporting}
+        isComplete={isComplete}
+        hasValidationErrors={Boolean(validationErrors)}
+        hasIndividualErrors={individualErrors.length > 0}
+        hasNumberErrors={numberErrors.length > 0}
+        seedPhraseLength={seedPhraseWords.length}
+        onSubmit={async () => await handleSubmit(handleImport)()}
+      />
 
-      {/* Error Messages Below Button */}
-      {(Boolean(validationErrors) || individualErrors.length > 0 || numberErrors.length > 0 || seedPhraseWords.some(word => word && /[^a-z]/.test(word.toLowerCase()))) && (
-        <div className="mt-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-4">
-          <div className="flex">
-            <AlertCircle
-              className="h-5 w-5 text-red-400 dark:text-red-500"
-              aria-hidden="true"
-            />
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
-                Seed Phrase Errors
-              </h3>
-              <div className="mt-2 text-sm text-red-700 dark:text-red-300">
-                <ul className="list-disc space-y-1 pl-5">
-                  {/* Validation errors from Zod */}
-                  {validationErrors?.message && !Array.isArray(validationErrors.message) && (
-                    <li>{validationErrors.message}</li>
-                  )}
-                  {/* Individual field errors */}
-                  {individualErrors.map((error, idx) => {
-                    if (!error?.message) return null;
-                    return (
-                      <li key={`validation-${idx}`}>
-                        Word {idx + 1}: {error.message}
-                      </li>
-                    );
-                  })}
-                  {/* Number and special character errors */}
-                  {numberErrors.map((error) => (
-                    <li key={`number-${error.index}`}>
-                      Word {error.index + 1}: {error.message}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <SeedPhraseErrors
+        validationErrors={validationErrors}
+        individualErrors={individualErrors}
+        numberErrors={numberErrors}
+        seedPhraseWords={seedPhraseWords}
+      />
     </div>
   );
 };
