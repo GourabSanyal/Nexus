@@ -6,7 +6,6 @@ const SeedPhraseInput = ({
   setValue,
   watch,
   error,
-  onPaste,
   onKeyDown,
   onError,
 }: SeedPhraseInputProps) => {
@@ -20,20 +19,39 @@ const SeedPhraseInput = ({
     const hasInvalidChars = /[^a-z]/.test(rawValue);
     setHasInvalidInput(hasInvalidChars);
     onError?.(hasInvalidChars, index);
-    
-    const value = rawValue.replace(/[^a-z]/g, "");
-    
+
     const currentWords = watch("inputData.seedPhraseWords");
     if (Array.isArray(currentWords)) {
       const newWords = [...currentWords];
-      newWords[index] = rawValue; // Use rawValue to preserve the invalid input
-      setValue("inputData", {
-        ...watch("inputData"),
-        seedPhraseWords: newWords
-      }, {
-        shouldValidate: true,
-      });
+      newWords[index] = rawValue; // using rawValue to preserve the invalid input
+      setValue(
+        "inputData",
+        {
+          ...watch("inputData"),
+          seedPhraseWords: newWords,
+        },
+        {
+          shouldValidate: true,
+        }
+      );
     }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (
+      [
+        "ArrowLeft",
+        "ArrowRight",
+        "ArrowUp",
+        "ArrowDown",
+        "Backspace",
+        "Delete",
+      ].includes(e.key)
+    ) {
+      e.stopPropagation();
+      return;
+    }
+    onKeyDown?.(e, index);
   };
 
   return (
@@ -56,8 +74,7 @@ const SeedPhraseInput = ({
           transition-colors
         `}
         onChange={handleChange}
-        onPaste={onPaste}
-        onKeyDown={(e) => onKeyDown?.(e, index)}
+        onKeyDown={handleKeyPress}
       />
       <div className="absolute -top-2 left-2 px-1 text-xs text-gray-500 bg-white dark:bg-gray-900">
         {index + 1}
