@@ -1,21 +1,16 @@
 import { BalanceParams } from "@api-types/BalanceParams";
-import { apiClient } from "@api-utils/apiClient";
-import { NetworkEnum } from "@repo/store/src/enums/network";
+import { rustApiClient } from "@api-utils/rustApiClient";
 
 export const getSolBalance = async ({
   address,
-  chain,
   cluster,
 }: BalanceParams) => {
-  const client = apiClient(
-    chain,
-    cluster as NetworkEnum.Devnet | NetworkEnum.Mainnet
-  );
-  const response = await client.post("/", {
-    jsonrpc: "2.0",
-    id: 1,
-    method: "getBalance",
-    params: [address],
-  });
-  return response.data?.result?.value as number;
+  const client = rustApiClient();
+  const requestData = {
+    address,
+    cluster: cluster as string,
+  };
+  const response = await client.post("/wallet/solana/balance", requestData);
+  // console.log("res ", response?.data)
+  return response.data?.balance as number;
 };
