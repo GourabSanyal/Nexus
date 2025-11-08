@@ -6,10 +6,10 @@ import { SolanaWalletProps } from "@/app/types/wallet/SolanaWalletProps";
 
 export const generateSolanaWallet = async ({
   mnemonic,
-  path,
+  accountIndex,
 }: SolanaWalletProps) => {
   const seed = await mnemonicToSeed(mnemonic);
-  const solPath = `m/44'/${path}'/0'`;
+  const solPath = `m/44'/501'/${accountIndex}'/0'`;
   const derivedSeed = derivePath(solPath, seed.toString("hex")).key;
   const secret = nacl.sign.keyPair.fromSeed(
     new Uint8Array(derivedSeed)
