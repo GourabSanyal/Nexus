@@ -1,4 +1,4 @@
 export interface EthereumWalletProps {
     mnemonic: string;
-    path: string
+    accountIndex: number;
   }
