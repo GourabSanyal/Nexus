@@ -11,9 +11,6 @@ import { WalletRenderer } from "./WalletRenderer";
 
 const SingleWallet = ({ path }: SingleWalletProps) => {
   const { addWallet, walletState } = useWalletOperations();
-  const [showPrivateKey, setShowPrivateKey] = useState<Record<number, boolean>>(
-    {}
-  );
   const [isGenerating, setIsGenerating] = useState(false);
   const solanaWallets = walletState.solanaWallets || [];
   const ethereumWallets = walletState.ethereumWallets || [];
@@ -27,7 +24,12 @@ const SingleWallet = ({ path }: SingleWalletProps) => {
 
     setIsGenerating(true);
     try {
-      const walletData = await generateWallet(mnemonic, path);
+      const accountIndex =
+        path === WalletPath.SOLANA
+          ? solanaWallets.length
+          : ethereumWallets.length;
+
+      const walletData = await generateWallet(mnemonic, path, accountIndex);
       addWallet(walletData.type, walletData.publicKey, walletData.privateKey);
     } catch (error) {
       console.error("Error generating wallet:", error);
@@ -35,10 +37,6 @@ const SingleWallet = ({ path }: SingleWalletProps) => {
     } finally {
       setIsGenerating(false);
     }
-  };
-
-  const togglePrivateKey = (id: number) => {
-    setShowPrivateKey((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   return (
@@ -87,7 +85,9 @@ const SingleWallet = ({ path }: SingleWalletProps) => {
         ) : null
       ) : null}
       {path === WalletPath.SOLANA && <WalletRenderer wallets={solanaWallets} />}
-      {path === WalletPath.ETHEREUM && <WalletRenderer wallets={ethereumWallets} />}
+      {path === WalletPath.ETHEREUM && (
+        <WalletRenderer wallets={ethereumWallets} />
+      )}
     </>
   );
 };

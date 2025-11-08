@@ -2,12 +2,12 @@ import { WalletPath } from "@repo/constants/src/WalletPaths";
 import { generateSolanaWallet } from "@/app/lib/utils/generateSolanaWallet";
 import { generateEthWallet } from "@/app/lib/utils/generateEthWallet";
 
-export const generateWallet = async (mnemonic: string, path: string) => {
+export const generateWallet = async (mnemonic: string, path: string, accountIndex: number) => {
   switch (path) {
     case WalletPath.SOLANA: {
       const { solPublicKey, solSecretKey } = await generateSolanaWallet({
         mnemonic,
-        path,
+        accountIndex,
       });
       return {
         type: "solana" as const,
@@ -18,7 +18,7 @@ export const generateWallet = async (mnemonic: string, path: string) => {
     case WalletPath.ETHEREUM: {
       const { ethPublicKey, ethPrivateKey } = await generateEthWallet({
         mnemonic,
-        path,
+        accountIndex,
       });
       return {
         type: "ethereum" as const,
