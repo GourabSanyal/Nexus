@@ -1,19 +1,10 @@
 export const RPC_ENDPOINTS = {
-  solana: {
-    mainnet:
-      "https://solana-mainnet.g.alchemy.com/v2/_czUokBIPxlF-zpeg0MH83_ZQcjSOFp_",
-    devnet:
-      "https://solana-devnet.g.alchemy.com/v2/_czUokBIPxlF-zpeg0MH83_ZQcjSOFp_",
-  },
   ethereum: {
     mainnet:
-      "https://eth-mainnet.g.alchemy.com/v2/_czUokBIPxlF-zpeg0MH83_ZQcjSOFp_",
+    process.env.EHTEREUM_MAINNET,
     sepolia:
-      "https://eth-holesky.g.alchemy.com/v2/_czUokBIPxlF-zpeg0MH83_ZQcjSOFp_",
+    process.env.EHTEREUM_SEPOLIA,
     holesky:
-      "https://eth-holesky.g.alchemy.com/v2/_czUokBIPxlF-zpeg0MH83_ZQcjSOFp_",
+    process.env.EHTEREUM_HOLESKY,
   },
-} as const;
-
-export type SolanaCluster = keyof typeof RPC_ENDPOINTS.solana;
-export type EthCluster = keyof typeof RPC_ENDPOINTS.ethereum;
+};
