@@ -1,5 +1,5 @@
 import { ChainEnum } from "@repo/store/src/enums/network"
-import { NetworkEnum } from "@repo/store/src/enums/network";export type Chain = "solana" | "ethereum";
+import { NetworkEnum } from "@repo/store/src/enums/network";
 
 export interface BalanceParams {
   chain: ChainEnum.Solana | ChainEnum.Ethereum;
