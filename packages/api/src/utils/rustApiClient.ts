@@ -15,9 +15,7 @@ export const rustApiClient = (): AxiosInstance => {
   client.interceptors.request.use(
     (config) => {
       if (!checkInternet()) {
-        return Promise.reject(
-          new Error(NetworkConnectionEnum.NoInternet)
-        );
+        return Promise.reject(new Error(NetworkConnectionEnum.NoInternet));
       }
       return config;
     },
@@ -28,4 +26,3 @@ export const rustApiClient = (): AxiosInstance => {
 
   return client;
 };
-
