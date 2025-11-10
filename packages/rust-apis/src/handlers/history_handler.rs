@@ -30,9 +30,9 @@ pub async fn get_sol_transactions_handler(
         url => url,
     };
 
-    // Set limit with validation (default 20, max 100)
+    // this set limit with validation (default 20, max 100 requests)
     let limit = payload.limit
-        .map(|l| l.min(100).max(1)) // Clamp between 1 and 100
+        .map(|l| l.min(100).max(1)) 
         .unwrap_or(20);
     
     match get_transactions(&payload.address, &cluster_url, Some(limit)).await {
@@ -53,10 +53,8 @@ pub async fn get_sol_transactions_handler(
             }))
         },
         Err(e) => {
-            // Log the error for debugging
             eprintln!("Error fetching transactions: {}", e);
             
-            // Return user-friendly error message
             let error_msg = if e.to_string().contains("Invalid") {
                 format!("Invalid address format: {}", payload.address)
             } else if e.to_string().contains("connection") || e.to_string().contains("timeout") {
