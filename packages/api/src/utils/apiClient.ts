@@ -8,7 +8,7 @@ import {
 import { checkInternet } from "@repo/api/src/services/shared/checkInternet";
 
 export const apiClient = (
-  chain: ChainEnum.Solana | ChainEnum.Ethereum,
+  chain: ChainEnum.Ethereum,
   cluster:
     | NetworkEnum.Devnet
     | NetworkEnum.Mainnet
@@ -17,11 +17,9 @@ export const apiClient = (
 ): AxiosInstance => {
   try {
     const baseURL =
-      chain === ChainEnum.Solana
-        ? RPC_ENDPOINTS.solana[cluster as keyof typeof RPC_ENDPOINTS.solana]
-        : RPC_ENDPOINTS.ethereum[
-            cluster as keyof typeof RPC_ENDPOINTS.ethereum
-          ];
+      RPC_ENDPOINTS.ethereum[
+        cluster as keyof typeof RPC_ENDPOINTS.ethereum
+      ];
 
     if (checkInternet()) {
       return axios.create({
