@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { useNetwork, NetworkEnum, NetworkConnectionEnum } from "@my-org/store";
+import { useNetwork, NetworkEnum, ChainEnum, NetworkConnectionEnum } from "@my-org/store";
 import {
   transactionHistoryState,
   transactionHistoryLoadingState,
@@ -22,8 +22,6 @@ export const useTransactionHistory = ({
     getEffectiveNetwork,
     fetchAllSolTransactions,
     toggleNetwork,
-    ChainEnum,
-    NetworkEnum,
   } = useNetwork();
   const walletStateValue = useRecoilValue(walletState);
   const [transactionHistory, setTransactionHistory] = useRecoilState(
