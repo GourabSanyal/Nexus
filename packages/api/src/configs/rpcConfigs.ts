@@ -1,10 +1,10 @@
 export const RPC_ENDPOINTS = {
   ethereum: {
     mainnet:
-    process.env.EHTEREUM_MAINNET,
+    process.env.ETHEREUM_MAINNET,
     sepolia:
-    process.env.EHTEREUM_SEPOLIA,
+    process.env.ETHEREUM_SEPOLIA,
     holesky:
-    process.env.EHTEREUM_HOLESKY,
+    process.env.ETHEREUM_HOLESKY,
   },
 };
