@@ -4,7 +4,8 @@ import {
   walletNetworkOverrideState,
 } from "@repo/store/src/atoms/networkState";
 import { ChainEnum, NetworkEnum } from "@repo/store/src/enums/network";
-import { getBalance } from "@repo/api/src/services/wallet/index/getBalance";
+import { getBalance } from "@/lib/utils/getBalance";
+import { getSolTransactions } from "@/lib/utils/getSolTransactions";
 
 const keyFor = (chain: ChainEnum, walletId?: number) =>
   walletId != null ? `${chain}:${walletId}` : "";
@@ -103,6 +104,24 @@ export const useNetwork = () => {
     });
   };
 
+  const fetchAllSolTransactions = async (params: {
+    walletId: string;
+    chain: ChainEnum.Solana | ChainEnum.Ethereum;
+    cluster:
+      | NetworkEnum.Devnet
+      | NetworkEnum.Mainnet
+      | NetworkEnum.Holesky
+      | NetworkEnum.Sepolia;
+    address: string;
+    limit?: number;
+  }) => {
+    return getSolTransactions({
+      address: params.address,
+      cluster: params.cluster as NetworkEnum.Mainnet | NetworkEnum.Devnet,
+      limit: params.limit,
+    });
+  };
+
   return {
     globalNetworks,
     overrides,
@@ -114,5 +133,6 @@ export const useNetwork = () => {
     ChainEnum,
     NetworkEnum,
     fetchBalanceFromAPI,
+    fetchAllSolTransactions,
   };
 };
