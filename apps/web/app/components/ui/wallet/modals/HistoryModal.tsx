@@ -1,23 +1,87 @@
 "use client";
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../dialog/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "../../dialog/dialog";
+import { ClusterToggle } from "../sections/header/ClusterToggle";
+import { TransactionHistorySkeleton } from "../../loading";
+import { ChainEnum } from "@my-org/store";
+import { RefreshCw } from "lucide-react";
+import { Button } from "../../button/button";
+import { useTransactionHistory } from "./hooks/useTransactionHistory";
+import { TransactionItem } from "./components/TransactionItem";
+import { HistoryModalProps } from "@/app/types/components/HistoryModalProps";
 
-interface HistoryModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  walletId: number;
-}
+const HistoryModal = ({ isOpen, onClose, walletId }: HistoryModalProps) => {
+  const {
+    wallet,
+    currentCluster,
+    currentTransactions,
+    loading,
+    isRefreshing,
+    handleClusterToggle,
+    handleRefresh,
+  } = useTransactionHistory({ walletId, isOpen });
 
-const HistoryModal = ({ isOpen, onClose }: HistoryModalProps) => {
+  if (!wallet || wallet.type !== "solana") {
+    return null;
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Transaction History</DialogTitle>
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader className="text-left">
+          <div className="flex items-center justify-between">
+            <div className="pt-[0.7vh] text-left">
+              <DialogTitle>Transaction History</DialogTitle>
+              <DialogDescription className="pt-[1vh]">
+                View transaction history for this wallet
+              </DialogDescription>
+            </div>
+            <div className="flex items-center gap-2">
+              <ClusterToggle
+                chain={ChainEnum.Solana}
+                walletId={walletId}
+                onToggle={handleClusterToggle}
+                currentNetwork={currentCluster}
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleRefresh}
+                disabled={isRefreshing || loading}
+                className="h-8 w-8"
+              >
+                <RefreshCw
+                  className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+                />
+              </Button>
+            </div>
+          </div>
         </DialogHeader>
-        <div className="text-sm text-muted-foreground">
-          {/* Placeholder list; wire actual tx data later */}
-          No transactions yet.
+
+        <div className="mt-4">
+          {loading ? (
+            <TransactionHistorySkeleton count={5} />
+          ) : currentTransactions.length === 0 ? (
+            <div className="text-center py-8 text-sm text-muted-foreground">
+              No transactions yet.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {currentTransactions.map((tx) => (
+                <TransactionItem 
+                  key={tx.signature} 
+                  transaction={tx} 
+                  cluster={currentCluster}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>
@@ -25,5 +89,3 @@ const HistoryModal = ({ isOpen, onClose }: HistoryModalProps) => {
 };
 
 export default HistoryModal;
-
-
