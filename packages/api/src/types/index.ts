@@ -1,1 +1,2 @@
-export * from "./BalanceParams"
+export * from "./BalanceParams";
+export * from "./TransactionTypes";
