@@ -3,6 +3,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "jsx": "preserve",
+    "skipLibCheck": true,
     "paths": {
       "@/*": ["./*"],
       "@repo/*": ["../../packages/*"],
