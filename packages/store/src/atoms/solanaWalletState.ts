@@ -15,3 +15,5 @@ export const selectedSolanaWalletState = atom<SolanaWallet | null>({
     key: "selectedSolanaWalletState",
     default: null
 })
+
+// export const solWalletTransactionHistory

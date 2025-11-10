@@ -1,6 +1,7 @@
 import { BalanceParams } from "@api-types/BalanceParams";
 import { apiClient } from "@api-utils/apiClient";
 import { NetworkEnum } from "@repo/store/src/enums/network";
+import { ChainEnum } from "@repo/store/src/enums/network";
 
 export const getEthBalance = async ({
   address,
@@ -8,7 +9,7 @@ export const getEthBalance = async ({
   cluster,
 }: BalanceParams) => {
   const client = apiClient(
-    chain,
+    chain as ChainEnum.Ethereum,
     cluster as
       | NetworkEnum.Devnet
       | NetworkEnum.Holesky
@@ -23,7 +24,7 @@ export const getEthBalance = async ({
     params: [address, "latest"],
   });
 
-  console.log("res from getEth :", response);
+  console.log("res from getEth server:", response);
 
   return response.data?.result;
 };

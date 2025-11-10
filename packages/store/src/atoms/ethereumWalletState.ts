@@ -15,3 +15,5 @@ export const selectedEthereumWalletState = atom<EthereumWallet | null>({
     key: "selectedEthereumWalletState",
     default: null
 })
+
+// export const ethWalletTransactionHistory

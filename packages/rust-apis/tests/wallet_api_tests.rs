@@ -1,0 +1,1 @@
+// tests for wallet eralted api endpoints

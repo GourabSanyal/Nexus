@@ -8,9 +8,10 @@ export const importWalletState = atom<ImportWalletSchema>({
     isImporting: false,
     currentPhase: "input",
     inputData: {
-      seedPhrase: undefined,
-      privateKey: undefined,
-      password: undefined,
+      seedPhrase: '',
+      privateKey: '',
+      password: '',
+      seedPhraseWords: Array(12).fill(''),
     },
     validationErrors: [],
     importedWallet: undefined,
