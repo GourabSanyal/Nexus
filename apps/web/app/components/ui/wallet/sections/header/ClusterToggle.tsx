@@ -3,9 +3,17 @@
 import { NetworkEnum, useNetwork } from "@my-org/store";
 import { ClusterToggleProps } from "@/app/types/wallet/ClusterToggleTypes";
 
-export function ClusterToggle({ chain, walletId }: ClusterToggleProps) {
+export function ClusterToggle({ chain, walletId, onToggle, currentNetwork }: ClusterToggleProps) {
   const { getEffectiveNetwork, toggleNetwork } = useNetwork();
-  const networkType = getEffectiveNetwork(chain, walletId);
+  const networkType = currentNetwork || getEffectiveNetwork(chain, walletId);
+  
+  const handleClick = () => {
+    if (onToggle) {
+      onToggle();
+    } else {
+      toggleNetwork(chain, walletId);
+    }
+  };
 
   const getNetworkDisplayName = (network: NetworkEnum) => {
     switch (network) {
@@ -41,7 +49,7 @@ export function ClusterToggle({ chain, walletId }: ClusterToggleProps) {
     <button
       aria-label="Toggle network"
       title={getNetworkDisplayName(networkType)}
-      onClick={() => toggleNetwork(chain, walletId)}
+      onClick={handleClick}
       className={`px-2 py-0.5 text-xs rounded-full border transition-colors ${getNetworkColor(networkType)}`}
     >
       {getNetworkDisplayName(networkType)}
