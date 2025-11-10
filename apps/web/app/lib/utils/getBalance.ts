@@ -7,6 +7,7 @@ import { checkMissingParams } from "@repo/api/src/utils/checkMissingParams";
 export const getBalance = async (params: BalanceParams) => {
   checkMissingParams(params);
 
+
   if (params.chain === ChainEnum.Solana) {
     return getSolBalance(params);
   } else if (params.chain === ChainEnum.Ethereum) {
