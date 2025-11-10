@@ -1,7 +1,6 @@
 export * from "./BalancePillTypes";
 export * from "./ClusterToggleTypes";
 export * from "./InlineActionsTypes";
-// export * from "./RefreshButtonTypes";
 export * from "./ReceiveButtonTypes";
 export * from "./SingleWalletProps";
 export * from "./SmallScreenMenuTypes";
