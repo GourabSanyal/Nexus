@@ -4,8 +4,8 @@ import {
   walletNetworkOverrideState,
 } from "@repo/store/src/atoms/networkState";
 import { ChainEnum, NetworkEnum } from "@repo/store/src/enums/network";
-import { getBalance } from "@/lib/utils/getBalance";
-import { getSolTransactions } from "@/lib/utils/getSolTransactions";
+import { getBalance } from "@/app/lib/utils/getBalance";
+import { getSolTransactions } from "@/app/lib/utils/getSolTransactions";
 
 const keyFor = (chain: ChainEnum, walletId?: number) =>
   walletId != null ? `${chain}:${walletId}` : "";
@@ -130,8 +130,6 @@ export const useNetwork = () => {
     toggleNetwork,
     sendEth,
     sendSol,
-    ChainEnum,
-    NetworkEnum,
     fetchBalanceFromAPI,
     fetchAllSolTransactions,
   };

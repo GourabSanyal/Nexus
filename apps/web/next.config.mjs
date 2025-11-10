@@ -17,9 +17,15 @@ const nextConfig = {
   },
   reactStrictMode: true,
   transpilePackages: ["store", "zod", "constants", "api", "rust-apis"],
-  webpack: (config) => {
+  webpack: (config, { dir }) => {
     config.plugins.push(new NodePolyfillPlugin());
     config.devtool = "source-map";
+
+    // Add resolve aliases so store package can import from web app
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      "@": dir,
+    };
 
     return config;
   },
