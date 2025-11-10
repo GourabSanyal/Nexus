@@ -20,7 +20,13 @@ import {
 
 import { SendModalProps } from "@/app/types/wallet";
 
-const SendModal = ({ isOpen, onClose, chain, walletId, network }: SendModalProps) => {
+const SendModal = ({
+  isOpen,
+  onClose,
+  chain,
+  walletId,
+  network,
+}: SendModalProps) => {
   const { getBalance } = useWalletBalances();
   const balance = getBalance(walletId, network);
   const [recipient, setRecipient] = useState<string>("");
@@ -36,9 +42,9 @@ const SendModal = ({ isOpen, onClose, chain, walletId, network }: SendModalProps
   const isAmountValid =
     Number.isFinite(amountNumber) &&
     amountNumber > 0 &&
-    amountNumber <= balance;
+    amountNumber <= Number(balance);
   const isAmountTooHigh =
-    Number.isFinite(amountNumber) && amountNumber > balance;
+    Number.isFinite(amountNumber) && amountNumber > Number(balance);
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent>
@@ -50,10 +56,10 @@ const SendModal = ({ isOpen, onClose, chain, walletId, network }: SendModalProps
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span
-                    className="cursor-not-allowed"
-                  >
-                    <TabsTrigger value="scan" disabled>Scan QR</TabsTrigger>
+                  <span className="cursor-not-allowed">
+                    <TabsTrigger value="scan" disabled>
+                      Scan QR
+                    </TabsTrigger>
                   </span>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -64,10 +70,10 @@ const SendModal = ({ isOpen, onClose, chain, walletId, network }: SendModalProps
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span
-                    className="cursor-not-allowed"
-                  >
-                    <TabsTrigger value="import" disabled>Import Image</TabsTrigger>
+                  <span className="cursor-not-allowed">
+                    <TabsTrigger value="import" disabled>
+                      Import Image
+                    </TabsTrigger>
                   </span>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -80,7 +86,7 @@ const SendModal = ({ isOpen, onClose, chain, walletId, network }: SendModalProps
         </Tabs>
         <div className="space-y-3">
           <div className="text-sm text-muted-foreground">
-            Balance: {balance}
+            Balance: {Number(balance)}
           </div>
           <div className="space-y-1">
             <Input
@@ -90,8 +96,12 @@ const SendModal = ({ isOpen, onClose, chain, walletId, network }: SendModalProps
               className={`${recipient ? (isAddressValid ? "border-green-600" : "border-destructive text-destructive placeholder:text-destructive/70") : ""}`}
             />
             {recipient && (
-              <div className={`text-xs ${isAddressValid ? "text-green-600" : "text-destructive"}`}>
-                {isAddressValid ? "Address looks valid" : "Wallet address is not valid"}
+              <div
+                className={`text-xs ${isAddressValid ? "text-green-600" : "text-destructive"}`}
+              >
+                {isAddressValid
+                  ? "Address looks valid"
+                  : "Wallet address is not valid"}
               </div>
             )}
           </div>
