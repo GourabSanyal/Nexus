@@ -4,6 +4,7 @@ export * from "./atoms/solanaWalletState";
 export * from "./atoms/ethereumWalletState";
 export * from "./atoms/walletBalancesState";
 export * from "./atoms/networkState";
+export * from "./atoms/transactionHistoryState";
 export * from "./enums/network";
 
 export * from "./hooks/useWalletOperations";
