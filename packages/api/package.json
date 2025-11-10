@@ -1,4 +1,5 @@
 {
+  "version": "1.0.0",
   "name": "api",
   "packageManager": "yarn@4.5.3",
   "dependencies": {
