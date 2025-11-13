@@ -2,7 +2,27 @@
   "version": "1.0.0",
   "name": "api",
   "packageManager": "yarn@4.5.3",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsc -b && nodemon dist/api/src/server.js",
+    "build": "tsc",
+    "start": "nodemon dist/api/src/server.js",
+    "start:prod": "NODE_ENV=production node dist/api/src/server.js",
+    "prestart": "yarn«« run build"
+  },
   "dependencies": {
-    "axios": "^1.12.2"
+    "axios": "^1.12.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "nodemon": "^3.1.11"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.10.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
   }
 }
