@@ -1,30 +1,36 @@
 import { BalanceParams } from "@api-types/BalanceParams";
-import { apiClient } from "@api-utils/apiClient";
-import { NetworkEnum } from "@repo/store/src/enums/network";
-import { ChainEnum } from "@repo/store/src/enums/network";
+import { expressApiClient } from "@api-utils/expressApiClient";
 
 export const getEthBalance = async ({
   address,
   chain,
   cluster,
 }: BalanceParams) => {
-  const client = apiClient(
-    chain as ChainEnum.Ethereum,
-    cluster as
-      | NetworkEnum.Devnet
-      | NetworkEnum.Holesky
-      | NetworkEnum.Mainnet
-      | NetworkEnum.Sepolia
-  );
+  const apiBaseURL = process.env.NEXT_PUBLIC_API_URL;
+  const client = expressApiClient(apiBaseURL);
 
-  const response = await client.post("/", {
-    jsonrpc: "2.0",
-    id: 1,
-    method: "eth_getBalance",
-    params: [address, "latest"],
-  });
+  const requestPayload = {
+    address,
+    cluster,
+  };
 
-  console.log("res from getEth server:", response);
+  let response;
+  try {
+    response = await client.post("/api/ethereum/balance", requestPayload);
+  } catch (error: any) {
+    throw error;
+  }
 
-  return response.data?.result;
+  // balance receieved as hex string (e.g., "0x1234...")
+  // convert it to BigInt for consistency with solana balances
+  if (response.data.balance) {
+    try {
+      const balance = BigInt(response.data.balance);
+      return balance;
+    } catch (e) {
+      return BigInt(0);
+    }
+  }
+
+  return BigInt(0);
 };
