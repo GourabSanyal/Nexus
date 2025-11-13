@@ -5,6 +5,10 @@ import { RotateCw } from "lucide-react";
 import { RefreshButtonProps } from "@/app/types/wallet/RefreshButtonTypes";
 
 const RefreshButton = ({ onClick, className, isRefreshing }: RefreshButtonProps) => {
+  const handleClick = () => {
+    onClick();
+  };
+
   return (
     <Button
       aria-label="Refresh"
@@ -12,7 +16,7 @@ const RefreshButton = ({ onClick, className, isRefreshing }: RefreshButtonProps)
       variant="ghost"
       size="icon"
       className={`h-7 w-7 text-muted-foreground hover:text-foreground ${className ?? ""}`}
-      onClick={onClick}
+      onClick={handleClick}
       disabled={!!isRefreshing}
     >
       <RotateCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
