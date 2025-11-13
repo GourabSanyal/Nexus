@@ -15,9 +15,5 @@
       "persistent": true
     }
   },
-  "globalEnv": [
-    "ETHEREUM_MAINNET",
-    "ETHEREUM_SEPOLIA",
-    "ETHEREUM_HOLESKY"
-  ]
+  "globalEnv": ["NEXT_PUBLIC_API_URL"]
 }
