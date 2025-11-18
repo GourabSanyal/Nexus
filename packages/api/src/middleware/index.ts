@@ -2,7 +2,11 @@ import { Request, Response, NextFunction } from "express";
 
 const NODE_ENV = process.env.NODE_ENV || "development";
 
-export function requestLogger(req: Request, res: Response, next: NextFunction): void {
+export function requestLogger(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void {
   if (NODE_ENV === "development") {
     console.log(`[API Server] ${req.method} ${req.path}`, {
       body: req.body,
@@ -23,6 +27,3 @@ export function errorHandler(
     error: NODE_ENV === "production" ? "Internal server error" : err.message,
   });
 }
-
-
-
