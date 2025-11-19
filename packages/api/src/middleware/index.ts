@@ -8,7 +8,7 @@ export function requestLogger(
   next: NextFunction
 ): void {
   if (NODE_ENV === "development") {
-    console.log(`[API Server] ${req.method} ${req.path}`, {
+    console.log(`[API Server: DEV] ${req.method} ${req.path}`, {
       body: req.body,
       query: req.query,
     });
@@ -22,8 +22,10 @@ export function errorHandler(
   res: Response,
   next: NextFunction
 ): void {
-  console.error("[API Server] Unhandled error:", err);
+  console.error("[API Server:DEV] Unhandled error:", err);
   res.status(500).json({
     error: NODE_ENV === "production" ? "Internal server error" : err.message,
   });
 }
+
+export { validateEthereumRequest } from "./validateEthereumRequest.js";
