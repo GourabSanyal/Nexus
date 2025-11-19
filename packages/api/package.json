@@ -3,25 +3,31 @@
   "name": "api",
   "packageManager": "yarn@4.5.3",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "dist/api/src/server.js",
   "scripts": {
-    "dev": "tsc -b && nodemon dist/api/src/server.js",
+    "dev": "tsx --watch --tsconfig tsconfig.json src/server.ts",
     "build": "tsc",
-    "start": "nodemon dist/api/src/server.js",
-    "start:prod": "NODE_ENV=production node dist/api/src/server.js",
-    "prestart": "yarn«« run build"
+    "start": "tsx --tsconfig tsconfig.json src/server.ts",
+    "start:prod": "NODE_ENV=production tsx --tsconfig tsconfig.json src/server.ts"
   },
   "dependencies": {
     "axios": "^1.12.2",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "express-rate-limit": "^8.2.1",
     "nodemon": "^3.1.11"
   },
   "devDependencies": {
+    "@swc/core": "^1.15.2",
+    "@swc/helpers": "^0.5.17",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
+    "@types/express-rate-limit": "^6.0.2",
     "@types/node": "^20.10.0",
+    "ts-node": "^10.9.2",
+    "tsc-alias": "^1.8.16",
+    "tsconfig-paths": "^4.2.0",
     "tsx": "^4.7.0",
     "typescript": "^5.3.3"
   }
