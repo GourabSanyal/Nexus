@@ -1,15 +1,12 @@
-import axios, { AxiosInstance } from "axios";
+import { AxiosInstance } from "axios";
+import { createSecureAxiosClient } from "./createSecureAxiosClient";
 
-export const expressApiClient = (baseURL?: string): AxiosInstance => {
-  const apiBaseURL = baseURL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
-  
-  return axios.create({
-    baseURL: apiBaseURL,
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+export const expressApiClient = (): AxiosInstance => {
+  const apiBaseURL = process.env.NEXT_PUBLIC_API_URL;
+
+  if (process.env.NODE_ENV === "development") {
+    console.log("Express API base URL:", apiBaseURL);
+  }
+
+  return createSecureAxiosClient(apiBaseURL);
 };
-
-
-
