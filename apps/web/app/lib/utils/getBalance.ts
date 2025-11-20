@@ -5,13 +5,10 @@ import { getEthBalance } from "@repo/api/src/services/wallet/ethereum/getEthBala
 import { checkMissingParams } from "@repo/api/src/utils/checkMissingParams";
 import { checkInternet } from "./internet";
 
-export const getBalance = async (params: BalanceParams) => {
-  try {
-    checkInternet();
-    checkMissingParams(params);
-  } catch (error: any) {
-    return error;
-  }
+export const getBalance = async (params: BalanceParams): Promise<bigint> => {
+  checkInternet();
+  checkMissingParams(params);
+
   switch (params.chain) {
     case ChainEnum.Solana:
       return getSolBalance(params);
