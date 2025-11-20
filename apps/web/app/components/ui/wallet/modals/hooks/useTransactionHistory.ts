@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { useNetwork, NetworkEnum, ChainEnum, NetworkConnectionEnum } from "@my-org/store";
+import { NetworkEnum, ChainEnum, NetworkConnectionEnum } from "@my-org/store";
 import {
   transactionHistoryState,
   transactionHistoryLoadingState,
@@ -8,6 +8,9 @@ import {
 import { walletState } from "@my-org/store";
 import { TransactionInfo } from "@api-types/TransactionTypes";
 import { toast } from "sonner";
+import { WalletAdapterFactory } from "@/app/lib/adapters/WalletAdapterFactory";
+import { useNetworkManager } from "@/app/hooks/useNetworkManager";
+import { IWalletAdapter } from "@/app/lib/adapters/IWalletAdapter";
 
 interface UseTransactionHistoryProps {
   walletId: number;
@@ -18,11 +21,6 @@ export const useTransactionHistory = ({
   walletId,
   isOpen,
 }: UseTransactionHistoryProps) => {
-  const {
-    getEffectiveNetwork,
-    fetchAllSolTransactions,
-    toggleNetwork,
-  } = useNetwork();
   const walletStateValue = useRecoilValue(walletState);
   const [transactionHistory, setTransactionHistory] = useRecoilState(
     transactionHistoryState
@@ -37,29 +35,28 @@ export const useTransactionHistory = ({
     ...(walletStateValue.ethereumWallets || []),
   ].find((w) => w.id === walletId);
 
-  const defaultCluster = getEffectiveNetwork(ChainEnum.Solana, walletId);
-  const [currentCluster, setCurrentCluster] = useState<
-    NetworkEnum.Mainnet | NetworkEnum.Devnet
-  >(
-    defaultCluster === NetworkEnum.Mainnet
-      ? NetworkEnum.Mainnet
-      : NetworkEnum.Devnet
-  );
+  // adapter memoized like useSendModal to prevent infinite loop
+  const adapter: IWalletAdapter | null = useMemo(() => {
+    return wallet ? WalletAdapterFactory.create(wallet.type) : null;
+  }, [wallet?.type]);
 
-  useEffect(() => {
-    if (isOpen) {
-      const defaultCluster = getEffectiveNetwork(ChainEnum.Solana, walletId);
-      setCurrentCluster(
-        defaultCluster === NetworkEnum.Mainnet
-          ? NetworkEnum.Mainnet
-          : NetworkEnum.Devnet
-      );
-    }
-  }, [isOpen, getEffectiveNetwork, walletId]);
+  const chain = adapter?.chain || ChainEnum.Solana;
+
+  const networkManager = adapter
+    ? useNetworkManager(adapter, chain, walletId)
+    : null;
+
+  // Use networkManager.currentNetwork directly,
+  // ensures the modal stays in sync with header toggle, 
+  // used reactive recoil management
+  const currentCluster =
+    networkManager?.currentNetwork ||
+    adapter?.getDefaultNetwork() ||
+    NetworkEnum.Mainnet;
 
   const transactionHistoryRef = useRef(transactionHistory);
   const walletRef = useRef(wallet);
-  const fetchAllSolTransactionsRef = useRef(fetchAllSolTransactions);
+  const adapterRef = useRef(adapter);
 
   useEffect(() => {
     transactionHistoryRef.current = transactionHistory;
@@ -70,24 +67,26 @@ export const useTransactionHistory = ({
   }, [wallet]);
 
   useEffect(() => {
-    fetchAllSolTransactionsRef.current = fetchAllSolTransactions;
-  }, [fetchAllSolTransactions]);
+    adapterRef.current = adapter;
+  }, [adapter]);
 
   const getCacheKey = useCallback(
-    (cluster: NetworkEnum.Mainnet | NetworkEnum.Devnet) => {
+    (cluster: NetworkEnum) => {
       return `${walletId}:${cluster}`;
     },
     [walletId]
   );
 
+  const getClusterString = useCallback((cluster: NetworkEnum): string => {
+    return cluster.toLowerCase();
+  }, []);
+
   const fetchTransactions = useCallback(
-    async (
-      cluster: NetworkEnum.Mainnet | NetworkEnum.Devnet,
-      forceRefresh: boolean = false
-    ) => {
+    async (cluster: NetworkEnum, forceRefresh: boolean = false) => {
+      if (!adapterRef.current || !walletRef.current) return;
+
       const cacheKey = getCacheKey(cluster);
-      const clusterString =
-        cluster === NetworkEnum.Mainnet ? "mainnet" : "devnet";
+      const clusterString = getClusterString(cluster);
 
       const currentHistory = transactionHistoryRef.current;
       const cachedData = currentHistory[walletId.toString()]?.[clusterString];
@@ -99,13 +98,12 @@ export const useTransactionHistory = ({
 
       try {
         const currentWallet = walletRef.current;
-        if (!currentWallet) return;
+        const currentAdapter = adapterRef.current;
+        if (!currentWallet || !currentAdapter) return;
 
-        const response = await fetchAllSolTransactionsRef.current({
-          walletId: walletId.toString(),
-          chain: ChainEnum.Solana,
-          cluster,
+        const response = await currentAdapter.fetchTransactions({
           address: currentWallet.publicKey,
+          cluster: cluster as string,
           limit: 20,
         });
 
@@ -119,7 +117,9 @@ export const useTransactionHistory = ({
       } catch (error: any) {
         console.error("Error fetching transactions:", error);
         if (error?.message?.includes(NetworkConnectionEnum.NoInternet)) {
-          toast.warning("Failed to fetch transactions. Please check your internet connection.");
+          toast.warning(
+            "Failed to fetch transactions. Please check your internet connection."
+          );
         } else {
           toast.error("Failed to fetch transactions. Please try again.");
         }
@@ -128,7 +128,13 @@ export const useTransactionHistory = ({
         setIsRefreshing(false);
       }
     },
-    [walletId, getCacheKey, setLoadingStates, setTransactionHistory]
+    [
+      walletId,
+      getCacheKey,
+      getClusterString,
+      setLoadingStates,
+      setTransactionHistory,
+    ]
   );
 
   const fetchTransactionsRef = useRef(fetchTransactions);
@@ -137,29 +143,24 @@ export const useTransactionHistory = ({
   }, [fetchTransactions]);
 
   useEffect(() => {
-    if (!isOpen || !wallet) return;
-    // On modal open, fetch for BOTH clusters if not cached yet (but only once per open)
-    const clusters: (NetworkEnum.Mainnet | NetworkEnum.Devnet)[] = [
-      NetworkEnum.Mainnet,
-      NetworkEnum.Devnet,
-    ];
+    if (!isOpen || !wallet || !adapter) return;
+    // On modal open, fetch for all supported networks if not cached yet, but only once per open
+    const clusters = adapter.supportedNetworks;
     clusters.forEach((cluster) => {
-      const clusterString =
-        cluster === NetworkEnum.Mainnet ? "mainnet" : "devnet";
+      const clusterString = getClusterString(cluster);
       const cachedData =
         transactionHistoryRef.current[walletId.toString()]?.[clusterString];
       if (!cachedData || cachedData.length === 0) {
         fetchTransactionsRef.current(cluster, false);
       }
     });
-  }, [isOpen, walletId, wallet]);
+  }, [isOpen, walletId, wallet, adapter, getClusterString]);
 
   // use useMemo to ensure it updates when cluster or history changes
   const currentTransactions = useMemo((): TransactionInfo[] => {
-    const clusterString =
-      currentCluster === NetworkEnum.Mainnet ? "mainnet" : "devnet";
+    const clusterString = getClusterString(currentCluster);
     return transactionHistory[walletId.toString()]?.[clusterString] || [];
-  }, [transactionHistory, walletId, currentCluster]);
+  }, [transactionHistory, walletId, currentCluster, getClusterString]);
 
   // use useMemo to ensure same as currentTransactions
   const loading = useMemo((): boolean => {
@@ -168,15 +169,9 @@ export const useTransactionHistory = ({
   }, [loadingStates, currentCluster, getCacheKey]);
 
   const handleClusterToggle = useCallback(() => {
-    const newCluster =
-      currentCluster === NetworkEnum.Mainnet
-        ? NetworkEnum.Devnet
-        : NetworkEnum.Mainnet;
-
-    setCurrentCluster(newCluster);
-    // Persist cluster change so all ClusterToggle components (header/modal) stay synced
-    toggleNetwork(ChainEnum.Solana, walletId);
-  }, [currentCluster, walletId, toggleNetwork, ChainEnum, NetworkEnum]);
+    if (!networkManager) return;
+    networkManager.toggle();
+  }, [networkManager]);
 
   const handleRefresh = useCallback(() => {
     setIsRefreshing(true);
