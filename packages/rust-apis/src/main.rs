@@ -8,6 +8,7 @@ mod services;
 use axum::{
     routing::get,
     Router,
+    response::Json,
 };
 
 use tower_http::cors::{CorsLayer, AllowOrigin, Any};
@@ -46,6 +47,18 @@ async fn main() {
 
     let app = Router::new()
         .route("/", get(|| async { "Hello, World!" }))
+        .route("/health", get(|| async {
+            use std::time::{SystemTime, UNIX_EPOCH};
+            let timestamp = SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_secs();
+            Json(serde_json::json!({
+                "status": "ok",
+                "service": "rust-apis",
+                "timestamp": timestamp,
+            }))
+        }))
         .merge(api::wallet_routes())
         .merge(api::history_routes())
         .layer(cors);
