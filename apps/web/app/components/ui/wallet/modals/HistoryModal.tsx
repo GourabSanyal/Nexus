@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,12 +10,12 @@ import {
 } from "../../dialog/dialog";
 import { ClusterToggle } from "../sections/header/ClusterToggle";
 import { TransactionHistorySkeleton } from "../../loading";
-import { ChainEnum } from "@my-org/store";
 import { RefreshCw } from "lucide-react";
 import { Button } from "../../button/button";
 import { useTransactionHistory } from "./hooks/useTransactionHistory";
 import { TransactionItem } from "./components/TransactionItem";
 import { HistoryModalProps } from "@/app/types/components/HistoryModalProps";
+import { WalletAdapterFactory } from "@/app/lib/adapters/WalletAdapterFactory";
 
 const HistoryModal = ({ isOpen, onClose, walletId }: HistoryModalProps) => {
   const {
@@ -27,7 +28,13 @@ const HistoryModal = ({ isOpen, onClose, walletId }: HistoryModalProps) => {
     handleRefresh,
   } = useTransactionHistory({ walletId, isOpen });
 
-  if (!wallet || wallet.type !== "solana") {
+  const chain = useMemo(() => {
+    if (!wallet) return null;
+    const adapter = WalletAdapterFactory.create(wallet.type);
+    return adapter.chain;
+  }, [wallet]);
+
+  if (!wallet || !chain) {
     return null;
   }
 
@@ -44,7 +51,7 @@ const HistoryModal = ({ isOpen, onClose, walletId }: HistoryModalProps) => {
             </div>
             <div className="flex items-center gap-2">
               <ClusterToggle
-                chain={ChainEnum.Solana}
+                chain={chain}
                 walletId={walletId}
                 onToggle={handleClusterToggle}
                 currentNetwork={currentCluster}
@@ -74,9 +81,9 @@ const HistoryModal = ({ isOpen, onClose, walletId }: HistoryModalProps) => {
           ) : (
             <div className="space-y-3">
               {currentTransactions.map((tx) => (
-                <TransactionItem 
-                  key={tx.signature} 
-                  transaction={tx} 
+                <TransactionItem
+                  key={tx.signature}
+                  transaction={tx}
                   cluster={currentCluster}
                 />
               ))}

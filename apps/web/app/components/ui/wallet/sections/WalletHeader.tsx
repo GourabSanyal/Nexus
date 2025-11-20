@@ -1,7 +1,7 @@
 "use client";
 
+import { useMemo } from "react";
 import { CardHeader } from "../../card/card";
-import { ChainEnum } from "@my-org/store";
 import { WalletTitle } from "./header/WalletTitle";
 import { BalancePill } from "./header/BalancePill";
 import { ClusterToggle } from "./header/ClusterToggle";
@@ -9,8 +9,7 @@ import RefreshButton from "../actions/RefreshButton";
 import { InlineActions } from "./header/InlineActions";
 import { SmallScreenMenu } from "./header/SmallScreenMenu";
 import { WalletHeaderProps } from "@/app/types/wallet/WalletHeaderTypes";
-import { WalletPath } from "@repo/constants/src/WalletPaths";
-import { convertToDisplayBalance } from "@/app/lib/utils/convert";
+import { useWalletFeatures } from "@/app/hooks/useWalletFeatures";
 
 export const WalletHeader = ({
   wallet,
@@ -20,15 +19,24 @@ export const WalletHeader = ({
   onEditName,
   onDelete,
 }: WalletHeaderProps) => {
-  const chain =
-    wallet.type === "solana" ? ChainEnum.Solana : ChainEnum.Ethereum;
+  const features = useWalletFeatures(wallet);
+  
+  if (!features) {
+    return null;
+  }
 
-  const balanceToShow =
-    balance !== undefined
-      ? wallet.type === "solana"
-        ? convertToDisplayBalance(balance, WalletPath.SOLANA)
-        : convertToDisplayBalance(balance, WalletPath.ETHEREUM)
-      : "0";
+  const chain = features.chain;
+
+  const balanceToShow = useMemo(() => {
+    if (balance === undefined) return "0";
+    // Convert string | BigInt to number | bigint for formatBalance
+    const balanceValue: number | bigint = typeof balance === "string" 
+      ? Number(balance) 
+      : typeof balance === "bigint" 
+        ? balance 
+        : BigInt(balance.toString());
+    return features.formatBalance(balanceValue);
+  }, [balance, features]);
 
   return (
     <CardHeader className="flex flex-row items-start sm:items-center justify-between space-y-0 pb-4">

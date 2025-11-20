@@ -9,7 +9,7 @@ import { NetworkEnum } from "@my-org/store";
 
 interface TransactionItemProps {
   transaction: TransactionInfo;
-  cluster: NetworkEnum.Mainnet | NetworkEnum.Devnet;
+  cluster: NetworkEnum;
 }
 
 export const TransactionItem = ({

@@ -1,19 +1,15 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "../card/card";
-import { useWalletOperations } from "@my-org/store";
-import { useNetwork } from "@my-org/store";
-import { ChainEnum, NetworkConnectionEnum } from "@repo/store/src/enums/network";
+import { useWalletOperations, useNetwork } from "@my-org/store";
+import { NetworkConnectionEnum } from "@repo/store/src/enums/network";
 
-import WalletHeader from "./sections/WalletHeader";
-import ReceiveModal from "./modals/ReceiveModal";
-import SendModal from "./modals/SendModal";
-import HistoryModal from "./modals/HistoryModal";
-import WalletMainSection from "./sections/WalletMainSection";
 import { useWalletBalances } from "@my-org/store";
 import { WalletRendererProps } from "@/app/types/wallet";
 import { Wallet } from "@/app/types/wallet/wallet";
 import { toast } from "sonner";
+import { WalletRendererContent } from "./WalletRendererContent";
+import { WalletAdapterFactory } from "@/app/lib/adapters/WalletAdapterFactory";
 
 export const WalletRenderer = ({ wallets }: WalletRendererProps) => {
   const { editWalletName, deleteWallet } = useWalletOperations();
@@ -28,7 +24,7 @@ export const WalletRenderer = ({ wallets }: WalletRendererProps) => {
     Record<number, boolean>
   >({});
   const { getBalance, setBalance } = useWalletBalances();
-  const { fetchBalanceFromAPI, getEffectiveNetwork } = useNetwork();
+  const { getEffectiveNetwork } = useNetwork();
 
   const openReceive = (id: number) =>
     setReceiveOpenById((p) => ({ ...p, [id]: true }));
@@ -38,21 +34,23 @@ export const WalletRenderer = ({ wallets }: WalletRendererProps) => {
     setSendOpenById((p) => ({ ...p, [id]: true }));
   const closeSend = (id: number) =>
     setSendOpenById((p) => ({ ...p, [id]: false }));
-  const refresh = async (wallet: Wallet) => {
-    const chain =
-      wallet.type === "solana" ? ChainEnum.Solana : ChainEnum.Ethereum;
-    const currentCluster = getEffectiveNetwork(chain, wallet.id);
 
+  const refresh = async (wallet: Wallet) => {
     try {
       setRefreshingById((p) => ({ ...p, [wallet.id]: true }));
-      const res = await fetchBalanceFromAPI({
-        walletId: wallet.id.toString(),
+
+      const adapter = WalletAdapterFactory.create(wallet.type);
+      const chain = adapter.chain;
+      const currentNetwork = getEffectiveNetwork(chain, wallet.id);
+
+      const balance = await adapter.fetchBalance({
         chain,
-        cluster: currentCluster,
+        cluster: currentNetwork,
         address: wallet.publicKey,
       });
-      if (res) {
-        setBalance(wallet.id, wallet.type, res.toString(), currentCluster);
+
+      if (balance !== undefined && balance !== null) {
+        setBalance(wallet.id, wallet.type, balance.toString(), currentNetwork);
       }
     } catch (error: any) {
       if (error?.message?.includes(NetworkConnectionEnum.NoInternet)) {
@@ -86,48 +84,24 @@ export const WalletRenderer = ({ wallets }: WalletRendererProps) => {
             style={{ overflow: "hidden" }}
           >
             <Card className="w-full mb-6 border border-border rounded-lg shadow-sm transition-shadow hover:shadow-lg bg-card text-card-foreground">
-              <WalletHeader
+              <WalletRendererContent
                 wallet={wallet}
-                balance={getBalance(
-                  wallet.id,
-                  wallet.type,
-                  getEffectiveNetwork(
-                    wallet.type === "solana"
-                      ? ChainEnum.Solana
-                      : ChainEnum.Ethereum,
-                    wallet.id
-                  )
-                )}
+                getBalance={getBalance}
                 isRefreshing={!!refreshingById[wallet.id]}
                 onRefresh={() => refresh(wallet)}
                 onEditName={(newName: string) =>
                   editWalletName(wallet.id, newName, wallet.type)
                 }
                 onDelete={() => deleteWallet(wallet.id, wallet.type)}
-              />
-              <WalletMainSection
-                wallet={wallet}
                 onReceive={openReceive}
                 onSend={openSend}
                 onHistory={openHistory}
-              />
-
-              <ReceiveModal
-                isOpen={!!receiveOpenById[wallet.id]}
-                onClose={() => closeReceive(wallet.id)}
-                publicKey={wallet.publicKey}
-              />
-              <SendModal
-                isOpen={!!sendOpenById[wallet.id]}
-                onClose={() => closeSend(wallet.id)}
-                chain={wallet.type}
-                walletId={wallet.id}
-                network={wallet.type}
-              />
-              <HistoryModal
-                isOpen={!!historyOpenById[wallet.id]}
-                onClose={() => closeHistory(wallet.id)}
-                walletId={wallet.id}
+                receiveOpenById={receiveOpenById}
+                sendOpenById={sendOpenById}
+                historyOpenById={historyOpenById}
+                closeReceive={closeReceive}
+                closeSend={closeSend}
+                closeHistory={closeHistory}
               />
             </Card>
           </motion.div>
