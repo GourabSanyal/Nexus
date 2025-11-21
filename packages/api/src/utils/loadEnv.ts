@@ -32,11 +32,11 @@ export function loadEnv(): void {
   const result = dotenv.config({ path: envPath });
 
   if (result.error) {
-    console.warn(`[API Server] Warning: Could not load .env from ${envPath}:`, result.error.message);
+    console.warn(
+      `[API Server] Warning: Could not load .env from ${envPath}:`,
+      result.error.message
+    );
   } else {
     console.log(`[API Server] Loaded .env from: ${envPath}`);
   }
 }
-
-
-
