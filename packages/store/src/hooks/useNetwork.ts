@@ -6,6 +6,8 @@ import {
 import { ChainEnum, NetworkEnum } from "@repo/store/src/enums/network";
 import { getBalance } from "@/app/lib/utils/getBalance";
 import { getSolTransactions } from "@/app/lib/utils/getSolTransactions";
+import { getEthTransactions } from "@/app/lib/utils/ethereum/transactions/getEthTransactions";
+import { TransactionResponse } from "@repo/api/src/types/TransactionTypes";
 
 const keyFor = (chain: ChainEnum, walletId?: number) =>
   walletId != null ? `${chain}:${walletId}` : "";
@@ -114,10 +116,28 @@ export const useNetwork = () => {
       | NetworkEnum.Sepolia;
     address: string;
     limit?: number;
-  }) => {
+  }): Promise<TransactionResponse> => {
     return getSolTransactions({
       address: params.address,
       cluster: params.cluster as NetworkEnum.Mainnet | NetworkEnum.Devnet,
+      limit: params.limit,
+    });
+  };
+
+  const fetchAllEthTransactions = async (params: {
+    walletId: string;
+    chain: ChainEnum.Solana | ChainEnum.Ethereum;
+    cluster:
+      | NetworkEnum.Devnet
+      | NetworkEnum.Mainnet
+      | NetworkEnum.Holesky
+      | NetworkEnum.Sepolia;
+    address: string;
+    limit?: number;
+  }): Promise<TransactionResponse> => {
+    return getEthTransactions({
+      address: params.address,
+      cluster: params.cluster as NetworkEnum.Mainnet | NetworkEnum.Sepolia | NetworkEnum.Holesky,
       limit: params.limit,
     });
   };
@@ -132,5 +152,6 @@ export const useNetwork = () => {
     sendSol,
     fetchBalanceFromAPI,
     fetchAllSolTransactions,
+    fetchAllEthTransactions
   };
 };
