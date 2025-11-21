@@ -11,7 +11,13 @@ interface UseSendModalProps {
   chain: ChainEnum.Solana | ChainEnum.Ethereum;
 }
 
-export const useSendModal = ({ walletId, chain }: UseSendModalProps) => {
+export const useSendModal = ({ walletId, chain }: UseSendModalProps): {
+  wallet: any;
+  currentNetwork: NetworkEnum;
+  balance: string | BigInt;
+  handleNetworkToggle: () => void;
+  chainEnum: ChainEnum;
+} => {
   const walletStateValue = useRecoilValue(walletState);
   const { getBalance } = useWalletBalances();
 
@@ -26,9 +32,7 @@ export const useSendModal = ({ walletId, chain }: UseSendModalProps) => {
     return wallet ? WalletAdapterFactory.create(wallet.type) : null;
   }, [wallet?.type]);
 
-  const chainEnum =
-    adapter?.chain ||
-    (chain === "solana" ? ChainEnum.Solana : ChainEnum.Ethereum);
+  const chainEnum: ChainEnum = adapter?.chain || chain;
 
   const networkManager = adapter
     ? useNetworkManager(adapter, chainEnum, walletId)

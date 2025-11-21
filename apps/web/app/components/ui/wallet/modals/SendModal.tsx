@@ -20,6 +20,7 @@ import {
 } from "@components/ui/tooltip";
 import { ClusterToggle } from "../sections/header/ClusterToggle";
 import { useSendModal } from "./hooks/useSendModal";
+import { ChainEnum } from "@my-org/store";
 
 import { SendModalProps } from "@/app/types/wallet";
 
@@ -30,13 +31,14 @@ const SendModal = ({
   walletId,
   network,
 }: SendModalProps) => {
+  const chainEnum = chain === "solana" ? ChainEnum.Solana : ChainEnum.Ethereum;
   const {
     wallet,
     currentNetwork,
     balance,
     handleNetworkToggle,
-    chainEnum,
-  } = useSendModal({ walletId, chain });
+    chainEnum: chainEnumFromHook,
+  } = useSendModal({ walletId, chain: chainEnum });
 
   const [recipient, setRecipient] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
@@ -77,7 +79,7 @@ const SendModal = ({
               </DialogDescription>
             </div>
             <ClusterToggle
-              chain={chainEnum}
+              chain={chainEnumFromHook}
               walletId={walletId}
               onToggle={handleNetworkToggle}
               currentNetwork={currentNetwork}
