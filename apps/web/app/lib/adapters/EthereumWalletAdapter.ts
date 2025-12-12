@@ -3,7 +3,7 @@ import { IWalletAdapter } from "./IWalletAdapter";
 import { BalanceParams } from "@api-types/BalanceParams";
 import { TransactionResponse, TransactionRequest } from "@api-types/TransactionTypes";
 import { getEthBalance } from "@repo/api/src/services/wallet/ethereum/getEthBalance";
-import { getEthTransactions } from "@/app/lib/utils/ethereum/transactions/getEthTransactions";
+import { fetchTransactions } from "@/app/lib/utils/fetchTransactions";
 import { validateAddress } from "@my-org/store";
 
 export class EthereumWalletAdapter implements IWalletAdapter {
@@ -47,9 +47,10 @@ export class EthereumWalletAdapter implements IWalletAdapter {
   }
 
   async fetchTransactions(params: TransactionRequest): Promise<TransactionResponse> {
-    return getEthTransactions({
+    return fetchTransactions({
+      chain: this.chain,
       address: params.address,
-      cluster: params.cluster as NetworkEnum.Mainnet | NetworkEnum.Sepolia | NetworkEnum.Holesky,
+      cluster: params.cluster as NetworkEnum,
       limit: params.limit,
     });
   }
