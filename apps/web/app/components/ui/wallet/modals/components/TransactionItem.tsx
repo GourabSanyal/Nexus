@@ -44,6 +44,18 @@ export const TransactionItem = ({
   chain,
   currencySymbol,
 }: TransactionItemProps) => {
+  // Log for Ethereum transactions only
+  if (chain === ChainEnum.Ethereum) {
+    console.log("🖼️ [ETH UI] Rendering TransactionItem", {
+      signature: tx.signature,
+      status: tx.status,
+      amount: tx.amount,
+      fee: tx.fee,
+      direction: tx.direction,
+      cluster,
+    });
+  }
+
   const explorerUrl = getExplorerUrl(tx.signature, chain, cluster);
 
   const handleSignatureClick = () => {

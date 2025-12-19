@@ -2,21 +2,29 @@ import { Router, Response } from "express";
 import { EthereumRequest } from "../../types/ethereum.js";
 import { validateEthereumRequest } from "../../middleware/validateEthereumRequest.js";
 import { handleEthereumError } from "../../middleware/ethereumErrorHandler.js";
+import { getEthTransactions } from "../../services/wallet/ethereum/getEthTransactions.js";
+import { TransactionResponse } from "../../types/TransactionTypes.js";
 
 const router = Router();
 
 router.post("/", validateEthereumRequest, async (req: EthereumRequest, res: Response) => {
   try {
-    const { address, cluster } = req.validatedData!;
+    const { address, cluster, rpcUrl, limit } = req.validatedData!;
 
-    // TODO: Implement Ethereum transaction fetching
-    // This is a placeholder - implement the actual transaction fetching logic here
-    
-    res.json({
-      message: "Transactions endpoint - to be implemented",
+    if (!address || !cluster || !rpcUrl) {
+      return res.status(400).json({
+        error: "Missing required parameters: address, cluster, or rpcUrl",
+      });
+    }
+
+    const result: TransactionResponse = await getEthTransactions({
       address,
+      rpcUrl,
       cluster,
+      limit: limit || 20,
     });
+
+    res.json(result);
   } catch (error: any) {
     handleEthereumError(res, error, "Failed to fetch transactions");
   }

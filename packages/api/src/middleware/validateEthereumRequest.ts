@@ -14,7 +14,7 @@ export function validateEthereumRequest(
   res: Response,
   next: NextFunction
 ): void {
-  const { address, cluster } = req.body;
+  const { address, cluster, limit } = req.body;
 
   if (!address) {
     res.status(400).json({ error: "Address is required" });
@@ -43,10 +43,16 @@ export function validateEthereumRequest(
     return;
   }
 
+  // Validate and set limit (default 20, max 100)
+  const validatedLimit = limit 
+    ? Math.min(Math.max(Number(limit), 1), 100) 
+    : 20;
+
   req.validatedData = {
     address,
     cluster: cluster as NetworkEnum,
     rpcUrl,
+    limit: validatedLimit,
   };
 
   next();

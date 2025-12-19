@@ -24,12 +24,22 @@ export const fetchTransactions = async ({
         limit,
       });
 
-    case ChainEnum.Ethereum:
-      return getEthTransactions({
+    case ChainEnum.Ethereum: {
+      console.log("🔄 [ETH Utility] fetchTransactions routing to Ethereum", {
+        address,
+        cluster,
+        limit,
+      });
+      const ethResult = await getEthTransactions({
         address,
         cluster: cluster as NetworkEnum.Mainnet | NetworkEnum.Sepolia | NetworkEnum.Holesky,
         limit,
       });
+      console.log("📦 [ETH Utility] Received Ethereum transactions in fetchTransactions", {
+        transactionCount: ethResult.transactions?.length || 0,
+      });
+      return ethResult;
+    }
 
     default:
       throw new Error(`Unsupported chain: ${chain}`);

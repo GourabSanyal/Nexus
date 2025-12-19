@@ -101,11 +101,30 @@ export const useTransactionHistory = ({
         const currentAdapter = adapterRef.current;
         if (!currentWallet || !currentAdapter) return;
 
+        if (chain === ChainEnum.Ethereum) {
+          console.log("📤 [ETH Hook] Sending request to adapter.fetchTransactions", {
+            address: currentWallet.publicKey,
+            cluster,
+            limit: 20,
+            walletId,
+          });
+        }
+
         const response = await currentAdapter.fetchTransactions({
           address: currentWallet.publicKey,
           cluster: cluster as string,
           limit: 20,
         });
+
+        if (chain === ChainEnum.Ethereum) {
+          console.log("✅ [ETH Hook] Received data from API in useTransactionHistory", {
+            transactionCount: response.transactions?.length || 0,
+            transactions: response.transactions,
+            pagination: response.pagination,
+            walletId,
+            cluster,
+          });
+        }
 
         setTransactionHistory((prev) => ({
           ...prev,
@@ -114,6 +133,14 @@ export const useTransactionHistory = ({
             [clusterString]: response.transactions,
           },
         }));
+
+        if (chain === ChainEnum.Ethereum) {
+          console.log("💾 [ETH Hook] Data stored in transactionHistoryState", {
+            walletId,
+            cluster: clusterString,
+            transactionCount: response.transactions?.length || 0,
+          });
+        }
       } catch (error: any) {
         console.error("Error fetching transactions:", error);
         if (error?.message?.includes(NetworkConnectionEnum.NoInternet)) {
@@ -159,8 +186,19 @@ export const useTransactionHistory = ({
   // use useMemo to ensure it updates when cluster or history changes
   const currentTransactions = useMemo((): TransactionInfo[] => {
     const clusterString = getClusterString(currentCluster);
-    return transactionHistory[walletId.toString()]?.[clusterString] || [];
-  }, [transactionHistory, walletId, currentCluster, getClusterString]);
+    const transactions = transactionHistory[walletId.toString()]?.[clusterString] || [];
+    
+    if (chain === ChainEnum.Ethereum && transactions.length > 0) {
+      console.log("📖 [ETH Hook] Retrieved transactions from state for rendering", {
+        walletId,
+        cluster: clusterString,
+        transactionCount: transactions.length,
+        transactions,
+      });
+    }
+    
+    return transactions;
+  }, [transactionHistory, walletId, currentCluster, getClusterString, chain]);
 
   // use useMemo to ensure same as currentTransactions
   const loading = useMemo((): boolean => {
@@ -174,9 +212,16 @@ export const useTransactionHistory = ({
   }, [networkManager]);
 
   const handleRefresh = useCallback(() => {
+    if (chain === ChainEnum.Ethereum) {
+      console.log("📥 [ETH Hook] Received refresh request in useTransactionHistory", {
+        walletId,
+        currentCluster,
+        chain,
+      });
+    }
     setIsRefreshing(true);
     fetchTransactionsRef.current(currentCluster, true);
-  }, [currentCluster]);
+  }, [currentCluster, chain, walletId]);
 
   return {
     wallet,
