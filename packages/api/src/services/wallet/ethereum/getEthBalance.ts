@@ -12,20 +12,26 @@ export const getEthBalance = async ({
     cluster,
   };
 
-  const response = await client.post("/wallet/ethereum/balance", requestPayload);
-
-  if (!response.data?.balance) {
-    return BigInt(0);
-  }
-
   try {
-    const balance = BigInt(response.data.balance);
-    return balance;
+    const response = await client.post("/wallet/ethereum/balance", requestPayload);
+
+    if (!response.data?.balance) {
+      return BigInt(0);
+    }
+
+    try {
+      const hexBalance = response.data.balance;
+      const balance = BigInt(hexBalance);
+      return balance;
+    } catch (error: any) {
+      console.error(
+        `[getEthBalance] Failed to convert balance to BigInt: ${response.data.balance}`,
+        error
+      );
+      return BigInt(0);
+    }
   } catch (error: any) {
-    console.error(
-      `[getEthBalance] Failed to convert balance to BigInt: ${response.data.balance}`,
-      error
-    );
+    console.error("[getEthBalance] API call failed:", error.response?.data || error.message);
     return BigInt(0);
   }
 };
