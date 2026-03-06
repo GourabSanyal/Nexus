@@ -47,24 +47,12 @@ export class EthereumWalletAdapter implements IWalletAdapter {
   }
 
   async fetchTransactions(params: TransactionRequest): Promise<TransactionResponse> {
-    console.log("🔗 [ETH Adapter] EthereumWalletAdapter.fetchTransactions called", {
-      address: params.address,
-      cluster: params.cluster,
-      limit: params.limit,
-    });
-    
-    const result = await fetchTransactions({
+    return fetchTransactions({
       chain: this.chain,
       address: params.address,
       cluster: params.cluster as NetworkEnum,
       limit: params.limit,
     });
-    
-    console.log("📥 [ETH Adapter] Received response in EthereumWalletAdapter", {
-      transactionCount: result.transactions?.length || 0,
-    });
-    
-    return result;
   }
 
   async sendTransaction(params: any): Promise<any> {
