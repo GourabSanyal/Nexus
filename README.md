@@ -1,81 +1,115 @@
-# Turborepo starter
+Nexus — Multi-Chain Wallet Infrastructure
+Nexus is a production-grade, open-source web based wallet platform built for the modern multi-chain world. It delivers seamless Ethereum and Solana support, letting you send, receive, and manage assets across both networks from a single, unified interface.
 
-This is an official starter Turborepo.
+Overview
+Built as a TypeScript monorepo with a high-performance Rust backend, powered by Turborepo, Nexus enforces strict separation of concerns across every layer. Designed from the ground up for scalability, security, and clean developer ergonomics. Whether you're integrating wallet infrastructure into your product or evaluating how modern Web3 architecture should be structured, Nexus is built to production standards.
 
-## Using this example
+## Tech Stack
 
-Run the following command:
+| Layer | Technology |
+|-------|------------|
+| Frontend | Next.js 14, React 18, TypeScript, Tailwind CSS, Framer Motion |
+| State Management | Recoil |
+| API Layer | Express.js (TypeScript), Rust (Axum), Alchemy gRPCs | 
+| Blockchain | Solana SDK, Ethers.js |
+| Build Tools | Turborepo, Yarn Workspaces |
 
-```sh
-npx create-turbo@latest
+## Key Features
+
+- **Multi-chain Support**: Ethereum (Mainnet, Sepolia, Holesky) and Solana (Mainnet, Devnet)
+- **Wallet Generation**: BIP-39 seed phrase based wallet creation
+- **Balance Fetching**: Real-time on-chain balance queries
+- **Transaction History**: View past transactions on both chains
+- **Network Switching**: Easy network toggle between testnets and mainnets
+
+## Prerequisites
+
+- Node.js 18+
+- Rust (latest stable)
+- Yarn 4.x
+- Alchemy or similar RPC provider account
+
+## Setup
+
+### 1. Install Dependencies
+
+```bash
+# Root workspace
+yarn install
 ```
 
-## What's inside?
+### 2. Configure Environment Variables
 
-This Turborepo includes the following packages/apps:
+Create `.env` files in the following locations:
 
-### Apps and Packages
-
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-pnpm build
+**`packages/api/.env`**
+```env
+NODE_ENV=development
+CORS_ORIGIN=http://localhost:3000
+NEXT_PUBLIC_RUST_API_URL=http://localhost:9000
+NEXT_PUBLIC_API_URL=http://localhost:3001
+ETHEREUM_MAINNET=<your-alchemy-url>
+ETHEREUM_SEPOLIA=<your-alchemy-url>
+ETHEREUM_HOLESKY=<your-alchemy-url>
 ```
 
-### Develop
-
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
-pnpm dev
-```
-
-### Remote Caching
-
-Turborepo can use a technique known as [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup), then enter the following commands:
-
-```
-cd my-turborepo
-npx turbo login
+**`packages/rust-apis/.env`**
+```env
+PORT=9000
+CORS_ORIGIN=http://localhost:3000
+SOLANA_MAINNET_RPC=<your-alchemy-url>
+SOLANA_DEVNET_RPC=<your-alchemy-url>
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-npx turbo link
+**`apps/web/.env`**
+```env
+NEXT_PUBLIC_API_URL=http://localhost:3001
+NEXT_PUBLIC_RUST_API_URL=http://localhost:9000
 ```
 
-## Useful Links
+> **Note**: Obtain RPC URLs from [Alchemy](https://www.alchemy.com/) or similar providers. Free tiers are available for development.
 
-Learn more about the power of Turborepo:
+### 3. Run Development Servers
 
-- [Tasks](https://turbo.build/repo/docs/core-concepts/monorepos/running-tasks)
-- [Caching](https://turbo.build/repo/docs/core-concepts/caching)
-- [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching)
-- [Filtering](https://turbo.build/repo/docs/core-concepts/monorepos/filtering)
-- [Configuration Options](https://turbo.build/repo/docs/reference/configuration)
-- [CLI Usage](https://turbo.build/repo/docs/reference/command-line-reference)
+```bash
+# Terminal 1 - Rust API (Solana)
+cd packages/rust-apis && cargo run --release
+
+# Terminal 2 - TypeScript API (Ethereum)
+cd packages/api && yarn dev
+
+# Terminal 3 - Frontend
+cd apps/web && yarn dev
+```
+
+### Ports
+
+| Service | Port | URL |
+|---------|------|-----|
+| Frontend | 3000 | http://localhost:3000 |
+| TypeScript API | 3001 | http://localhost:3001 |
+| Rust API | 9000 | http://localhost:9000 |
+
+## Project Structure
+
+```
+├── apps/
+│   └── web/                 # Next.js frontend
+├── packages/
+│   ├── api/                 # Express.js API (Ethereum)
+│   ├── rust-apis/           # Axum Rust API (Solana)
+│   ├── store/               # Shared Recoil state
+│   ├── ui/                  # Shared UI components
+│   └── zod/                 # Validation schemas
+```
+
+## Design Principles
+
+1. **Adapter Pattern**: Chain-specific logic encapsulated in wallet adapters
+2. **Type Safety**: Full TypeScript coverage with strict mode
+3. **Separation of Concerns**: Clear boundaries between layers
+4. **Monorepo Efficiency**: Shared code via Yarn workspaces
+
+## License
+
+MIT
