@@ -16,6 +16,7 @@ import { useTransactionHistory } from "./hooks/useTransactionHistory";
 import { TransactionItem } from "./components/TransactionItem";
 import { HistoryModalProps } from "@/app/types/components/HistoryModalProps";
 import { WalletAdapterFactory } from "@/app/lib/adapters/WalletAdapterFactory";
+import { ChainEnum } from "@my-org/store";
 
 const HistoryModal = ({ isOpen, onClose, walletId }: HistoryModalProps) => {
   const {
@@ -59,7 +60,12 @@ const HistoryModal = ({ isOpen, onClose, walletId }: HistoryModalProps) => {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={handleRefresh}
+                onClick={() => {
+                  if (chain === ChainEnum.Ethereum) {
+                    console.log("🔄 [ETH UI] Button clicked - Refresh request sent from HistoryModal");
+                  }
+                  handleRefresh();
+                }}
                 disabled={isRefreshing || loading}
                 className="h-8 w-8"
               >
@@ -80,13 +86,24 @@ const HistoryModal = ({ isOpen, onClose, walletId }: HistoryModalProps) => {
             </div>
           ) : (
             <div className="space-y-3">
-              {currentTransactions.map((tx) => (
-                <TransactionItem
-                  key={tx.signature}
-                  transaction={tx}
-                  cluster={currentCluster}
-                />
-              ))}
+              {(() => {
+                if (chain === ChainEnum.Ethereum && currentTransactions.length > 0) {
+                  console.log("🎨 [ETH UI] Rendering transactions in HistoryModal", {
+                    count: currentTransactions.length,
+                    transactions: currentTransactions,
+                    cluster: currentCluster,
+                  });
+                }
+                return currentTransactions.map((tx) => (
+                  <TransactionItem
+                    key={tx.signature}
+                    transaction={tx}
+                    cluster={currentCluster}
+                    chain={chain}
+                    currencySymbol={wallet?.type === "ethereum" ? "ETH" : "SOL"}
+                  />
+                ));
+              })()}
             </div>
           )}
         </div>

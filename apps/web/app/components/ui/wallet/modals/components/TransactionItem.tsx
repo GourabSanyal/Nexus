@@ -5,19 +5,58 @@ import {
   truncateSignature,
 } from "../utils/transactionFormatters";
 import { ExternalLink } from "lucide-react";
-import { NetworkEnum } from "@my-org/store";
+import { NetworkEnum, ChainEnum } from "@my-org/store";
 
 interface TransactionItemProps {
   transaction: TransactionInfo;
   cluster: NetworkEnum;
+  chain: ChainEnum;
+  currencySymbol: string;
+}
+
+function getExplorerUrl(
+  signature: string,
+  chain: ChainEnum,
+  cluster: NetworkEnum
+): string {
+  if (chain === ChainEnum.Solana) {
+    const clusterString =
+      cluster === NetworkEnum.Mainnet ? "mainnet" : "devnet";
+    return `https://explorer.solana.com/tx/${signature}?cluster=${clusterString}`;
+  } else if (chain === ChainEnum.Ethereum) {
+    switch (cluster) {
+      case NetworkEnum.Mainnet:
+        return `https://etherscan.io/tx/${signature}`;
+      case NetworkEnum.Sepolia:
+        return `https://sepolia.etherscan.io/tx/${signature}`;
+      case NetworkEnum.Holesky:
+        return `https://holesky.etherscan.io/tx/${signature}`;
+      default:
+        return `https://etherscan.io/tx/${signature}`;
+    }
+  }
+  return `https://explorer.solana.com/tx/${signature}`;
 }
 
 export const TransactionItem = ({
   transaction: tx,
   cluster,
+  chain,
+  currencySymbol,
 }: TransactionItemProps) => {
-  const clusterString = cluster === NetworkEnum.Mainnet ? "mainnet" : "devnet";
-  const explorerUrl = `https://explorer.solana.com/tx/${tx.signature}?cluster=${clusterString}`;
+  // Log for Ethereum transactions only
+  if (chain === ChainEnum.Ethereum) {
+    console.log("🖼️ [ETH UI] Rendering TransactionItem", {
+      signature: tx.signature,
+      status: tx.status,
+      amount: tx.amount,
+      fee: tx.fee,
+      direction: tx.direction,
+      cluster,
+    });
+  }
+
+  const explorerUrl = getExplorerUrl(tx.signature, chain, cluster);
 
   const handleSignatureClick = () => {
     window.open(explorerUrl, "_blank", "noopener,noreferrer");
@@ -67,14 +106,16 @@ export const TransactionItem = ({
             }`}
           >
             {tx.amount && tx.amount > 0 ? "+" : ""}
-            {formatAmount(tx.amount)} SOL
+            {formatAmount(tx.amount)} {currencySymbol}
           </span>
         </div>
 
         {tx.fee && (
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>Fee:</span>
-            <span>{formatAmount(tx.fee)} SOL</span>
+            <span>
+              {formatAmount(tx.fee)} {currencySymbol}
+            </span>
           </div>
         )}
 

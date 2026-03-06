@@ -3,7 +3,7 @@ import { IWalletAdapter } from "./IWalletAdapter";
 import { BalanceParams } from "@api-types/BalanceParams";
 import { TransactionResponse, TransactionRequest } from "@api-types/TransactionTypes";
 import { getSolBalance } from "@/app/lib/utils/getSolBalance";
-import { getSolTransactions } from "@/app/lib/utils/getSolTransactions";
+import { fetchTransactions } from "@/app/lib/utils/fetchTransactions";
 import { validateAddress } from "@my-org/store";
 
 export class SolanaWalletAdapter implements IWalletAdapter {
@@ -35,9 +35,10 @@ export class SolanaWalletAdapter implements IWalletAdapter {
   }
 
   async fetchTransactions(params: TransactionRequest): Promise<TransactionResponse> {
-    return getSolTransactions({
+    return fetchTransactions({
+      chain: this.chain,
       address: params.address,
-      cluster: params.cluster as NetworkEnum.Mainnet | NetworkEnum.Devnet,
+      cluster: params.cluster as NetworkEnum,
       limit: params.limit,
     });
   }

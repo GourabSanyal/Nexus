@@ -6,6 +6,7 @@ export interface EthereumRequest extends Request {
     address: string;
     cluster: NetworkEnum;
     rpcUrl: string;
+    limit?: number;
   };
 }
 
