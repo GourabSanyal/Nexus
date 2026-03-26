@@ -24,14 +24,10 @@ export const getEthBalance = async ({
       const balance = BigInt(hexBalance);
       return balance;
     } catch (error: any) {
-      console.error(
-        `[getEthBalance] Failed to convert balance to BigInt: ${response.data.balance}`,
-        error
-      );
+      console.error("Error parsing balance:", error);
       return BigInt(0);
     }
   } catch (error: any) {
-    console.error("[getEthBalance] API call failed:", error.response?.data || error.message);
     return BigInt(0);
   }
 };
