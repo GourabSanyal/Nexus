@@ -27,7 +27,7 @@ export const fetchTransactions = async ({
     case ChainEnum.Ethereum: {
       return getEthTransactions({
         address,
-        cluster: cluster as NetworkEnum.Mainnet | NetworkEnum.Sepolia | NetworkEnum.Holesky,
+        cluster: cluster as NetworkEnum.Mainnet | NetworkEnum.Sepolia,
         limit,
       });
     }

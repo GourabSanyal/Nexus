@@ -11,7 +11,6 @@ export class EthereumWalletAdapter implements IWalletAdapter {
   readonly supportedNetworks: NetworkEnum[] = [
     NetworkEnum.Mainnet,
     NetworkEnum.Sepolia,
-    NetworkEnum.Holesky,
   ];
 
   getDefaultNetwork(): NetworkEnum {
@@ -21,7 +20,6 @@ export class EthereumWalletAdapter implements IWalletAdapter {
   getNextNetwork(current: NetworkEnum): NetworkEnum {
     const order = [
       NetworkEnum.Sepolia,
-      NetworkEnum.Holesky,
       NetworkEnum.Mainnet,
     ];
     const currentIndex = order.indexOf(current);
@@ -77,8 +75,6 @@ export class EthereumWalletAdapter implements IWalletAdapter {
         return "Mainnet";
       case NetworkEnum.Sepolia:
         return "Sepolia";
-      case NetworkEnum.Holesky:
-        return "Holesky";
       default:
         return "Unknown";
     }
@@ -88,8 +84,6 @@ export class EthereumWalletAdapter implements IWalletAdapter {
     switch (network) {
       case NetworkEnum.Sepolia:
         return "border-blue-600 text-blue-700 bg-blue-50 dark:text-blue-500 dark:bg-blue-950";
-      case NetworkEnum.Holesky:
-        return "border-purple-600 text-purple-700 bg-purple-50 dark:text-purple-500 dark:bg-purple-950";
       case NetworkEnum.Mainnet:
         return "border-orange-600 text-orange-700 bg-orange-50 dark:text-orange-500 dark:bg-orange-950";
       default:
