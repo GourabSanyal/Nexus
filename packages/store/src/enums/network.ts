@@ -7,7 +7,6 @@ export enum NetworkEnum {
   Mainnet = "mainnet",
   Devnet = "devnet",
   Sepolia = "sepolia",
-  Holesky = "holesky"
 }
 
 export enum NetworkConnectionEnum {
