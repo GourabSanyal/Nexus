@@ -31,7 +31,8 @@ export class SolanaWalletAdapter implements IWalletAdapter {
 
   formatBalance(balance: number | bigint): string {
     const numBalance = typeof balance === 'bigint' ? Number(balance) : balance;
-    return numBalance.toString();
+    const sol = numBalance / 1e9;
+    return sol.toFixed(3);
   }
 
   async fetchTransactions(params: TransactionRequest): Promise<TransactionResponse> {

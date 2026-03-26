@@ -41,7 +41,7 @@ export class EthereumWalletAdapter implements IWalletAdapter {
   formatBalance(balance: number | bigint): string {
     const wei = typeof balance === 'bigint' ? balance : BigInt(balance);
     const eth = Number(wei) / 1e18;
-    return eth.toString();
+    return eth.toFixed(3);
   }
 
   async fetchTransactions(params: TransactionRequest): Promise<TransactionResponse> {
