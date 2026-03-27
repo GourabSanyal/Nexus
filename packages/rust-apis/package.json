@@ -1,0 +1,19 @@
+{
+  "name": "rust-apis",
+  "version": "0.1.0",
+  "description": "Rust backend for Cloudflare Workers",
+  "main": "src/index.ts",
+  "type": "module",
+  "packageManager": "yarn@4",
+  "scripts": {
+    "dev": "wrangler dev",
+    "build": "cargo build --target wasm32-unknown-unknown --release",
+    "deploy": "wrangler publish",
+    "preview": "wrangler dev --env production"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240427.0",
+    "@types/node": "^20.0.0",
+    "wrangler": "^4.77.0"
+  }
+}

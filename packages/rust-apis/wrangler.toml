@@ -1,0 +1,20 @@
+name = "rust-apis"
+main = "src/index.ts"
+compatibility_date = "2026-03-27"
+workers_dev = true
+
+[build]
+command = "cargo build --target wasm32-unknown-unknown --release && mkdir -p _wasm && wasm-bindgen --out-dir _wasm --target web --no-typescript target/wasm32-unknown-unknown/release/rust_apis.wasm"
+cwd = "."
+watch_dir = "src"
+
+# Environment variables / secrets
+# Set these: wrangler secret put SOLANA_MAINNET_RPC
+[env.production]
+# vars = { ENVIRONMENT = "production" }
+
+[env.development]
+# vars = { ENVIRONMENT = "development" }
+
+[dev]
+port = 9000
