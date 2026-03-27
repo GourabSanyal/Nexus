@@ -1,30 +1,38 @@
 use anyhow::Result;
-use solana_client::{
-    nonblocking::rpc_client::RpcClient,
-    rpc_client::GetConfirmedSignaturesForAddress2Config,
-    rpc_config::RpcTransactionConfig,
-    rpc_response::RpcConfirmedTransactionStatusWithSignature,
-};
-use solana_commitment_config::CommitmentConfig;
-use solana_sdk::{
-    pubkey::Pubkey,
-    signature::Signature,
-};
-use std::str::FromStr;
+use serde_json::{json, Value};
 use crate::models::TransactionInfo;
+use wasm_bindgen_futures::JsFuture;
+use wasm_bindgen::prelude::*;
+use web_sys::{Request, RequestInit, Response};
 
+#[wasm_bindgen]
+extern "C" {
+    // Cloudflare Workers global fetch (no `window` object)
+    #[wasm_bindgen(js_name = "fetch")]
+    fn global_fetch(input: &Request) -> js_sys::Promise;
+}
+
+/// Fetch Solana balance via JSON-RPC
 pub async fn get_balance(address: &str, cluster_url: &str) -> Result<u64> {
-    let client = RpcClient::new_with_commitment(
-        cluster_url.to_string(),
-        CommitmentConfig::confirmed(),
-    );
+    let request_body = json!({
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "getBalance",
+        "params": [address]
+    });
 
-    let pubkey = Pubkey::from_str(address)?;
-    let balance = client.get_balance(&pubkey).await?;
+    let response_data = make_rpc_request(cluster_url, request_body).await?;
+
+    let balance = response_data
+        .get("result")
+        .and_then(|r| r.get("value"))
+        .and_then(|v| v.as_u64())
+        .ok_or_else(|| anyhow::anyhow!("Failed to parse balance from response"))?;
 
     Ok(balance)
 }
 
+/// Fetch Solana transactions via JSON-RPC
 pub async fn get_transactions(
     address: &str,
     cluster_url: &str,
@@ -37,36 +45,40 @@ pub async fn get_transactions(
         return Err(anyhow::anyhow!("Cluster URL cannot be empty"));
     }
 
-    let client = RpcClient::new_with_commitment(
-        cluster_url.to_string(),
-        CommitmentConfig::confirmed(),
-    );
+    let effective_limit = limit.unwrap_or(20).min(100);
 
-    let pubkey = Pubkey::from_str(address)
-        .map_err(|e| anyhow::anyhow!("Invalid Solana address format: {}", e))?;
-    
-    let effective_limit = limit.unwrap_or(20).min(100); // Default 20, max 100
-    let signatures_config = GetConfirmedSignaturesForAddress2Config {
-        before: None,
-        until: None,
-        limit: Some(effective_limit + 1), 
-        commitment: Some(CommitmentConfig::finalized()),
-    };
+    let request_body = json!({
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "getSignaturesForAddress",
+        "params": [
+            address,
+            {
+                "limit": effective_limit + 1
+            }
+        ]
+    });
 
-    let signatures = client
-        .get_signatures_for_address_with_config(&pubkey, signatures_config)
-        .await
-        .map_err(|e| anyhow::anyhow!("Failed to fetch signatures: {}", e))?;
+    let response_data = make_rpc_request(cluster_url, request_body).await?;
+
+    let signatures = response_data
+        .get("result")
+        .and_then(|r| r.as_array())
+        .ok_or_else(|| anyhow::anyhow!("Failed to parse signatures from response"))?;
 
     let has_more = signatures.len() > effective_limit;
     let signatures_to_process = if has_more {
         &signatures[..effective_limit]
     } else {
-        &signatures
+        &signatures[..]
     };
 
     let next_cursor = if has_more && !signatures.is_empty() {
-        signatures_to_process.last().map(|s| s.signature.clone())
+        signatures_to_process
+            .last()
+            .and_then(|s| s.get("signature"))
+            .and_then(|s| s.as_str())
+            .map(|s| s.to_string())
     } else {
         None
     };
@@ -74,148 +86,97 @@ pub async fn get_transactions(
     let mut transactions = Vec::new();
 
     for sig_info in signatures_to_process {
-        let signature = match Signature::from_str(&sig_info.signature) {
-            Ok(sig) => sig,
-            Err(e) => {
-                eprintln!("Invalid signature format {}: {}", sig_info.signature, e);
-                transactions.push(create_transaction_info_from_signature(sig_info, &pubkey));
-                continue;
-            }
-        };
-        
-        let tx_config = RpcTransactionConfig {
-            encoding: Some(solana_transaction_status::UiTransactionEncoding::Json),
-            commitment: Some(CommitmentConfig::finalized()),
-            max_supported_transaction_version: Some(0),
-        };
-
-        match client.get_transaction_with_config(&signature, tx_config).await {
-            Ok(tx_with_meta) => {
-                let tx_info = extract_transaction_info(&tx_with_meta, sig_info, &pubkey);
-                transactions.push(tx_info);
-            }
-            Err(e) => {
-                eprintln!("Warning: Failed to fetch transaction details for {}: {}", sig_info.signature, e);
-                transactions.push(create_transaction_info_from_signature(sig_info, &pubkey));
-            }
-        }
+        let tx_info = parse_transaction_from_signature(sig_info);
+        transactions.push(tx_info);
     }
 
     Ok((transactions, has_more, next_cursor))
 }
 
-fn create_transaction_info_from_signature(
-    sig_info: &RpcConfirmedTransactionStatusWithSignature,
-    _target_pubkey: &Pubkey,
-) -> TransactionInfo {
-    let status = if sig_info.err.is_some() {
-        "failed".to_string()
+/// Make a JSON-RPC request to Solana using global fetch (Cloudflare Workers compatible)
+async fn make_rpc_request(cluster_url: &str, request_body: Value) -> Result<Value> {
+    let opts = RequestInit::new();
+    opts.set_method("POST");
+
+    let body_str = serde_json::to_string(&request_body)?;
+    opts.set_body(&JsValue::from_str(&body_str));
+
+    let request = Request::new_with_str_and_init(cluster_url, &opts)
+        .map_err(|_| anyhow::anyhow!("Failed to create request"))?;
+    
+    request.headers().set("Content-Type", "application/json")
+        .map_err(|_| anyhow::anyhow!("Failed to set request headers"))?;
+
+    // Use global fetch (works in Cloudflare Workers, no `window` needed)
+    let resp_value = JsFuture::from(global_fetch(&request))
+        .await
+        .map_err(|e| anyhow::anyhow!("Fetch failed: {:?}", e))?;
+    
+    let resp: Response = resp_value.dyn_into()
+        .map_err(|_| anyhow::anyhow!("Failed to convert response"))?;
+
+    let text_promise = resp.text()
+        .map_err(|_| anyhow::anyhow!("Failed to get response text"))?;
+    
+    let text_value = JsFuture::from(text_promise)
+        .await
+        .map_err(|_| anyhow::anyhow!("Failed to read response body"))?;
+    
+    let text_str = text_value.as_string()
+        .ok_or_else(|| anyhow::anyhow!("Response is not a string"))?;
+
+    let response_data: Value = serde_json::from_str(&text_str)?;
+
+    if let Some(error) = response_data.get("error") {
+        return Err(anyhow::anyhow!("RPC Error: {}", error));
+    }
+
+    Ok(response_data)
+}
+
+/// Parse transaction info from signature data
+fn parse_transaction_from_signature(sig_info: &Value) -> TransactionInfo {
+    let signature = sig_info
+        .get("signature")
+        .and_then(|s| s.as_str())
+        .unwrap_or("unknown")
+        .to_string();
+
+    let slot = sig_info
+        .get("slot")
+        .and_then(|s| s.as_u64())
+        .unwrap_or(0);
+
+    let block_time = sig_info
+        .get("blockTime")
+        .and_then(|b| b.as_i64());
+
+    let status = if sig_info.get("err").is_some() {
+        "failed"
     } else {
-        "success".to_string()
+        "success"
     };
 
+    let confirmation_status = sig_info
+        .get("confirmationStatus")
+        .and_then(|c| c.as_str())
+        .map(|s| s.to_string());
+
     TransactionInfo {
-        signature: sig_info.signature.clone(),
-        slot: sig_info.slot,
-        block_time: sig_info.block_time,
-        status,
-        err: sig_info.err.as_ref().map(|e| serde_json::to_value(e).unwrap_or(serde_json::Value::Null)),
-        confirmation_status: sig_info.confirmation_status.as_ref().map(|s| format!("{:?}", s)),
+        signature,
+        slot,
+        block_time,
+        status: status.to_string(),
+        err: sig_info.get("err").cloned(),
+        confirmation_status,
         amount: None,
         fee: None,
         direction: None,
         from_address: None,
         to_address: None,
-        memo: sig_info.memo.clone(),
+        memo: sig_info
+            .get("memo")
+            .and_then(|m| m.as_str())
+            .map(|s| s.to_string()),
     }
-}
-
-fn extract_transaction_info(
-    tx_with_meta: &solana_transaction_status::EncodedConfirmedTransactionWithStatusMeta,
-    sig_info: &RpcConfirmedTransactionStatusWithSignature,
-    target_pubkey: &Pubkey,
-) -> TransactionInfo {
-    let meta = tx_with_meta.transaction.meta.as_ref();
-    
-    let status = if meta.map(|m| m.err.is_some()).unwrap_or(false) || sig_info.err.is_some() {
-        "failed".to_string()
-    } else {
-        "success".to_string()
-    };
-
-    let (amount, direction, from_address, to_address) = calculate_transaction_details(tx_with_meta, target_pubkey);
-    
-    let fee = meta.map(|m| m.fee);
-
-    TransactionInfo {
-        signature: sig_info.signature.clone(),
-        slot: tx_with_meta.slot,
-        block_time: tx_with_meta.block_time.or(sig_info.block_time),
-        status,
-        err: sig_info.err.as_ref().or_else(|| meta.and_then(|m| m.err.as_ref()))
-            .map(|e| serde_json::to_value(e).unwrap_or(serde_json::Value::Null)),
-        confirmation_status: sig_info.confirmation_status.as_ref().map(|s| format!("{:?}", s)),
-        amount,
-        fee,
-        direction,
-        from_address,
-        to_address,
-        memo: sig_info.memo.clone(),
-    }
-}
-
-fn calculate_transaction_details(
-    tx_with_meta: &solana_transaction_status::EncodedConfirmedTransactionWithStatusMeta,
-    target_pubkey: &Pubkey,
-) -> (Option<i64>, Option<String>, Option<String>, Option<String>) {
-    let meta = match tx_with_meta.transaction.meta.as_ref() {
-        Some(m) => m,
-        None => return (None, None, None, None),
-    };
-
-    let account_index = match &tx_with_meta.transaction.transaction {
-        solana_transaction_status::EncodedTransaction::Json(json_tx) => {
-            match &json_tx.message {
-                solana_transaction_status::UiMessage::Parsed(parsed_msg) => {
-                    parsed_msg.account_keys
-                        .iter()
-                        .position(|acc| acc.pubkey == target_pubkey.to_string())
-                }
-                solana_transaction_status::UiMessage::Raw(raw_msg) => {
-                    raw_msg.account_keys
-                        .iter()
-                        .position(|key| key == &target_pubkey.to_string())
-                }
-            }
-        }
-        _ => None,
-    };
-
-    let account_index = match account_index {
-        Some(idx) => idx,
-        None => return (None, None, None, None),
-    };
-
-    let pre_balances = &meta.pre_balances;
-    let post_balances = &meta.post_balances;
-    
-    if account_index >= pre_balances.len() || account_index >= post_balances.len() {
-        return (None, None, None, None);
-    }
-
-    let pre_balance = pre_balances[account_index] as i64;
-    let post_balance = post_balances[account_index] as i64;
-    let amount = Some(post_balance - pre_balance);
-
-    let direction = match amount {
-        Some(amt) if amt > 0 => Some("received".to_string()),
-        Some(amt) if amt < 0 => Some("sent".to_string()),
-        Some(_) => Some("self".to_string()),
-        None => None,
-    };
-
-    let from_address = None;
-    let to_address = None;
-
-    (amount, direction, from_address, to_address)
 }

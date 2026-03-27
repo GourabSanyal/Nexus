@@ -1,9 +1,2 @@
-use crate::handlers::get_sol_transactions_handler;
-use axum::{routing::post, Router};
-
-pub fn history_routes() -> Router {
-    Router::new().route(
-        "/wallet/solana/transactions",
-        post(get_sol_transactions_handler),
-    )
-}
+// Routes are now handled in src/index.ts (Cloudflare Workers pattern)
+// This module is kept for compatibility but routes are handled by the TypeScript handler
