@@ -1,18 +1,22 @@
-// Import Rust WASM functions and the init function from wasm-bindgen generated JS glue
-import init, { get_solana_balance, get_solana_transactions } from '../_wasm/rust_apis.js';
+// Import the Rust WASM module through the generated JS glue
+import init, * as wasmExports from '../_wasm/rust_apis.js';
 
-// Import the WASM module. Wrangler handles this as a WebAssembly.Module
-// @ts-ignore
-import wasmModule from '../_wasm/rust_apis_bg.wasm';
+let wasmInitialized = false;
 
-let initialized = false;
-
-async function ensureInitialized() {
-  if (!initialized) {
-    // Initialize the WASM module with the module provided by Wrangler
-    await init(wasmModule);
-    initialized = true;
+async function getWasmModule() {
+  if (!wasmInitialized) {
+    // Import the WASM binary (esbuild will handle this)
+    const wasmResponse = await import('../_wasm/rust_apis_bg.wasm');
+    
+    // Initialize the glue code with the WASM module
+    await init(wasmResponse.default || wasmResponse);
+    
+    if (wasmExports.init_panic_hook) {
+      wasmExports.init_panic_hook();
+    }
+    wasmInitialized = true;
   }
+  return wasmExports;
 }
 
 interface Env {
@@ -22,6 +26,9 @@ interface Env {
 
 export default {
   async fetch(request: Request, env: Env, ctx: any): Promise<Response> {
+    // Get WASM module
+    const wasm = await getWasmModule();
+
     const url = new URL(request.url);
     const method = request.method;
     const path = url.pathname;
@@ -42,9 +49,6 @@ export default {
     }
 
     try {
-      // Ensure WASM is initialized before calling any functions
-      await ensureInitialized();
-
       // Route handling
       let responseBody: string;
       let status = 200;
@@ -62,27 +66,26 @@ export default {
       } else if (method === 'POST' && path === '/wallet/solana/balance') {
         try {
           const body = await request.json() as any;
-          const address = body.address;
           
-          if (!address) {
+          if (!body.address) {
             status = 400;
-            responseBody = JSON.stringify({ error: 'Missing address field' });
+            responseBody = JSON.stringify({ error: 'Address is required' });
           } else {
-            // Get RPC URL from request body or env
+            // Get RPC URL from env
             const rpcUrl = body.cluster === 'mainnet'
               ? env.SOLANA_MAINNET_RPC || 'https://api.mainnet-beta.solana.com'
               : env.SOLANA_DEVNET_RPC || 'https://api.devnet.solana.com';
 
-            // Call Rust WASM function
-            const balanceLamports = await get_solana_balance(address, rpcUrl);
-            responseBody = JSON.stringify({
-              address,
-              balance: balanceLamports.toString(), // Balance is bigint from wasm-bindgen
-              balance_sol: Number(balanceLamports) / 1_000_000_000,
-              cluster: body.cluster || 'devnet',
+            // Call Rust WASM function directly
+            const balance = await wasm.get_solana_balance(body.address, rpcUrl);
+            responseBody = JSON.stringify({ 
+              balance: balance.toString(),
+              address: body.address,
+              cluster: body.cluster || 'devnet'
             });
           }
         } catch (error) {
+          console.error('Balance error:', error);
           status = 500;
           responseBody = JSON.stringify({
             error: `Failed to get balance: ${error}`,
@@ -91,24 +94,23 @@ export default {
       } else if (method === 'POST' && path === '/wallet/solana/transactions') {
         try {
           const body = await request.json() as any;
-          const address = body.address;
           
-          if (!address) {
+          if (!body.address) {
             status = 400;
-            responseBody = JSON.stringify({ error: 'Missing address field' });
+            responseBody = JSON.stringify({ error: 'Address is required' });
           } else {
-            // Get RPC URL from request body or env
+            // Get RPC URL from env
             const rpcUrl = body.cluster === 'mainnet'
               ? env.SOLANA_MAINNET_RPC || 'https://api.mainnet-beta.solana.com'
               : env.SOLANA_DEVNET_RPC || 'https://api.devnet.solana.com';
 
-            const limit = body.limit || 20;
-
-            // Call Rust WASM function
-            const resultJson = await get_solana_transactions(address, rpcUrl, limit);
-            responseBody = typeof resultJson === 'string' ? resultJson : JSON.stringify(resultJson);
+            // Call Rust WASM function directly
+            const result = await wasm.get_solana_transactions(body.address, rpcUrl, body.limit);
+            // wasm.get_solana_transactions returns a stringified JSON JsValue
+            responseBody = typeof result === 'string' ? result : JSON.stringify(result);
           }
         } catch (error) {
+          console.error('Transactions error:', error);
           status = 500;
           responseBody = JSON.stringify({
             error: `Failed to get transactions: ${error}`,
