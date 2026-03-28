@@ -1,3 +1,6 @@
 .env
 target
 _wasm
+src/_wasm/
+.wrangler/
+.turbo/
