@@ -4,9 +4,16 @@ compatibility_date = "2026-03-27"
 workers_dev = true
 
 [build]
-command = "cargo build --target wasm32-unknown-unknown --release && mkdir -p _wasm && wasm-bindgen --out-dir _wasm --target web --no-typescript target/wasm32-unknown-unknown/release/rust_apis.wasm"
-cwd = "."
+command = "cargo build --target wasm32-unknown-unknown --release && wasm-bindgen --target web --out-dir _wasm target/wasm32-unknown-unknown/release/rust_apis.wasm"
 watch_dir = "src"
+cwd = "."
+
+[observability]
+enabled = true
+
+[observability.logs]
+enabled = true
+invocation_logs = true
 
 # Environment variables / secrets
 # Set these: wrangler secret put SOLANA_MAINNET_RPC
