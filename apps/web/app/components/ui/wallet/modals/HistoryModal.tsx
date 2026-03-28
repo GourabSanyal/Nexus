@@ -18,7 +18,7 @@ import { HistoryModalProps } from "@/app/types/components/HistoryModalProps";
 import { WalletAdapterFactory } from "@/app/lib/adapters/WalletAdapterFactory";
 import { ChainEnum } from "@my-org/store";
 
-const HistoryModal = ({ isOpen, onClose, walletId }: HistoryModalProps) => {
+const HistoryModal = ({ isOpen, onClose, walletId, onRefreshBalance }: HistoryModalProps) => {
   const {
     wallet,
     currentCluster,
@@ -27,7 +27,7 @@ const HistoryModal = ({ isOpen, onClose, walletId }: HistoryModalProps) => {
     isRefreshing,
     handleClusterToggle,
     handleRefresh,
-  } = useTransactionHistory({ walletId, isOpen });
+  } = useTransactionHistory({ walletId, isOpen, onRefreshBalance });
 
   const chain = useMemo(() => {
     if (!wallet) return null;

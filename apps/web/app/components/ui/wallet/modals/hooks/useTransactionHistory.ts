@@ -15,11 +15,13 @@ import { IWalletAdapter } from "@/app/lib/adapters/IWalletAdapter";
 interface UseTransactionHistoryProps {
   walletId: number;
   isOpen: boolean;
+  onRefreshBalance?: () => void;
 }
 
 export const useTransactionHistory = ({
   walletId,
   isOpen,
+  onRefreshBalance,
 }: UseTransactionHistoryProps) => {
   const walletStateValue = useRecoilValue(walletState);
   const [transactionHistory, setTransactionHistory] = useRecoilState(
@@ -211,7 +213,7 @@ export const useTransactionHistory = ({
     networkManager.toggle();
   }, [networkManager]);
 
-  const handleRefresh = useCallback(() => {
+  const handleRefresh = useCallback(async () => {
     if (chain === ChainEnum.Ethereum) {
       console.log("📥 [ETH Hook] Received refresh request in useTransactionHistory", {
         walletId,
@@ -220,8 +222,20 @@ export const useTransactionHistory = ({
       });
     }
     setIsRefreshing(true);
-    fetchTransactionsRef.current(currentCluster, true);
-  }, [currentCluster, chain, walletId]);
+    
+    // Refresh balance of the dashboard as well (before and after fetch for reliability)
+    console.log("🔄 Triggering balance refresh before history fetch");
+    if (onRefreshBalance) {
+      onRefreshBalance();
+    }
+    
+    await fetchTransactionsRef.current(currentCluster, true);
+    
+    // Final fresh balance after transactions are fetched
+    if (onRefreshBalance) {
+      onRefreshBalance();
+    }
+  }, [currentCluster, chain, walletId, onRefreshBalance]);
 
   return {
     wallet,

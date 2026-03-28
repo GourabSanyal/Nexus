@@ -86,6 +86,7 @@ export function WalletRendererContent({
         isOpen={!!historyOpenById[wallet.id]}
         onClose={() => closeHistory(wallet.id)}
         walletId={wallet.id}
+        onRefreshBalance={onRefresh}
       />
     </>
   );
