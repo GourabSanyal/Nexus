@@ -74,6 +74,8 @@ export function WalletRendererContent({
         isOpen={!!receiveOpenById[wallet.id]}
         onClose={() => closeReceive(wallet.id)}
         publicKey={wallet.publicKey}
+        chain={features.chain}
+        network={features.currentNetwork}
       />
       <SendModal
         isOpen={!!sendOpenById[wallet.id]}
