@@ -29,8 +29,6 @@ function getExplorerUrl(
         return `https://etherscan.io/tx/${signature}`;
       case NetworkEnum.Sepolia:
         return `https://sepolia.etherscan.io/tx/${signature}`;
-      case NetworkEnum.Holesky:
-        return `https://holesky.etherscan.io/tx/${signature}`;
       default:
         return `https://etherscan.io/tx/${signature}`;
     }
