@@ -73,10 +73,10 @@ NEXT_PUBLIC_RUST_API_URL=http://localhost:9000
 
 ```bash
 # Terminal 1 - Rust API (Solana)
-cd packages/rust-apis && cargo run --release
+cd packages/rust-apis && wranger dev
 
 # Terminal 2 - TypeScript API (Ethereum)
-cd packages/api && yarn dev
+cd packages/api && yarn start
 
 # Terminal 3 - Frontend
 cd apps/web && yarn dev
