@@ -106,7 +106,7 @@ export const TransactionItem = ({
             }`}
           >
             {tx.amount && tx.amount > 0 ? "+" : ""}
-            {formatAmount(tx.amount)} {currencySymbol}
+            {formatAmount(tx.amount, chain)} {currencySymbol}
           </span>
         </div>
 
@@ -114,7 +114,7 @@ export const TransactionItem = ({
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>Fee:</span>
             <span>
-              {formatAmount(tx.fee)} {currencySymbol}
+              {formatAmount(tx.fee, chain)} {currencySymbol}
             </span>
           </div>
         )}
