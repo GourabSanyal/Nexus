@@ -1,9 +1,14 @@
+import { ChainEnum } from "@my-org/store";
+
 const LAMPORTS_PER_SOL = 1_000_000_000;
 
-export const formatAmount = (lamports: number | null): string => {
-  if (lamports === null) return "0";
-  const sol = Math.abs(lamports) / LAMPORTS_PER_SOL;
-  return sol.toFixed(4);
+export const formatAmount = (amount: number | null, chain?: ChainEnum): string => {
+  if (amount === null) return "0";
+  if (chain === ChainEnum.Ethereum) {
+    return Math.abs(amount).toFixed(8);
+  }
+  const sol = Math.abs(amount) / LAMPORTS_PER_SOL;
+  return sol.toFixed(8);
 };
 
 export const formatDate = (timestamp: number | null): string => {
