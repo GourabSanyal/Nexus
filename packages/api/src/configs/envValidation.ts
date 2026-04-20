@@ -14,10 +14,20 @@ export function validateEnv(): void {
       (varName) => !process.env[varName]
     );
 
-    if (missingVars.length > 0) {
+    const missingSolanaVars = [
+      ["SOLANA_MAINNET", "SOLANA_MAINNET_RPC"],
+      ["SOLANA_DEVNET", "SOLANA_DEVNET_RPC"],
+    ].filter(([primary, fallback]) => !process.env[primary] && !process.env[fallback]);
+
+    const missingVarNames = [
+      ...missingVars,
+      ...missingSolanaVars.map(([primary, fallback]) => `${primary} or ${fallback}`),
+    ];
+
+    if (missingVarNames.length > 0) {
       console.error(
         `[API Server] ERROR: Missing required environment variables in production:`,
-        missingVars.join(", ")
+        missingVarNames.join(", ")
       );
       console.error(
         `[API Server] Please set these variables before starting the server.`

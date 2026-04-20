@@ -15,6 +15,7 @@ import express from "express";
 import cors from "cors";
 import axios from "axios";
 import { ethereumRoutes } from "./routes/ethereum";
+import { solanaRoutes } from "./routes/solana";
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3001;
@@ -82,6 +83,7 @@ app.get("/health", async (_req, res) => {
 });
 
 app.use("/wallet/ethereum", walletRateLimiter, ethereumRoutes);
+app.use("/wallet/solana", walletRateLimiter, solanaRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ error: "Route not found" });

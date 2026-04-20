@@ -6,4 +6,14 @@ export const RPC_ENDPOINTS = {
       holesky: process.env.ETHEREUM_HOLESKY,
     };
   },
+  get solana() {
+    return {
+      mainnet:
+        process.env.SOLANA_MAINNET ||
+        process.env.SOLANA_MAINNET_RPC,
+      devnet:
+        process.env.SOLANA_DEVNET ||
+        process.env.SOLANA_DEVNET_RPC,
+    };
+  },
 };
