@@ -116,6 +116,44 @@ export default {
             error: `Failed to get transactions: ${error}`,
           });
         }
+      } else if (method === 'POST' && path === '/wallet/solana/send/prepare') {
+        try {
+          const body = await request.json() as any;
+          const rpcUrl = body.cluster === 'mainnet'
+            ? env.SOLANA_MAINNET_RPC || 'https://api.mainnet-beta.solana.com'
+            : env.SOLANA_DEVNET_RPC || 'https://api.devnet.solana.com';
+
+          const result = await wasm.get_solana_latest_blockhash(rpcUrl);
+          responseBody = typeof result === 'string' ? result : JSON.stringify(result);
+        } catch (error) {
+          console.error('Prepare error:', error);
+          status = 500;
+          responseBody = JSON.stringify({
+            error: `Failed to prepare transaction: ${error}`,
+          });
+        }
+      } else if (method === 'POST' && path === '/wallet/solana/send') {
+        try {
+          const body = await request.json() as any;
+          
+          if (!body.signedTransaction) {
+            status = 400;
+            responseBody = JSON.stringify({ error: 'Signed transaction is required' });
+          } else {
+            const rpcUrl = body.cluster === 'mainnet'
+              ? env.SOLANA_MAINNET_RPC || 'https://api.mainnet-beta.solana.com'
+              : env.SOLANA_DEVNET_RPC || 'https://api.devnet.solana.com';
+
+            const result = await wasm.send_solana_transaction(body.signedTransaction, rpcUrl);
+            responseBody = JSON.stringify({ signature: result });
+          }
+        } catch (error) {
+          console.error('Send error:', error);
+          status = 500;
+          responseBody = JSON.stringify({
+            error: `Failed to send transaction: ${error}`,
+          });
+        }
       } else {
         status = 404;
         responseBody = JSON.stringify({

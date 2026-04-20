@@ -4,7 +4,7 @@ use crate::models::TransactionInfo;
 use wasm_bindgen_futures::JsFuture;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-use web_sys::{Request, RequestInit, Response, window};
+use web_sys::{Request, RequestInit, Response};
 
 /// Fetch Solana balance via JSON-RPC
 pub async fn get_balance(address: &str, cluster_url: &str) -> Result<u64> {
@@ -287,3 +287,50 @@ fn parse_transaction_from_signature(sig_info: &Value) -> TransactionInfo {
             .map(|s| s.to_string()),
     }
 }
+
+/// Get latest blockhash from Solana
+pub async fn get_latest_blockhash(cluster_url: &str) -> Result<Value> {
+    let request_body = json!({
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "getLatestBlockhash",
+        "params": [
+            {
+                "commitment": "finalized"
+            }
+        ]
+    });
+
+    let response_data = make_rpc_request(cluster_url, request_body).await?;
+    
+    response_data
+        .get("result")
+        .and_then(|r| r.get("value"))
+        .cloned()
+        .ok_or_else(|| anyhow::anyhow!("Failed to parse blockhash result"))
+}
+
+/// Send a signed transaction to Solana
+pub async fn send_transaction(cluster_url: &str, signed_transaction: &str) -> Result<String> {
+    let request_body = json!({
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "sendTransaction",
+        "params": [
+            signed_transaction,
+            {
+                "encoding": "base64",
+                "preflightCommitment": "confirmed"
+            }
+        ]
+    });
+
+    let response_data = make_rpc_request(cluster_url, request_body).await?;
+    
+    response_data
+        .get("result")
+        .and_then(|r| r.as_str())
+        .map(|s| s.to_string())
+        .ok_or_else(|| anyhow::anyhow!("Failed to parse transaction signature"))
+}
+

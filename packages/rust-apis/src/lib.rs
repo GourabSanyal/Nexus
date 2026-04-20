@@ -123,3 +123,26 @@ pub async fn get_solana_transactions(
         .map(|s| JsValue::from_str(&s))
         .map_err(|e| JsValue::from_str(&e.to_string()))
 }
+
+#[wasm_bindgen]
+pub async fn get_solana_latest_blockhash(rpc_url: String) -> Result<JsValue, JsValue> {
+    let result = services::get_latest_blockhash(&rpc_url)
+        .await
+        .map_err(|e| JsValue::from_str(&e.to_string()))?;
+
+    // Convert Value to JsValue
+    serde_json::to_string(&result)
+        .map(|s| JsValue::from_str(&s))
+        .map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
+#[wasm_bindgen]
+pub async fn send_solana_transaction(
+    signed_transaction: String,
+    rpc_url: String,
+) -> Result<String, JsValue> {
+    services::send_transaction(&rpc_url, &signed_transaction)
+        .await
+        .map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
