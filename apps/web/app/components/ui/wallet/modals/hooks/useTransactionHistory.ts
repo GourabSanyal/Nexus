@@ -118,6 +118,10 @@ export const useTransactionHistory = ({
           limit: 20,
         });
 
+        if (onRefreshBalance) {
+          onRefreshBalance();
+        }
+
         if (chain === ChainEnum.Ethereum) {
           console.log("✅ [ETH Hook] Received data from API in useTransactionHistory", {
             transactionCount: response.transactions?.length || 0,
