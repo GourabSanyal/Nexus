@@ -8,12 +8,19 @@
   "scripts": {
     "dev": "wrangler dev",
     "build": "cargo build --target wasm32-unknown-unknown --release",
-    "deploy": "wrangler publish",
-    "preview": "wrangler dev --env production"
+    "check": "cargo fmt --check && cargo clippy -- -D warnings && cargo test",
+    "test:ts": "vitest run",
+    "test:ts:watch": "vitest",
+    "test:all": "yarn check && yarn test:ts",
+    "preview": "wrangler dev --env production",
+    "deploy": "wrangler deploy",
+    "deploy:production": "wrangler deploy --env production"
   },
   "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.14.8",
     "@cloudflare/workers-types": "^4.20240427.0",
     "@types/node": "^20.0.0",
+    "vitest": "^4.1.4",
     "wrangler": "^4.77.0"
   }
 }

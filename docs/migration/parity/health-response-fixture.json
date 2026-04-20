@@ -1,0 +1,11 @@
+{
+  "route": "/health",
+  "method": "GET",
+  "expectedStatus": 200,
+  "requiredKeys": ["status", "service", "timestamp"],
+  "expectedValues": {
+    "status": "ok",
+    "service": "rust-apis"
+  },
+  "notes": "timestamp is dynamic and validated as a number in tests"
+}
