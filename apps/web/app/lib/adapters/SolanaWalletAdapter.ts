@@ -5,6 +5,7 @@ import { TransactionResponse, TransactionRequest } from "@api-types/TransactionT
 import { getSolBalance } from "@/app/lib/utils/getSolBalance";
 import { fetchTransactions } from "@/app/lib/utils/fetchTransactions";
 import { validateAddress } from "@my-org/store";
+import { sendTransaction } from "@/app/lib/utils/sendTransaction";
 
 export class SolanaWalletAdapter implements IWalletAdapter {
   readonly chain = ChainEnum.Solana;
@@ -45,8 +46,10 @@ export class SolanaWalletAdapter implements IWalletAdapter {
   }
 
   async sendTransaction(params: any): Promise<any> {
-    // due
-    throw new Error("Send transaction not yet implemented");
+    return sendTransaction({
+      ...params,
+      chain: this.chain,
+    });
   }
 
   validateAddress(address: string): boolean {
@@ -87,4 +90,3 @@ export class SolanaWalletAdapter implements IWalletAdapter {
     return "SOL";
   }
 }
-

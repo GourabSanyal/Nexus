@@ -29,12 +29,10 @@ export const WalletHeader = ({
 
   const balanceToShow = useMemo(() => {
     if (balance === undefined) return "0";
-    // Convert string | BigInt to number | bigint for formatBalance
+    // Convert string | bigint to number | bigint for formatBalance
     const balanceValue: number | bigint = typeof balance === "string" 
       ? Number(balance) 
-      : typeof balance === "bigint" 
-        ? balance 
-        : BigInt(balance.toString());
+      : balance;
     return features.formatBalance(balanceValue);
   }, [balance, features]);
 

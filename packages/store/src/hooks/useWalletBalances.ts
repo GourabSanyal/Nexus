@@ -4,7 +4,7 @@ import { walletBalancesState } from "../atoms/walletBalancesState";
 export const useWalletBalances = () => {
   const [balances, setBalances] = useRecoilState(walletBalancesState);
 
-  const getBalance = (walletId: number, network: "solana" | "ethereum", cluster?: string): string | BigInt => {
+  const getBalance = (walletId: number, network: "solana" | "ethereum", cluster?: string): string | bigint => {
     const key = cluster ? `${walletId}-${network}-${cluster}` : `${walletId}-${network}`;
     return balances[key] ?? "0";
   };
@@ -12,7 +12,7 @@ export const useWalletBalances = () => {
   const setBalance = (
     walletId: number,
     network: "solana" | "ethereum",
-    amount: string | BigInt,
+    amount: string | bigint,
     cluster?: string
   ) => {
     const key = cluster ? `${walletId}-${network}-${cluster}` : `${walletId}-${network}`;
@@ -21,5 +21,4 @@ export const useWalletBalances = () => {
 
   return { balances, getBalance, setBalance };
 };
-
 

@@ -14,7 +14,7 @@ interface UseSendModalProps {
 export const useSendModal = ({ walletId, chain }: UseSendModalProps): {
   wallet: any;
   currentNetwork: NetworkEnum;
-  balance: string | BigInt;
+  balance: string | bigint;
   handleNetworkToggle: () => void;
   chainEnum: ChainEnum;
 } => {

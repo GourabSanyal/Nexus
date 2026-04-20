@@ -9,7 +9,7 @@ import { Wallet } from "@/app/types/wallet/wallet";
 
 interface WalletRendererContentProps {
   wallet: Wallet;
-  getBalance: (walletId: number, network: "solana" | "ethereum", cluster?: string) => string | BigInt;
+  getBalance: (walletId: number, network: "solana" | "ethereum", cluster?: string) => string | bigint;
   isRefreshing: boolean;
   onRefresh: () => void;
   onEditName: (newName: string) => void;
@@ -93,4 +93,3 @@ export function WalletRendererContent({
     </>
   );
 }
-

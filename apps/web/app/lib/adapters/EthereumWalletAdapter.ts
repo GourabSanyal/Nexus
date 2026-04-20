@@ -5,6 +5,7 @@ import { TransactionResponse, TransactionRequest } from "@api-types/TransactionT
 import { getEthBalance } from "@repo/api/src/services/wallet/ethereum/getEthBalance";
 import { fetchTransactions } from "@/app/lib/utils/fetchTransactions";
 import { validateAddress } from "@my-org/store";
+import { sendTransaction } from "@/app/lib/utils/sendTransaction";
 
 export class EthereumWalletAdapter implements IWalletAdapter {
   readonly chain = ChainEnum.Ethereum;
@@ -54,7 +55,10 @@ export class EthereumWalletAdapter implements IWalletAdapter {
   }
 
   async sendTransaction(params: any): Promise<any> {
-    throw new Error("Send transaction not yet implemented");
+    return sendTransaction({
+      ...params,
+      chain: this.chain,
+    });
   }
 
   validateAddress(address: string): boolean {
@@ -95,4 +99,3 @@ export class EthereumWalletAdapter implements IWalletAdapter {
     return "ETH";
   }
 }
-
