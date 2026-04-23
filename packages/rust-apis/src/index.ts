@@ -1,9 +1,6 @@
 import init, * as wasmExports from "../_wasm/rust_apis.js";
-
-interface WasmModule {
-  init_panic_hook?: () => void;
-  handle_request: (request: Request) => Promise<Response>;
-}
+import { ENV_TO_HEADER, type Env } from "./env";
+import type { WasmModule } from "./wasm";
 
 let wasmInitialized = false;
 
@@ -21,10 +18,20 @@ async function getWasmModule(): Promise<WasmModule> {
 }
 
 export default {
-  async fetch(request: Request): Promise<Response> {
+  async fetch(request: Request, env: Env): Promise<Response> {
     try {
       const wasm = await getWasmModule();
-      return await wasm.handle_request(request);
+      const headers = new Headers(request.headers);
+
+      for (const { envKey, header } of ENV_TO_HEADER) {
+        const value = env[envKey];
+        if (value) {
+          headers.set(header, value);
+        }
+      }
+
+      const requestWithEnv = new Request(request, { headers });
+      return await wasm.handle_request(requestWithEnv);
     } catch (error) {
       return new Response(JSON.stringify({ error: `Internal server error: ${error}` }), {
         status: 500,
