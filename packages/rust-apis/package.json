@@ -14,7 +14,9 @@
     "test:all": "yarn check && yarn test:ts",
     "preview": "wrangler dev --env production",
     "deploy": "wrangler deploy",
-    "deploy:production": "wrangler deploy --env production"
+    "deploy:production": "wrangler deploy --env production",
+    "cc": "cargo clippy --all-targets --all-features -- -W clippy::cognitive_complexity"
+
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.14.8",
