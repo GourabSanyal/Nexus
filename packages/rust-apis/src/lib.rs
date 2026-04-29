@@ -1,4 +1,5 @@
 mod api;
+mod chains;
 mod config;
 mod error;
 mod handlers;
