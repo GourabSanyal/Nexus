@@ -1,7 +1,7 @@
 import { BalanceParams } from "@api-types/BalanceParams";
 import { ChainEnum } from "@repo/store/src/enums/network";
 import { getSolBalance } from "./getSolBalance";
-import { getEthBalance } from "@repo/api/src/services/wallet/ethereum/getEthBalance";
+import { getEthBalance } from "./getEthBalance";
 import { checkMissingParams } from "@repo/api/src/utils/checkMissingParams";
 import { checkInternet } from "./internet";
 
