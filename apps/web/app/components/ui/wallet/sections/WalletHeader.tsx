@@ -10,6 +10,7 @@ import { InlineActions } from "./header/InlineActions";
 import { SmallScreenMenu } from "./header/SmallScreenMenu";
 import { WalletHeaderProps } from "@/app/types/wallet/WalletHeaderTypes";
 import { useWalletFeatures } from "@/app/hooks/useWalletFeatures";
+import { parseBalanceString } from "@/app/lib/utils/parseBalanceString";
 
 export const WalletHeader = ({
   wallet,
@@ -29,10 +30,10 @@ export const WalletHeader = ({
 
   const balanceToShow = useMemo(() => {
     if (balance === undefined) return "0";
-    // Convert string | bigint to number | bigint for formatBalance
-    const balanceValue: number | bigint = typeof balance === "string" 
-      ? Number(balance) 
-      : balance;
+    const balanceValue: number | bigint =
+      typeof balance === "string"
+        ? parseBalanceString(balance)
+        : balance;
     return features.formatBalance(balanceValue);
   }, [balance, features]);
 
