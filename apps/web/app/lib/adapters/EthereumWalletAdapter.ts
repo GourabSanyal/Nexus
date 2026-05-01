@@ -2,7 +2,7 @@ import { ChainEnum, NetworkEnum } from "@repo/store/src/enums/network";
 import { IWalletAdapter } from "./IWalletAdapter";
 import { BalanceParams } from "@api-types/BalanceParams";
 import { TransactionResponse, TransactionRequest } from "@api-types/TransactionTypes";
-import { getEthBalance } from "@repo/api/src/services/wallet/ethereum/getEthBalance";
+import { getEthBalance } from "@/app/lib/utils/getEthBalance";
 import { fetchTransactions } from "@/app/lib/utils/fetchTransactions";
 import { validateAddress } from "@my-org/store";
 import { sendTransaction } from "@/app/lib/utils/sendTransaction";
@@ -40,9 +40,11 @@ export class EthereumWalletAdapter implements IWalletAdapter {
   }
 
   formatBalance(balance: number | bigint): string {
-    const wei = typeof balance === 'bigint' ? balance : BigInt(balance);
-    const eth = Number(wei) / 1e18;
-    return eth.toFixed(3);
+    const wei = typeof balance === "bigint" ? balance : BigInt(Math.trunc(balance));
+    const divisor = 10n ** 18n;
+    const whole = wei / divisor;
+    const fraction = ((wei % divisor) * 1000n) / divisor;
+    return `${whole.toString()}.${fraction.toString().padStart(3, "0")}`;
   }
 
   async fetchTransactions(params: TransactionRequest): Promise<TransactionResponse> {
