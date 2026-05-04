@@ -7,42 +7,53 @@ mod models;
 mod services;
 
 use wasm_bindgen::prelude::*;
-use wasm_bindgen_futures::JsFuture;
 use serde_json::json;
 
 #[wasm_bindgen]
 pub async fn handle_request(req: web_sys::Request) -> Result<web_sys::Response, JsValue> {
     let method = req.method();
     let path = req.url();
+    let cors_origin = read_cors_origin(&req);
+    let path_segment = extract_path_segment(&path);
+    let headers = build_json_headers(&cors_origin)?;
 
-    // Parse path from URL
+    if method == "OPTIONS" {
+        return make_response(200, "", &headers);
+    }
+
+    let (status, response_body): (u16, String) = route_request(&req, &method, &path_segment).await;
+    make_response(status, &response_body, &headers)
+}
+
+fn read_cors_origin(req: &web_sys::Request) -> String {
+    req.headers()
+        .get("x-cors-origin")
+        .ok()
+        .flatten()
+        .filter(|value| !value.trim().is_empty())
+        .unwrap_or_else(|| "*".to_string())
+}
+
+fn extract_path_segment(path: &str) -> String {
     let url_parts: Vec<&str> = path.split('/').collect();
-    let path_segment = if url_parts.len() > 3 {
+    if url_parts.len() > 3 {
         url_parts[3..].join("/")
     } else {
         String::new()
-    };
+    }
+}
 
-    // Create CORS headers
-    let mut headers = web_sys::Headers::new().map_err(|_| "Failed to create headers")?;
-    headers.set("Access-Control-Allow-Origin", "*").ok();
+fn build_json_headers(cors_origin: &str) -> Result<web_sys::Headers, JsValue> {
+    let headers = web_sys::Headers::new().map_err(|_| "Failed to create headers")?;
+    headers.set("Access-Control-Allow-Origin", cors_origin).ok();
     headers.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS").ok();
     headers.set("Access-Control-Allow-Headers", "Content-Type").ok();
     headers.set("Content-Type", "application/json").ok();
+    Ok(headers)
+}
 
-    // Handle CORS preflight
-    if method == "OPTIONS" {
-        let mut init = web_sys::ResponseInit::new();
-        init.set_status(200);
-        init.set_headers(&headers);
-        let response = web_sys::Response::new_with_opt_str_and_init(
-            Some(""),
-            &init,
-        ).map_err(|_| "Failed to create response")?;
-        return Ok(response);
-    }
-
-    let (status, response_body): (u16, String) = match (method.as_str(), path_segment.as_str()) {
+async fn route_request(req: &web_sys::Request, method: &str, path_segment: &str) -> (u16, String) {
+    match (method, path_segment) {
         ("GET", "") => {
             (200, json!({"message": "Hello from Cloudflare Worker - Rust APIs"}).to_string())
         }
@@ -53,40 +64,22 @@ pub async fn handle_request(req: web_sys::Request) -> Result<web_sys::Response, 
                 "timestamp": js_sys::Date::now() as u64,
             }).to_string())
         }
-        ("POST", "wallet/solana/balance") => {
-            let body_promise = req.text().map_err(|_| "Failed to get request text")?;
-            match JsFuture::from(body_promise).await {
-                Ok(body_val) => {
-                    if let Some(_body_str) = body_val.as_string() {
-                        // Handle balance request
-                        (200, json!({"error": "Balance endpoint requires environment setup"}).to_string())
-                    } else {
-                        (400, json!({"error": "Invalid request body"}).to_string())
-                    }
-                }
-                Err(_) => {
-                    (500, json!({"error": "Failed to read request body"}).to_string())
-                }
-            }
-        }
+        ("POST", "wallet/solana/balance") => api::wallet_routes::handle_balance(&req, "solana").await,
+        ("POST", "wallet/ethereum/balance") => api::wallet_routes::handle_balance(&req, "ethereum").await,
         ("POST", "wallet/solana/transactions") => {
             (200, json!({"error": "Transactions endpoint requires environment setup"}).to_string())
         }
-        _ => {
-            (404, json!({"error": "Not Found"}).to_string())
-        }
-    };
+        _ => (404, json!({"error": "Not Found"}).to_string()),
+    }
+}
 
-    let mut init = web_sys::ResponseInit::new();
+fn make_response(status: u16, body: &str, headers: &web_sys::Headers) -> Result<web_sys::Response, JsValue> {
+    let init = web_sys::ResponseInit::new();
     init.set_status(status);
-    init.set_headers(&headers);
+    init.set_headers(headers);
 
-    let response = web_sys::Response::new_with_opt_str_and_init(
-        Some(&response_body),
-        &init,
-    ).map_err(|_| "Failed to create response")?;
-
-    Ok(response)
+    web_sys::Response::new_with_opt_str_and_init(Some(body), &init)
+        .map_err(|_| "Failed to create response".into())
 }
 
 #[wasm_bindgen]
@@ -98,7 +91,7 @@ pub fn init_panic_hook() {
 // Export functions for JavaScript/TypeScript to call
 #[wasm_bindgen]
 pub async fn get_solana_balance(address: String, rpc_url: String) -> Result<u64, JsValue> {
-    services::get_balance(&address, &rpc_url)
+    services::solana_rpc::get_balance(&address, &rpc_url)
         .await
         .map_err(|e| JsValue::from_str(&e.to_string()))
 }
@@ -109,7 +102,7 @@ pub async fn get_solana_transactions(
     rpc_url: String,
     limit: Option<usize>,
 ) -> Result<JsValue, JsValue> {
-    let (transactions, has_more, next_cursor) = services::get_transactions(&address, &rpc_url, limit)
+    let (transactions, has_more, next_cursor) = services::solana_rpc::get_transactions(&address, &rpc_url, limit)
         .await
         .map_err(|e| JsValue::from_str(&e.to_string()))?;
 
@@ -127,7 +120,7 @@ pub async fn get_solana_transactions(
 
 #[wasm_bindgen]
 pub async fn get_solana_latest_blockhash(rpc_url: String) -> Result<JsValue, JsValue> {
-    let result = services::get_latest_blockhash(&rpc_url)
+    let result = services::solana_rpc::get_latest_blockhash(&rpc_url)
         .await
         .map_err(|e| JsValue::from_str(&e.to_string()))?;
 
@@ -142,7 +135,7 @@ pub async fn send_solana_transaction(
     signed_transaction: String,
     rpc_url: String,
 ) -> Result<String, JsValue> {
-    services::send_transaction(&rpc_url, &signed_transaction)
+    services::solana_rpc::send_transaction(&rpc_url, &signed_transaction)
         .await
         .map_err(|e| JsValue::from_str(&e.to_string()))
 }

@@ -1,0 +1,14 @@
+{
+  "route": "/wallet/solana/balance",
+  "method": "POST",
+  "requestBody": {
+    "address": "So11111111111111111111111111111111111111111",
+    "cluster": "devnet"
+  },
+  "expectedStatus": 200,
+  "requiredKeys": ["balance"],
+  "expectedTypes": {
+    "balance": "string"
+  },
+  "notes": "Balance is lamports as string; parity should match Express contract for successful response shape."
+}
