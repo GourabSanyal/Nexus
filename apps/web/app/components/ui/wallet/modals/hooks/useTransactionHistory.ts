@@ -91,7 +91,7 @@ export const useTransactionHistory = ({
       const clusterString = getClusterString(cluster);
 
       const currentHistory = transactionHistoryRef.current;
-      const cachedData = currentHistory[walletId.toString()]?.[clusterString];
+      const cachedData = currentHistory[walletId.toString()]?.[clusterString] || [];
       if (!forceRefresh && cachedData && cachedData.length > 0) {
         return;
       }
@@ -117,10 +117,11 @@ export const useTransactionHistory = ({
           cluster: cluster as string,
           limit: 20,
         });
-
-        if (onRefreshBalance) {
-          onRefreshBalance();
-        }
+        const fetchedTransactions = response.transactions || [];
+        const hasHistoryChanged =
+          fetchedTransactions.length !== cachedData.length ||
+          (fetchedTransactions[0]?.signature || "") !==
+            (cachedData[0]?.signature || "");
 
         if (chain === ChainEnum.Ethereum) {
           console.log("✅ [ETH Hook] Received data from API in useTransactionHistory", {
@@ -136,9 +137,14 @@ export const useTransactionHistory = ({
           ...prev,
           [walletId.toString()]: {
             ...(prev[walletId.toString()] || {}),
-            [clusterString]: response.transactions,
+            [clusterString]: fetchedTransactions,
           },
         }));
+
+        // Refresh wallet header balance only if transaction history changed.
+        if (hasHistoryChanged && onRefreshBalance) {
+          onRefreshBalance();
+        }
 
         if (chain === ChainEnum.Ethereum) {
           console.log("💾 [ETH Hook] Data stored in transactionHistoryState", {
@@ -177,17 +183,9 @@ export const useTransactionHistory = ({
 
   useEffect(() => {
     if (!isOpen || !wallet || !adapter) return;
-    // On modal open, fetch for all supported networks if not cached yet, but only once per open
-    const clusters = adapter.supportedNetworks;
-    clusters.forEach((cluster) => {
-      const clusterString = getClusterString(cluster);
-      const cachedData =
-        transactionHistoryRef.current[walletId.toString()]?.[clusterString];
-      if (!cachedData || cachedData.length === 0) {
-        fetchTransactionsRef.current(cluster, false);
-      }
-    });
-  }, [isOpen, walletId, wallet, adapter, getClusterString]);
+    // Fetch only the currently selected network to keep modal load fast.
+    fetchTransactionsRef.current(currentCluster, false);
+  }, [isOpen, walletId, wallet, adapter, currentCluster]);
 
   // use useMemo to ensure it updates when cluster or history changes
   const currentTransactions = useMemo((): TransactionInfo[] => {
@@ -226,19 +224,7 @@ export const useTransactionHistory = ({
       });
     }
     setIsRefreshing(true);
-    
-    // Refresh balance of the dashboard as well (before and after fetch for reliability)
-    console.log("🔄 Triggering balance refresh before history fetch");
-    if (onRefreshBalance) {
-      onRefreshBalance();
-    }
-    
     await fetchTransactionsRef.current(currentCluster, true);
-    
-    // Final fresh balance after transactions are fetched
-    if (onRefreshBalance) {
-      onRefreshBalance();
-    }
   }, [currentCluster, chain, walletId, onRefreshBalance]);
 
   return {

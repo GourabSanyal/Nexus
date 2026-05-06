@@ -5,7 +5,6 @@ use crate::chains::traits::{
     SendResult, TransactionsFuture, TransactionsResult,
 };
 use crate::services;
-use web_sys::console;
 
 pub struct SolanaAdapter;
 
@@ -50,13 +49,6 @@ impl BlockchainAdapter for SolanaAdapter {
     ) -> BalanceFuture<'a> {
         Box::pin(async move {
             let (cluster_value, rpc_url) = Self::resolve_rpc(cluster, rpc_override)?;
-            console::log_1(
-                &format!(
-                    "[rust-apis] POST /wallet/solana/balance rpc_url={} cluster={} address={}",
-                    rpc_url, cluster_value, address
-                )
-                .into(),
-            );
 
             let lamports = services::solana_rpc::get_balance(address, &rpc_url)
                 .await

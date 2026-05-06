@@ -64,11 +64,9 @@ async fn route_request(req: &web_sys::Request, method: &str, path_segment: &str)
                 "timestamp": js_sys::Date::now() as u64,
             }).to_string())
         }
-        ("POST", "wallet/solana/balance") => api::wallet_routes::handle_balance(&req, "solana").await,
-        ("POST", "wallet/ethereum/balance") => api::wallet_routes::handle_balance(&req, "ethereum").await,
-        ("POST", "wallet/solana/transactions") => {
-            (200, json!({"error": "Transactions endpoint requires environment setup"}).to_string())
-        }
+        ("POST", "wallet/solana/balance") => api::wallet::handle_balance(&req, "solana").await,
+        ("POST", "wallet/ethereum/balance") => api::wallet::handle_balance(&req, "ethereum").await,
+        ("POST", "wallet/solana/transactions") => api::wallet::handle_transactions(&req, "solana").await,
         _ => (404, json!({"error": "Not Found"}).to_string()),
     }
 }

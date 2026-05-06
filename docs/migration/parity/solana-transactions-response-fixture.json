@@ -1,0 +1,51 @@
+{
+  "slice": "solana-tx-history",
+  "endpoint": "POST /wallet/solana/transactions",
+  "request": {
+    "address": "cBXvXnd8cUdyuNaUjdeakEWZ42Wbh5bhwpeMC5FSdRP",
+    "cluster": "mainnet-beta",
+    "limit": 2
+  },
+  "response": {
+    "transactions": [
+      {
+        "signature": "5hTjExampleSignature1111111111111111111111111111111",
+        "slot": 292000001,
+        "block_time": 1714861200,
+        "status": "success",
+        "err": null,
+        "confirmation_status": "finalized",
+        "amount": -2500000,
+        "fee": 5000,
+        "direction": "sent",
+        "from_address": null,
+        "to_address": null,
+        "memo": null
+      },
+      {
+        "signature": "3AZExampleSignature2222222222222222222222222222222",
+        "slot": 292000000,
+        "block_time": 1714861000,
+        "status": "success",
+        "err": null,
+        "confirmation_status": "finalized",
+        "amount": 1000000,
+        "fee": 5000,
+        "direction": "received",
+        "from_address": null,
+        "to_address": null,
+        "memo": null
+      }
+    ],
+    "pagination": {
+      "has_more": true,
+      "next_cursor": "3AZExampleSignature2222222222222222222222222222222",
+      "limit": 2
+    }
+  },
+  "notes": [
+    "Fixture records contract shape for Rust route parity checks.",
+    "Numeric values are sample representative payloads; signature values are anonymized.",
+    "Edge-case assertions are covered in tests/transaction_api_test.rs."
+  ]
+}
