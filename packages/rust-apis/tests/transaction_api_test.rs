@@ -118,3 +118,97 @@ async fn solana_transactions_rpc_failure_returns_500() {
         .expect("request handler should return response");
     assert_eq!(response.status(), 500, "unreachable rpc should return 500");
 }
+
+#[wasm_bindgen_test(async)]
+async fn ethereum_transactions_valid_address_returns_contract_shape() {
+    let request = build_post_request(
+        "https://example.com/wallet/ethereum/transactions",
+        json!({
+            "address": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb4",
+            "cluster": "mainnet",
+            "rpcUrl": "https://eth.llamarpc.com"
+        }),
+    );
+
+    let response = handle_request(request)
+        .await
+        .expect("request handler should return response");
+    assert_eq!(
+        response.status(),
+        200,
+        "expected 200 for valid ethereum transactions request"
+    );
+
+    let parsed = parse_json_body(response).await;
+    assert!(
+        parsed.get("transactions").and_then(Value::as_array).is_some(),
+        "transactions should be an array"
+    );
+    let pagination = parsed
+        .get("pagination")
+        .expect("pagination should exist in response");
+    assert!(
+        pagination.get("has_more").and_then(Value::as_bool).is_some(),
+        "pagination.has_more should be a bool"
+    );
+    assert!(
+        pagination.get("limit").and_then(Value::as_u64).is_some(),
+        "pagination.limit should be numeric"
+    );
+}
+
+#[wasm_bindgen_test(async)]
+async fn ethereum_transactions_invalid_payload_returns_400() {
+    let request = build_post_request(
+        "https://example.com/wallet/ethereum/transactions",
+        json!({
+            "cluster": "mainnet",
+            "limit": 20
+        }),
+    );
+
+    let response = handle_request(request)
+        .await
+        .expect("request handler should return response");
+    assert_eq!(response.status(), 400, "missing address should return 400");
+}
+
+#[wasm_bindgen_test(async)]
+async fn ethereum_transactions_unsupported_cluster_returns_400() {
+    let request = build_post_request(
+        "https://example.com/wallet/ethereum/transactions",
+        json!({
+            "address": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb4",
+            "cluster": "goerli"
+        }),
+    );
+
+    let response = handle_request(request)
+        .await
+        .expect("request handler should return response");
+    assert_eq!(response.status(), 400, "unsupported cluster should return 400");
+
+    let parsed = parse_json_body(response).await;
+    let error = parsed.get("error").and_then(Value::as_str).unwrap_or_default();
+    assert!(
+        error.contains("Unsupported Ethereum cluster"),
+        "error should mention unsupported cluster"
+    );
+}
+
+#[wasm_bindgen_test(async)]
+async fn ethereum_transactions_rpc_failure_returns_500() {
+    let request = build_post_request(
+        "https://example.com/wallet/ethereum/transactions",
+        json!({
+            "address": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb4",
+            "cluster": "mainnet",
+            "rpcUrl": "http://127.0.0.1:1"
+        }),
+    );
+
+    let response = handle_request(request)
+        .await
+        .expect("request handler should return response");
+    assert_eq!(response.status(), 500, "unreachable rpc should return 500");
+}

@@ -19,8 +19,8 @@ pub struct TransactionInfo {
     pub err: Option<serde_json::Value>,
     pub confirmation_status: Option<String>,
 
-    pub amount: Option<i64>,
-    pub fee: Option<u64>,
+    pub amount: Option<f64>,
+    pub fee: Option<f64>,
     pub direction: Option<String>,
 
     pub from_address: Option<String>,

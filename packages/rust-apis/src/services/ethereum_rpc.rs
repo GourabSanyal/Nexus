@@ -70,11 +70,11 @@ fn map_transaction(t: &Value, address: &str) -> TransactionInfo {
     TransactionInfo {
         signature: t.get("hash").and_then(|v| v.as_str()).unwrap_or_default().to_string(),
         slot: block_num(t),
-        block_time: None,
+        block_time: block_time(t),
         status: "success".to_string(),
         err: None,
         confirmation_status: None,
-        amount: t.get("value").and_then(|v| v.as_f64()).map(|v| v as i64),
+        amount: amount_eth(t),
         fee: None,
         direction: transfer_direction(&from, &to, address),
         from_address: from,
@@ -102,6 +102,37 @@ fn block_num(t: &Value) -> u64 {
         16,
     )
     .unwrap_or(0)
+}
+
+fn block_time(t: &Value) -> Option<i64> {
+    let timestamp = t
+        .get("metadata")
+        .and_then(|m| m.get("blockTimestamp"))
+        .and_then(|v| v.as_str())?;
+    js_sys::Date::new(&wasm_bindgen::JsValue::from_str(timestamp))
+        .get_time()
+        .is_finite()
+        .then(|| (js_sys::Date::new(&wasm_bindgen::JsValue::from_str(timestamp)).get_time() / 1000.0) as i64)
+}
+
+fn amount_eth(t: &Value) -> Option<f64> {
+    if let Some(value) = t.get("value") {
+        if let Some(n) = value.as_f64() {
+            return Some(n);
+        }
+        if let Some(s) = value.as_str() {
+            if let Ok(n) = s.parse::<f64>() {
+                return Some(n);
+            }
+        }
+    }
+
+    let hex_wei = t
+        .get("rawContract")
+        .and_then(|r| r.get("value"))
+        .and_then(|v| v.as_str())?;
+    let wei = u128::from_str_radix(hex_wei.trim_start_matches("0x"), 16).ok()?;
+    Some((wei as f64) / 1_000_000_000_000_000_000_f64)
 }
 
 async fn rpc(rpc_url: &str, method: &str, params: Value) -> Result<Value> {

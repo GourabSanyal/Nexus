@@ -1,4 +1,4 @@
-import { expressApiClient } from "@api-utils/expressApiClient";
+import { rustApiClient } from "@api-utils/rustApiClient";
 import { GetEthTransactionsParams } from "@/app/types/components/GetEthTransactionsParams";
 import {
     TransactionResponse,
@@ -10,7 +10,7 @@ export const getEthTransactions = async ({
     cluster,
     limit = 20,
   }: GetEthTransactionsParams): Promise<TransactionResponse> => {
-    const client = expressApiClient();
+    const client = rustApiClient();
   
     const requestData: TransactionRequest = {
       address,

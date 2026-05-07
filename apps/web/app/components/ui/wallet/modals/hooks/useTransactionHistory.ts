@@ -84,7 +84,11 @@ export const useTransactionHistory = ({
   }, []);
 
   const fetchTransactions = useCallback(
-    async (cluster: NetworkEnum, forceRefresh: boolean = false) => {
+    async (
+      cluster: NetworkEnum,
+      forceRefresh: boolean = false,
+      refreshBalanceOnChange: boolean = false
+    ) => {
       if (!adapterRef.current || !walletRef.current) return;
 
       const cacheKey = getCacheKey(cluster);
@@ -142,7 +146,7 @@ export const useTransactionHistory = ({
         }));
 
         // Refresh wallet header balance only if transaction history changed.
-        if (hasHistoryChanged && onRefreshBalance) {
+        if (refreshBalanceOnChange && hasHistoryChanged && onRefreshBalance) {
           onRefreshBalance();
         }
 
@@ -184,7 +188,7 @@ export const useTransactionHistory = ({
   useEffect(() => {
     if (!isOpen || !wallet || !adapter) return;
     // Fetch only the currently selected network to keep modal load fast.
-    fetchTransactionsRef.current(currentCluster, false);
+    fetchTransactionsRef.current(currentCluster, false, false);
   }, [isOpen, walletId, wallet, adapter, currentCluster]);
 
   // use useMemo to ensure it updates when cluster or history changes
@@ -224,7 +228,7 @@ export const useTransactionHistory = ({
       });
     }
     setIsRefreshing(true);
-    await fetchTransactionsRef.current(currentCluster, true);
+    await fetchTransactionsRef.current(currentCluster, true, true);
   }, [currentCluster, chain, walletId, onRefreshBalance]);
 
   return {
