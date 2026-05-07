@@ -19,7 +19,9 @@ fn build_post_request(path: &str, payload: Value) -> web_sys::Request {
 }
 
 async fn parse_json_body(response: web_sys::Response) -> Value {
-    let body_promise = response.text().expect("response text promise should be available");
+    let body_promise = response
+        .text()
+        .expect("response text promise should be available");
     let body_value = JsFuture::from(body_promise)
         .await
         .expect("response text promise should resolve");
@@ -43,18 +45,28 @@ async fn solana_transactions_valid_address_default_limit_returns_contract_shape(
     let response = handle_request(request)
         .await
         .expect("request handler should return response");
-    assert_eq!(response.status(), 200, "expected 200 for valid solana tx request");
+    assert_eq!(
+        response.status(),
+        200,
+        "expected 200 for valid solana tx request"
+    );
 
     let parsed = parse_json_body(response).await;
     assert!(
-        parsed.get("transactions").and_then(Value::as_array).is_some(),
+        parsed
+            .get("transactions")
+            .and_then(Value::as_array)
+            .is_some(),
         "transactions should be an array"
     );
     let pagination = parsed
         .get("pagination")
         .expect("pagination should exist in response");
     assert!(
-        pagination.get("has_more").and_then(Value::as_bool).is_some(),
+        pagination
+            .get("has_more")
+            .and_then(Value::as_bool)
+            .is_some(),
         "pagination.has_more should be a bool"
     );
     assert!(
@@ -92,10 +104,17 @@ async fn solana_transactions_unsupported_cluster_returns_400() {
     let response = handle_request(request)
         .await
         .expect("request handler should return response");
-    assert_eq!(response.status(), 400, "unsupported cluster should return 400");
+    assert_eq!(
+        response.status(),
+        400,
+        "unsupported cluster should return 400"
+    );
 
     let parsed = parse_json_body(response).await;
-    let error = parsed.get("error").and_then(Value::as_str).unwrap_or_default();
+    let error = parsed
+        .get("error")
+        .and_then(Value::as_str)
+        .unwrap_or_default();
     assert!(
         error.contains("Unsupported Solana cluster"),
         "error should mention unsupported cluster"
@@ -141,14 +160,20 @@ async fn ethereum_transactions_valid_address_returns_contract_shape() {
 
     let parsed = parse_json_body(response).await;
     assert!(
-        parsed.get("transactions").and_then(Value::as_array).is_some(),
+        parsed
+            .get("transactions")
+            .and_then(Value::as_array)
+            .is_some(),
         "transactions should be an array"
     );
     let pagination = parsed
         .get("pagination")
         .expect("pagination should exist in response");
     assert!(
-        pagination.get("has_more").and_then(Value::as_bool).is_some(),
+        pagination
+            .get("has_more")
+            .and_then(Value::as_bool)
+            .is_some(),
         "pagination.has_more should be a bool"
     );
     assert!(
@@ -186,10 +211,17 @@ async fn ethereum_transactions_unsupported_cluster_returns_400() {
     let response = handle_request(request)
         .await
         .expect("request handler should return response");
-    assert_eq!(response.status(), 400, "unsupported cluster should return 400");
+    assert_eq!(
+        response.status(),
+        400,
+        "unsupported cluster should return 400"
+    );
 
     let parsed = parse_json_body(response).await;
-    let error = parsed.get("error").and_then(Value::as_str).unwrap_or_default();
+    let error = parsed
+        .get("error")
+        .and_then(Value::as_str)
+        .unwrap_or_default();
     assert!(
         error.contains("Unsupported Ethereum cluster"),
         "error should mention unsupported cluster"
@@ -213,8 +245,14 @@ async fn ethereum_transactions_rpc_failure_returns_500() {
     assert_eq!(response.status(), 500, "unreachable rpc should return 500");
 
     let parsed = parse_json_body(response).await;
-    let error = parsed.get("error").and_then(Value::as_str).unwrap_or_default();
-    assert!(!error.is_empty(), "rpc failure should include error message");
+    let error = parsed
+        .get("error")
+        .and_then(Value::as_str)
+        .unwrap_or_default();
+    assert!(
+        !error.is_empty(),
+        "rpc failure should include error message"
+    );
 }
 
 #[wasm_bindgen_test(async)]
@@ -230,7 +268,11 @@ async fn solana_send_prepare_unsupported_cluster_returns_400() {
     let response = handle_request(request)
         .await
         .expect("request handler should return response");
-    assert_eq!(response.status(), 400, "unsupported cluster should return 400");
+    assert_eq!(
+        response.status(),
+        400,
+        "unsupported cluster should return 400"
+    );
 }
 
 #[wasm_bindgen_test(async)]
@@ -250,8 +292,14 @@ async fn solana_send_prepare_rpc_failure_returns_500() {
     assert_eq!(response.status(), 500, "unreachable rpc should return 500");
 
     let parsed = parse_json_body(response).await;
-    let error = parsed.get("error").and_then(Value::as_str).unwrap_or_default();
-    assert!(!error.is_empty(), "rpc failure should include error message");
+    let error = parsed
+        .get("error")
+        .and_then(Value::as_str)
+        .unwrap_or_default();
+    assert!(
+        !error.is_empty(),
+        "rpc failure should include error message"
+    );
 }
 
 #[wasm_bindgen_test(async)]
@@ -288,7 +336,11 @@ async fn ethereum_send_prepare_unsupported_cluster_returns_400() {
     let response = handle_request(request)
         .await
         .expect("request handler should return response");
-    assert_eq!(response.status(), 400, "unsupported cluster should return 400");
+    assert_eq!(
+        response.status(),
+        400,
+        "unsupported cluster should return 400"
+    );
 }
 
 #[wasm_bindgen_test(async)]

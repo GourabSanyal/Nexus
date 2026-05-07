@@ -2,8 +2,8 @@
 use rust_apis::handle_request;
 use serde_json::{json, Value};
 use wasm_bindgen::JsValue;
-use wasm_bindgen_test::*;
 use wasm_bindgen_futures::JsFuture;
+use wasm_bindgen_test::*;
 
 #[wasm_bindgen_test(async)]
 async fn solana_balance_valid_address_returns_200_and_balance_key() {
@@ -31,9 +31,15 @@ async fn solana_balance_valid_address_returns_200_and_balance_key() {
         .await
         .expect("request handler should return response");
 
-    assert_eq!(response.status(), 200, "expected 200 for valid Solana balance request");
+    assert_eq!(
+        response.status(),
+        200,
+        "expected 200 for valid Solana balance request"
+    );
 
-    let body_promise = response.text().expect("response text promise should be available");
+    let body_promise = response
+        .text()
+        .expect("response text promise should be available");
     let body_value = JsFuture::from(body_promise)
         .await
         .expect("response text promise should resolve");
