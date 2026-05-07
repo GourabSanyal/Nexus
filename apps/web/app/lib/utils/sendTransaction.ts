@@ -5,7 +5,6 @@ import {
   Transaction,
 } from "@solana/web3.js";
 import { Wallet, parseEther } from "ethers";
-import { expressApiClient } from "@api-utils/expressApiClient";
 import { rustApiClient } from "@api-utils/rustApiClient";
 import { ChainEnum, NetworkEnum } from "@repo/store/src/enums/network";
 import { validateSendInput } from "@my-org/zod";
@@ -49,11 +48,11 @@ const sendEthereumTransaction = async ({
   to,
   amount,
 }: Omit<SendTransactionParams, "chain">): Promise<SendTransactionResult> => {
-  const client = expressApiClient();
+  const client = rustApiClient();
   const value = parseEther(amount);
   const valueHex = `0x${value.toString(16)}`;
 
-  const prepareResponse = await client.post("/wallet/ethereum/sendeth/prepare", {
+  const prepareResponse = await client.post("/wallet/ethereum/send/prepare", {
     address: from,
     cluster,
     to,
@@ -71,13 +70,13 @@ const sendEthereumTransaction = async ({
     gasLimit: BigInt(prepared.gasLimit),
   });
 
-  const response = await client.post("/wallet/ethereum/sendeth", {
+  const response = await client.post("/wallet/ethereum/send", {
     address: from,
     cluster,
     signedTransaction,
   });
 
-  return { id: response.data.hash };
+  return { id: response.data.signature };
 };
 
 const sendSolanaTransaction = async ({

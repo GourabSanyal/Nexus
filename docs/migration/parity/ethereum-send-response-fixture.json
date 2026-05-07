@@ -1,0 +1,30 @@
+{
+  "slice": "ethereum-send",
+  "endpoint_prepare": "POST /wallet/ethereum/send/prepare",
+  "endpoint_send": "POST /wallet/ethereum/send",
+  "request_prepare": {
+    "address": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb4",
+    "cluster": "mainnet",
+    "to": "0x1111111111111111111111111111111111111111",
+    "value": "0x2386f26fc10000"
+  },
+  "response_prepare": {
+    "chainId": "0x1",
+    "nonce": "0x2a",
+    "gasPrice": "0x3b9aca00",
+    "gasLimit": "0x5208"
+  },
+  "request_send": {
+    "address": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb4",
+    "cluster": "mainnet",
+    "signedTransaction": "0x02f86b0180843b9aca00825208941111111111111111111111111111111111111111872386f26fc1000080c001a0examplea0example"
+  },
+  "response_send": {
+    "signature": "0xaaaabbbbccccddddeeeeffff1111222233334444555566667777888899990000"
+  },
+  "notes": [
+    "Fixture records request/response contract shape for Ethereum send prepare/send endpoints.",
+    "Values are representative placeholders for deterministic parity checks.",
+    "Edge-case assertions are covered in tests/transaction_api_test.rs."
+  ]
+}

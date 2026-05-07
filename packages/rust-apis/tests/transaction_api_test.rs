@@ -272,3 +272,76 @@ async fn solana_send_missing_signed_transaction_returns_400() {
         "signedTransaction is required for send route"
     );
 }
+
+#[wasm_bindgen_test(async)]
+async fn ethereum_send_prepare_unsupported_cluster_returns_400() {
+    let request = build_post_request(
+        "https://example.com/wallet/ethereum/send/prepare",
+        json!({
+            "address": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb4",
+            "cluster": "goerli",
+            "to": "0x1111111111111111111111111111111111111111",
+            "value": "0x2386f26fc10000"
+        }),
+    );
+
+    let response = handle_request(request)
+        .await
+        .expect("request handler should return response");
+    assert_eq!(response.status(), 400, "unsupported cluster should return 400");
+}
+
+#[wasm_bindgen_test(async)]
+async fn ethereum_send_prepare_rpc_failure_returns_500() {
+    let request = build_post_request(
+        "https://example.com/wallet/ethereum/send/prepare",
+        json!({
+            "address": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb4",
+            "cluster": "mainnet",
+            "to": "0x1111111111111111111111111111111111111111",
+            "value": "0x2386f26fc10000",
+            "rpcUrl": "http://127.0.0.1:1"
+        }),
+    );
+
+    let response = handle_request(request)
+        .await
+        .expect("request handler should return response");
+    assert_eq!(response.status(), 500, "unreachable rpc should return 500");
+}
+
+#[wasm_bindgen_test(async)]
+async fn ethereum_send_missing_signed_transaction_returns_400() {
+    let request = build_post_request(
+        "https://example.com/wallet/ethereum/send",
+        json!({
+            "cluster": "mainnet"
+        }),
+    );
+
+    let response = handle_request(request)
+        .await
+        .expect("request handler should return response");
+    assert_eq!(
+        response.status(),
+        400,
+        "signedTransaction is required for send route"
+    );
+}
+
+#[wasm_bindgen_test(async)]
+async fn ethereum_send_rpc_failure_returns_500() {
+    let request = build_post_request(
+        "https://example.com/wallet/ethereum/send",
+        json!({
+            "cluster": "mainnet",
+            "signedTransaction": "0xdeadbeef",
+            "rpcUrl": "http://127.0.0.1:1"
+        }),
+    );
+
+    let response = handle_request(request)
+        .await
+        .expect("request handler should return response");
+    assert_eq!(response.status(), 500, "unreachable rpc should return 500");
+}

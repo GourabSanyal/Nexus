@@ -49,4 +49,3 @@ This document is the source of truth for maintaining code quality, modularity, a
 - Update `docs/migration/rust-migration-tracker.md` after every substantial Rust backend change.
 - Prefer incremental refactors over large rewrites.
 - Keep public API contracts backward-compatible during migration unless explicitly approved.
-
