@@ -1,0 +1,27 @@
+{
+  "slice": "solana-send",
+  "endpoint_prepare": "POST /wallet/solana/send/prepare",
+  "endpoint_send": "POST /wallet/solana/send",
+  "request_prepare": {
+    "address": "cBXvXnd8cUdyuNaUjdeakEWZ42Wbh5bhwpeMC5FSdRP",
+    "cluster": "mainnet-beta"
+  },
+  "response_prepare": {
+    "chain": "solana",
+    "cluster": "mainnet-beta",
+    "blockhash": "5R1ExampleBlockhash111111111111111111111111111111111",
+    "lastValidBlockHeight": 283800000
+  },
+  "request_send": {
+    "cluster": "mainnet-beta",
+    "signedTransaction": "<base64-signed-transaction>"
+  },
+  "response_send": {
+    "signature": "5hTjExampleSignature1111111111111111111111111111111"
+  },
+  "notes": [
+    "Fixture records request/response contract shape for Solana send prepare/send endpoints.",
+    "Values are representative placeholders for deterministic parity checks.",
+    "Edge-case assertions are covered in tests/transaction_api_test.rs."
+  ]
+}

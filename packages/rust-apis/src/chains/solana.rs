@@ -91,13 +91,18 @@ impl BlockchainAdapter for SolanaAdapter {
         _from: Option<&'a str>,
         _to: Option<&'a str>,
         _value: Option<&'a str>,
-        _rpc_override: Option<&'a str>,
+        rpc_override: Option<&'a str>,
     ) -> SendPrepareFuture<'a> {
         Box::pin(async move {
-            let (cluster_value, _) = Self::resolve_rpc(cluster, _rpc_override)?;
+            let (cluster_value, rpc_url) = Self::resolve_rpc(cluster, rpc_override)?;
+            let blockhash_payload = services::solana_rpc::get_latest_blockhash(&rpc_url)
+                .await
+                .map_err(|e| e.to_string())?;
             let payload = json!({
                 "chain": "solana",
                 "cluster": cluster_value,
+                "blockhash": blockhash_payload.get("blockhash").and_then(|v| v.as_str()),
+                "lastValidBlockHeight": blockhash_payload.get("lastValidBlockHeight").and_then(|v| v.as_u64()),
             });
 
             Ok(SendPrepareResult { payload })

@@ -1,7 +1,7 @@
 use anyhow::{anyhow, Result};
 use serde_json::{json, Value};
 
-use crate::models::TransactionInfo;
+use crate::models::transaction::TransactionInfo;
 use crate::services::rpc_client::make_rpc_request;
 
 pub async fn get_balance(address: &str, rpc_url: &str) -> Result<String> {

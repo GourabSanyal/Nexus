@@ -26,5 +26,17 @@ describe("ethereum tx-history parity and frontend wiring", () => {
     expect(source).toContain("rustApiClient");
     expect(source).toContain('"/wallet/ethereum/transactions"');
   });
+
+  it("frontend fetch dispatcher routes ethereum history through eth helper", () => {
+    const fetchUtilPath = resolve(
+      process.cwd(),
+      "../..",
+      "apps/web/app/lib/utils/fetchTransactions.ts"
+    );
+    const source = readFileSync(fetchUtilPath, "utf-8");
+
+    expect(source).toContain("case ChainEnum.Ethereum");
+    expect(source).toContain("getEthTransactions");
+  });
 });
 

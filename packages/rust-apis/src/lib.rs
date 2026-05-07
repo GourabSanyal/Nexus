@@ -68,6 +68,8 @@ async fn route_request(req: &web_sys::Request, method: &str, path_segment: &str)
         ("POST", "wallet/ethereum/balance") => api::wallet::handle_balance(&req, "ethereum").await,
         ("POST", "wallet/solana/transactions") => api::wallet::handle_transactions(&req, "solana").await,
         ("POST", "wallet/ethereum/transactions") => api::wallet::handle_transactions(&req, "ethereum").await,
+        ("POST", "wallet/solana/send/prepare") => api::wallet::handle_prepare_send(&req, "solana").await,
+        ("POST", "wallet/solana/send") => api::wallet::handle_send(&req, "solana").await,
         _ => (404, json!({"error": "Not Found"}).to_string()),
     }
 }

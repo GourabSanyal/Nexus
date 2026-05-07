@@ -10,10 +10,17 @@ use crate::chains::traits::BlockchainAdapter;
 
 #[derive(Debug, Deserialize)]
 pub struct WalletRequestBody {
-    pub address: String,
+    #[serde(default)]
+    pub address: Option<String>,
     pub cluster: Option<String>,
     #[serde(default)]
     pub limit: Option<usize>,
+    #[serde(default)]
+    pub to: Option<String>,
+    #[serde(default)]
+    pub value: Option<String>,
+    #[serde(alias = "signedTransaction", default)]
+    pub signed_transaction: Option<String>,
     #[serde(alias = "rpcUrl")]
     pub rpc_url: Option<String>,
 }
@@ -45,6 +52,16 @@ pub fn map_wallet_error(error: String) -> (u16, String) {
         500
     };
     (status, json!({"error": error}).to_string())
+}
+
+pub fn required_address(parsed: &WalletRequestBody) -> Result<&str, (u16, String)> {
+    let address = parsed
+        .address
+        .as_deref()
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .ok_or_else(|| (400, json!({"error": "Address is required"}).to_string()))?;
+    Ok(address)
 }
 
 pub fn resolve_rpc_override_from_headers(

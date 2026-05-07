@@ -1,7 +1,7 @@
 use std::future::Future;
 use std::pin::Pin;
 
-use crate::models::TransactionInfo;
+use crate::models::transaction::TransactionInfo;
 
 pub struct BalanceResult {
     pub balance: String,

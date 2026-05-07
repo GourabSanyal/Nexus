@@ -4,7 +4,9 @@ use serde_json::json;
 
 use crate::chains::ChainRegistry;
 
-use super::body::{map_wallet_error, parse_wallet_body, resolve_rpc_override_from_headers};
+use super::body::{
+    map_wallet_error, parse_wallet_body, required_address, resolve_rpc_override_from_headers,
+};
 
 pub async fn handle_balance(req: &web_sys::Request, chain: &str) -> (u16, String) {
     let parsed = match parse_wallet_body(req).await {
@@ -12,10 +14,10 @@ pub async fn handle_balance(req: &web_sys::Request, chain: &str) -> (u16, String
         Err(err) => return err,
     };
 
-    let address = parsed.address.trim();
-    if address.is_empty() {
-        return (400, json!({"error": "Address is required"}).to_string());
-    }
+    let address = match required_address(&parsed) {
+        Ok(address) => address,
+        Err(error) => return error,
+    };
 
     let registry = ChainRegistry::new();
     let Some(adapter) = registry.adapter(chain) else {
