@@ -1,7 +1,7 @@
-use anyhow::Result;
-use serde_json::{json, Value};
 use crate::models::transaction::TransactionInfo;
 use crate::services::rpc_client::make_rpc_request;
+use anyhow::Result;
+use serde_json::{json, Value};
 
 /// Fetch Solana balance via JSON-RPC
 pub async fn get_balance(address: &str, cluster_url: &str) -> Result<u64> {
@@ -23,7 +23,12 @@ pub async fn get_balance(address: &str, cluster_url: &str) -> Result<u64> {
                 r.get("value").and_then(|v| v.as_u64())
             }
         })
-        .ok_or_else(|| anyhow::anyhow!("Failed to parse balance from response. Received: {}", response_data))?;
+        .ok_or_else(|| {
+            anyhow::anyhow!(
+                "Failed to parse balance from response. Received: {}",
+                response_data
+            )
+        })?;
 
     Ok(balance)
 }
@@ -74,11 +79,15 @@ async fn get_transaction_details(
     });
 
     let response_data = make_rpc_request(cluster_url, request_body).await?;
-    let result = response_data.get("result").ok_or_else(|| anyhow::anyhow!("No transaction result"))?;
+    let result = response_data
+        .get("result")
+        .ok_or_else(|| anyhow::anyhow!("No transaction result"))?;
 
-    let meta = result.get("meta").ok_or_else(|| anyhow::anyhow!("No transaction meta"))?;
+    let meta = result
+        .get("meta")
+        .ok_or_else(|| anyhow::anyhow!("No transaction meta"))?;
     let fee = meta.get("fee").and_then(|f| f.as_u64()).unwrap_or(0);
-    
+
     // Parse time and slot
     let slot = result.get("slot").and_then(|s| s.as_u64()).unwrap_or(0);
     let block_time = result.get("blockTime").and_then(|t| t.as_i64());
@@ -109,14 +118,9 @@ fn parse_transaction_from_signature(sig_info: &Value) -> TransactionInfo {
         .unwrap_or("unknown")
         .to_string();
 
-    let slot = sig_info
-        .get("slot")
-        .and_then(|s| s.as_u64())
-        .unwrap_or(0);
+    let slot = sig_info.get("slot").and_then(|s| s.as_u64()).unwrap_or(0);
 
-    let block_time = sig_info
-        .get("blockTime")
-        .and_then(|b| b.as_i64());
+    let block_time = sig_info.get("blockTime").and_then(|b| b.as_i64());
 
     let status = signature_status(sig_info);
 
@@ -170,7 +174,7 @@ fn extract_signatures(response_data: &Value) -> Result<&Vec<Value>> {
         .ok_or_else(|| anyhow::anyhow!("Failed to parse signatures from response"))
 }
 
-fn signatures_window(signatures: &Vec<Value>, limit: usize) -> (&[Value], bool) {
+fn signatures_window(signatures: &[Value], limit: usize) -> (&[Value], bool) {
     let has_more = signatures.len() > limit;
     let end = signatures.len().min(limit);
     (&signatures[..end], has_more)
@@ -226,7 +230,11 @@ fn signature_status(sig_info: &Value) -> &'static str {
     }
 }
 
-fn derive_wallet_amount_and_direction(result: &Value, meta: &Value, wallet_address: &str) -> (i64, String) {
+fn derive_wallet_amount_and_direction(
+    result: &Value,
+    meta: &Value,
+    wallet_address: &str,
+) -> (i64, String) {
     let Some(account_keys) = result
         .get("transaction")
         .and_then(|t| t.get("message"))
@@ -248,7 +256,10 @@ fn derive_wallet_amount_and_direction(result: &Value, meta: &Value, wallet_addre
     let Some(pre_bal) = pre.and_then(|p| p.get(wallet_idx)).and_then(|b| b.as_i64()) else {
         return (0, "unknown".to_string());
     };
-    let Some(post_bal) = post.and_then(|p| p.get(wallet_idx)).and_then(|b| b.as_i64()) else {
+    let Some(post_bal) = post
+        .and_then(|p| p.get(wallet_idx))
+        .and_then(|b| b.as_i64())
+    else {
         return (0, "unknown".to_string());
     };
 
@@ -271,7 +282,7 @@ pub async fn get_latest_blockhash(cluster_url: &str) -> Result<Value> {
     });
 
     let response_data = make_rpc_request(cluster_url, request_body).await?;
-    
+
     response_data
         .get("result")
         .and_then(|r| r.get("value"))
@@ -295,11 +306,10 @@ pub async fn send_transaction(cluster_url: &str, signed_transaction: &str) -> Re
     });
 
     let response_data = make_rpc_request(cluster_url, request_body).await?;
-    
+
     response_data
         .get("result")
         .and_then(|r| r.as_str())
         .map(|s| s.to_string())
         .ok_or_else(|| anyhow::anyhow!("Failed to parse transaction signature"))
 }
-

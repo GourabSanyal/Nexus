@@ -21,7 +21,10 @@ pub async fn handle_balance(req: &web_sys::Request, chain: &str) -> (u16, String
 
     let registry = ChainRegistry::new();
     let Some(adapter) = registry.adapter(chain) else {
-        return (400, json!({"error": format!("Unsupported chain: {chain}")}).to_string());
+        return (
+            400,
+            json!({"error": format!("Unsupported chain: {chain}")}).to_string(),
+        );
     };
 
     let cluster = parsed.cluster.as_deref();
@@ -33,4 +36,3 @@ pub async fn handle_balance(req: &web_sys::Request, chain: &str) -> (u16, String
         Err(error) => map_wallet_error(error),
     }
 }
-

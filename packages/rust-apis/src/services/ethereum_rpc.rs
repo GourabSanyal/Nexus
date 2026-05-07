@@ -5,7 +5,8 @@ use crate::models::transaction::TransactionInfo;
 use crate::services::rpc_client::make_rpc_request;
 
 pub async fn get_balance(address: &str, rpc_url: &str) -> Result<String> {
-    let body = json!({"id":1,"jsonrpc":"2.0","method":"eth_getBalance","params":[address,"latest"]});
+    let body =
+        json!({"id":1,"jsonrpc":"2.0","method":"eth_getBalance","params":[address,"latest"]});
     let data = make_rpc_request(rpc_url, body).await?;
     data.get("result")
         .and_then(|v| v.as_str())
@@ -13,30 +14,60 @@ pub async fn get_balance(address: &str, rpc_url: &str) -> Result<String> {
         .ok_or_else(|| anyhow!("Failed to parse balance"))
 }
 
-pub async fn get_transactions(address: &str, rpc_url: &str, limit: Option<usize>) -> Result<(Vec<TransactionInfo>, bool, Option<String>)> {
+pub async fn get_transactions(
+    address: &str,
+    rpc_url: &str,
+    limit: Option<usize>,
+) -> Result<(Vec<TransactionInfo>, bool, Option<String>)> {
     let max = limit.unwrap_or(20).min(100);
     let txs = fetch_and_merge_transfers(rpc_url, address, max).await?;
-    let out: Vec<TransactionInfo> = txs.iter().take(max).map(|t| map_transaction(t, address)).collect();
+    let out: Vec<TransactionInfo> = txs
+        .iter()
+        .take(max)
+        .map(|t| map_transaction(t, address))
+        .collect();
     let next_cursor = out.last().map(|t| t.signature.clone());
     Ok((out, txs.len() > max, next_cursor))
 }
 
 pub async fn prepare_send(address: &str, to: &str, value: &str, rpc_url: &str) -> Result<Value> {
     let chain_id = rpc(rpc_url, "eth_chainId", json!([])).await?;
-    let nonce = rpc(rpc_url, "eth_getTransactionCount", json!([address, "pending"])).await?;
+    let nonce = rpc(
+        rpc_url,
+        "eth_getTransactionCount",
+        json!([address, "pending"]),
+    )
+    .await?;
     let gas_price = rpc(rpc_url, "eth_gasPrice", json!([])).await?;
-    let gas_limit = rpc(rpc_url, "eth_estimateGas", json!([{"from": address, "to": to, "value": value}])).await?;
+    let gas_limit = rpc(
+        rpc_url,
+        "eth_estimateGas",
+        json!([{"from": address, "to": to, "value": value}]),
+    )
+    .await?;
     Ok(json!({"chainId":chain_id,"nonce":nonce,"gasPrice":gas_price,"gasLimit":gas_limit}))
 }
 
 pub async fn send_raw_transaction(rpc_url: &str, signed_transaction: &str) -> Result<String> {
-    let result = rpc(rpc_url, "eth_sendRawTransaction", json!([signed_transaction])).await?;
-    result.as_str().map(|s| s.to_string()).ok_or_else(|| anyhow!("Failed to parse tx hash"))
+    let result = rpc(
+        rpc_url,
+        "eth_sendRawTransaction",
+        json!([signed_transaction]),
+    )
+    .await?;
+    result
+        .as_str()
+        .map(|s| s.to_string())
+        .ok_or_else(|| anyhow!("Failed to parse tx hash"))
 }
 
 async fn fetch_transfers(rpc_url: &str, params: Value) -> Result<Vec<Value>> {
     let data = rpc(rpc_url, "alchemy_getAssetTransfers", json!([params])).await?;
-    Ok(data.get("transfers").and_then(|v| v.as_array()).cloned().unwrap_or_default())
+    Ok(data
+        .get("transfers")
+        .and_then(|v| v.as_array())
+        .cloned()
+        .unwrap_or_default())
 }
 
 async fn fetch_and_merge_transfers(rpc_url: &str, address: &str, max: usize) -> Result<Vec<Value>> {
@@ -65,10 +96,17 @@ async fn fetch_and_merge_transfers(rpc_url: &str, address: &str, max: usize) -> 
 }
 
 fn map_transaction(t: &Value, address: &str) -> TransactionInfo {
-    let from = t.get("from").and_then(|v| v.as_str()).map(|s| s.to_string());
+    let from = t
+        .get("from")
+        .and_then(|v| v.as_str())
+        .map(|s| s.to_string());
     let to = t.get("to").and_then(|v| v.as_str()).map(|s| s.to_string());
     TransactionInfo {
-        signature: t.get("hash").and_then(|v| v.as_str()).unwrap_or_default().to_string(),
+        signature: t
+            .get("hash")
+            .and_then(|v| v.as_str())
+            .unwrap_or_default()
+            .to_string(),
         slot: block_num(t),
         block_time: block_time(t),
         status: "success".to_string(),
@@ -85,7 +123,10 @@ fn map_transaction(t: &Value, address: &str) -> TransactionInfo {
 
 fn transfer_direction(from: &Option<String>, to: &Option<String>, address: &str) -> Option<String> {
     let addr = address.to_lowercase();
-    match (from.as_ref().map(|x| x.to_lowercase()), to.as_ref().map(|x| x.to_lowercase())) {
+    match (
+        from.as_ref().map(|x| x.to_lowercase()),
+        to.as_ref().map(|x| x.to_lowercase()),
+    ) {
         (Some(f), Some(t)) if f == addr && t == addr => Some("self".to_string()),
         (Some(f), _) if f == addr => Some("sent".to_string()),
         (_, Some(t)) if t == addr => Some("received".to_string()),
@@ -112,7 +153,10 @@ fn block_time(t: &Value) -> Option<i64> {
     js_sys::Date::new(&wasm_bindgen::JsValue::from_str(timestamp))
         .get_time()
         .is_finite()
-        .then(|| (js_sys::Date::new(&wasm_bindgen::JsValue::from_str(timestamp)).get_time() / 1000.0) as i64)
+        .then(|| {
+            (js_sys::Date::new(&wasm_bindgen::JsValue::from_str(timestamp)).get_time() / 1000.0)
+                as i64
+        })
 }
 
 fn amount_eth(t: &Value) -> Option<f64> {
@@ -138,6 +182,10 @@ fn amount_eth(t: &Value) -> Option<f64> {
 async fn rpc(rpc_url: &str, method: &str, params: Value) -> Result<Value> {
     let body = json!({"id":1,"jsonrpc":"2.0","method":method,"params":params});
     let data = make_rpc_request(rpc_url, body).await?;
-    if let Some(err) = data.get("error") { return Err(anyhow!("RPC Error: {err}")); }
-    data.get("result").cloned().ok_or_else(|| anyhow!("Missing result for {method}"))
+    if let Some(err) = data.get("error") {
+        return Err(anyhow!("RPC Error: {err}"));
+    }
+    data.get("result")
+        .cloned()
+        .ok_or_else(|| anyhow!("Missing result for {method}"))
 }

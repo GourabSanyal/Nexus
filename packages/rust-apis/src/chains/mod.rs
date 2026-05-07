@@ -1,5 +1,5 @@
-pub mod registry;
 pub mod ethereum;
+pub mod registry;
 pub mod solana;
 pub mod traits;
 

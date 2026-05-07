@@ -1,28 +1,31 @@
 use serde_json::json;
 
 use crate::chains::traits::{
-    BalanceFuture, BalanceResult, BlockchainAdapter, SendFuture, SendPrepareFuture, SendPrepareResult,
-    SendResult, TransactionsFuture, TransactionsResult,
+    BalanceFuture, BalanceResult, BlockchainAdapter, SendFuture, SendPrepareFuture,
+    SendPrepareResult, SendResult, TransactionsFuture, TransactionsResult,
 };
 use crate::services;
 
 pub struct SolanaAdapter;
 
 impl SolanaAdapter {
-    fn resolve_rpc(cluster: Option<&str>, rpc_override: Option<&str>) -> Result<(String, String), String> {
+    fn resolve_rpc(
+        cluster: Option<&str>,
+        rpc_override: Option<&str>,
+    ) -> Result<(String, String), String> {
         let cluster_value = cluster.unwrap_or("mainnet-beta");
 
         if let Some(url) = rpc_override {
             return Ok((cluster_value.to_string(), url.to_string()));
         }
 
-            // fallback rps
-            let rpc_url = match cluster_value {
-                "mainnet" | "mainnet-beta" => "https://api.mainnet-beta.solana.com",
-                "devnet" => "https://api.devnet.solana.com",
-                "testnet" => "https://api.testnet.solana.com",
-                _ => return Err(format!("Unsupported Solana cluster: {cluster_value}")),
-            };
+        // fallback rps
+        let rpc_url = match cluster_value {
+            "mainnet" | "mainnet-beta" => "https://api.mainnet-beta.solana.com",
+            "devnet" => "https://api.devnet.solana.com",
+            "testnet" => "https://api.testnet.solana.com",
+            _ => return Err(format!("Unsupported Solana cluster: {cluster_value}")),
+        };
 
         Ok((cluster_value.to_string(), rpc_url.to_string()))
     }
@@ -48,7 +51,7 @@ impl BlockchainAdapter for SolanaAdapter {
         rpc_override: Option<&'a str>,
     ) -> BalanceFuture<'a> {
         Box::pin(async move {
-            let (cluster_value, rpc_url) = Self::resolve_rpc(cluster, rpc_override)?;
+            let (_, rpc_url) = Self::resolve_rpc(cluster, rpc_override)?;
 
             let lamports = services::solana_rpc::get_balance(address, &rpc_url)
                 .await
@@ -56,8 +59,6 @@ impl BlockchainAdapter for SolanaAdapter {
 
             Ok(BalanceResult {
                 balance: lamports.to_string(),
-                address: address.to_string(),
-                cluster: cluster_value,
             })
         })
     }

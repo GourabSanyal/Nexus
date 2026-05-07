@@ -1,1 +1,0 @@
- // Custom error types for the API

@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+#[allow(dead_code)]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TransactionRequest {
     pub address: String,
@@ -28,6 +29,7 @@ pub struct TransactionInfo {
     pub memo: Option<String>,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PaginationInfo {
     pub has_more: bool,
@@ -35,6 +37,7 @@ pub struct PaginationInfo {
     pub limit: usize,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TransactionResponse {
     pub transactions: Vec<TransactionInfo>,

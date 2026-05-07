@@ -1,5 +1,5 @@
-mod body;
 mod balance;
+mod body;
 mod send;
 mod transactions;
 

@@ -26,12 +26,18 @@ pub struct WalletRequestBody {
 }
 
 pub async fn parse_wallet_body(req: &web_sys::Request) -> Result<WalletRequestBody, (u16, String)> {
-    let body_promise = req
-        .text()
-        .map_err(|_| (500, json!({"error": "Failed to read request body"}).to_string()))?;
-    let body_value = JsFuture::from(body_promise)
-        .await
-        .map_err(|_| (500, json!({"error": "Failed to read request body"}).to_string()))?;
+    let body_promise = req.text().map_err(|_| {
+        (
+            500,
+            json!({"error": "Failed to read request body"}).to_string(),
+        )
+    })?;
+    let body_value = JsFuture::from(body_promise).await.map_err(|_| {
+        (
+            500,
+            json!({"error": "Failed to read request body"}).to_string(),
+        )
+    })?;
     let body_str = body_value
         .as_string()
         .ok_or_else(|| (400, json!({"error": "Invalid request body"}).to_string()))?;
@@ -78,4 +84,3 @@ pub fn resolve_rpc_override_from_headers(
         .map(|s| s.trim().to_string())
         .filter(|s| !s.is_empty())
 }
-
