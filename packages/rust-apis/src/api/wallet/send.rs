@@ -1,6 +1,7 @@
 //! `POST /wallet/<chain>/send/*`
 
 use serde_json::json;
+use web_sys::console;
 
 use crate::chains::ChainRegistry;
 
@@ -76,11 +77,36 @@ pub async fn handle_send(req: &web_sys::Request, chain: &str) -> (u16, String) {
     let env_rpc_override = resolve_rpc_override_from_headers(req, adapter, cluster);
     let rpc_override = parsed.rpc_url.as_deref().or(env_rpc_override.as_deref());
 
+    console::log_1(
+        &format!(
+            "[rust-apis] handle_send chain={} cluster={:?} signed_tx_len={} rpc_override_present={}",
+            chain,
+            cluster,
+            signed_transaction.len(),
+            rpc_override.is_some()
+        )
+        .into(),
+    );
+
     match adapter
         .send_transaction(cluster, signed_transaction, rpc_override)
         .await
     {
-        Ok(result) => (200, json!({ "signature": result.signature }).to_string()),
-        Err(error) => map_wallet_error(error),
+        Ok(result) => {
+            console::log_1(
+                &format!(
+                    "[rust-apis] handle_send success chain={} signature={}",
+                    chain, result.signature
+                )
+                .into(),
+            );
+            (200, json!({ "signature": result.signature }).to_string())
+        }
+        Err(error) => {
+            console::log_1(
+                &format!("[rust-apis] handle_send error chain={} error={}", chain, error).into(),
+            );
+            map_wallet_error(error)
+        }
     }
 }

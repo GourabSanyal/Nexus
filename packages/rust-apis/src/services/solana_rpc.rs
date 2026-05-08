@@ -2,6 +2,7 @@ use crate::models::transaction::TransactionInfo;
 use crate::services::rpc_client::make_rpc_request;
 use anyhow::Result;
 use serde_json::{json, Value};
+use web_sys::console;
 
 /// Fetch Solana balance via JSON-RPC
 pub async fn get_balance(address: &str, cluster_url: &str) -> Result<u64> {
@@ -292,6 +293,15 @@ pub async fn get_latest_blockhash(cluster_url: &str) -> Result<Value> {
 
 /// Send a signed transaction to Solana
 pub async fn send_transaction(cluster_url: &str, signed_transaction: &str) -> Result<String> {
+    console::log_1(
+        &format!(
+            "[rust-apis] solana_rpc.send_transaction url={} signed_tx_len={}",
+            cluster_url,
+            signed_transaction.len()
+        )
+        .into(),
+    );
+
     let request_body = json!({
         "jsonrpc": "2.0",
         "id": 1,
@@ -306,6 +316,13 @@ pub async fn send_transaction(cluster_url: &str, signed_transaction: &str) -> Re
     });
 
     let response_data = make_rpc_request(cluster_url, request_body).await?;
+    console::log_1(
+        &format!(
+            "[rust-apis] solana_rpc.send_transaction rpc_response={}",
+            response_data
+        )
+        .into(),
+    );
 
     response_data
         .get("result")

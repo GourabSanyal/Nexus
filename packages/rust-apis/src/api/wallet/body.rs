@@ -47,17 +47,24 @@ pub async fn parse_wallet_body(req: &web_sys::Request) -> Result<WalletRequestBo
 }
 
 pub fn map_wallet_error(error: String) -> (u16, String) {
-    let bad_request = [
-        "Unsupported Solana cluster",
-        "Unsupported Ethereum cluster",
-        "unsupported cluster",
-    ];
-    let status = if bad_request.iter().any(|needle| error.contains(needle)) {
-        400
+    let (status, client_error) = if error.contains("InsufficientFundsForRent")
+        || error.contains("insufficient funds for rent")
+    {
+        (
+            400,
+            "Insufficient SOL for rent and network fees. Fund the sender wallet or lower the amount."
+                .to_string(),
+        )
+    } else if error.contains("Unsupported Solana cluster")
+        || error.contains("Unsupported Ethereum cluster")
+        || error.contains("unsupported cluster")
+    {
+        (400, error.clone())
     } else {
-        500
+        (500, error.clone())
     };
-    (status, json!({"error": error}).to_string())
+
+    (status, json!({"error": client_error}).to_string())
 }
 
 pub fn required_address(parsed: &WalletRequestBody) -> Result<&str, (u16, String)> {

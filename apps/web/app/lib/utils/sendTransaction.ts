@@ -22,6 +22,34 @@ interface SendTransactionResult {
   id: string;
 }
 
+const extractResponseErrorMessage = (responseData: unknown): string | null => {
+  if (typeof responseData === "object" && responseData !== null) {
+    const apiError = (responseData as { error?: unknown }).error;
+    if (typeof apiError === "string" && apiError.trim().length > 0) {
+      return apiError;
+    }
+  }
+  return null;
+};
+
+const extractApiErrorMessage = (error: unknown): string => {
+  if (typeof error === "object" && error !== null) {
+    const maybeResponse = (error as { response?: { data?: { error?: unknown } } })
+      .response;
+    const apiError = maybeResponse?.data?.error;
+    if (typeof apiError === "string" && apiError.trim().length > 0) {
+      return apiError;
+    }
+
+    const message = (error as { message?: unknown }).message;
+    if (typeof message === "string" && message.trim().length > 0) {
+      return message;
+    }
+  }
+
+  return "Failed to send transaction";
+};
+
 const decimalToAtomicUnits = (amount: string, decimals: number): bigint => {
   const normalized = amount.trim();
 
@@ -70,13 +98,23 @@ const sendEthereumTransaction = async ({
     gasLimit: BigInt(prepared.gasLimit),
   });
 
-  const response = await client.post("/wallet/ethereum/send", {
-    address: from,
-    cluster,
-    signedTransaction,
-  });
+  try {
+    const response = await client.post("/wallet/ethereum/send", {
+      address: from,
+      cluster,
+      signedTransaction,
+    });
 
-  return { id: response.data.signature };
+    if (!response.data?.signature) {
+      throw new Error(
+        extractResponseErrorMessage(response.data) || "Failed to send transaction"
+      );
+    }
+
+    return { id: response.data.signature };
+  } catch (error) {
+    throw new Error(extractApiErrorMessage(error));
+  }
 };
 
 const sendSolanaTransaction = async ({
@@ -116,12 +154,22 @@ const sendSolanaTransaction = async ({
   transaction.sign(keypair);
 
   const signedTransaction = transaction.serialize().toString("base64");
-  const response = await client.post("/wallet/solana/send", {
-    cluster,
-    signedTransaction,
-  });
+  try {
+    const response = await client.post("/wallet/solana/send", {
+      cluster,
+      signedTransaction,
+    });
 
-  return { id: response.data.signature };
+    if (!response.data?.signature) {
+      throw new Error(
+        extractResponseErrorMessage(response.data) || "Failed to send transaction"
+      );
+    }
+
+    return { id: response.data.signature };
+  } catch (error) {
+    throw new Error(extractApiErrorMessage(error));
+  }
 };
 
 export const sendTransaction = async (
