@@ -63,4 +63,4 @@ Short, actionable items—implement in small PRs; avoid scope creep.
 | **Dead UI** | Disabled “Scan QR / Import Image” tabs | Remove until implemented, or single “Coming soon” note |
 | **Cross-cutting** | Duplicate wallet lookup (concat solana + ethereum arrays) | `selectWalletById` in store or one tiny util |
 
-When a row is done, remove it or move detail to your tracker doc—keep this table lean.
+Track ordered work and status in [`docs/migration/web-improvement-tracker.md`](../docs/migration/web-improvement-tracker.md). Keep this table lean; update the tracker as slices complete.
