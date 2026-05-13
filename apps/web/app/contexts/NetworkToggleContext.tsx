@@ -8,12 +8,14 @@ import {
   walletNetworkOverrideState,
 } from "@repo/store/src/atoms/networkState";
 import { IWalletAdapter } from "@/app/lib/adapters/IWalletAdapter";
-import {NetworkToggleContextValueProps} from "@/app/types/common/NetworkToggleContextValueProps";
+import { NetworkToggleContextValueProps } from "@/app/types/common/NetworkToggleContextValueProps";
+import {
+  NetworkManager,
+  getEffectiveNetworkFromStores,
+} from "@/app/lib/services/NetworkManager";
 
-const NetworkToggleContext = createContext<NetworkToggleContextValueProps | null>(null);
-
-const keyFor = (chain: ChainEnum, walletId?: number) =>
-  walletId != null ? `${chain}:${walletId}` : "";
+const NetworkToggleContext =
+  createContext<NetworkToggleContextValueProps | null>(null);
 
 interface NetworkToggleProviderProps {
   chain: ChainEnum;
@@ -28,40 +30,38 @@ export function NetworkToggleProvider({
   adapter,
   children,
 }: NetworkToggleProviderProps) {
-  const [globalNetworks, setGlobalNetworks] = useRecoilState(globalNetworkState);
+  const [globalNetworks, setGlobalNetworks] =
+    useRecoilState(globalNetworkState);
   const [overrides, setOverrides] = useRecoilState(walletNetworkOverrideState);
 
-  const getEffectiveNetwork = useCallback((): NetworkEnum => {
-    if (walletId != null) {
-      const k = keyFor(chain, walletId);
-      const o = overrides[k];
-      if (o) return o;
-    }
-    return globalNetworks[chain];
-  }, [chain, walletId, overrides, globalNetworks]);
+  const manager = useMemo(
+    () =>
+      new NetworkManager(
+        adapter,
+        chain,
+        walletId,
+        setGlobalNetworks,
+        setOverrides
+      ),
+    [adapter, chain, walletId, setGlobalNetworks, setOverrides]
+  );
 
-  const currentNetwork = useMemo(() => getEffectiveNetwork(), [getEffectiveNetwork]);
+  const currentNetwork = useMemo(
+    () =>
+      getEffectiveNetworkFromStores(chain, walletId, globalNetworks, overrides),
+    [chain, walletId, globalNetworks, overrides]
+  );
 
   const setNetwork = useCallback(
     (network: NetworkEnum) => {
-      if (!adapter.validateNetwork(network)) {
-        throw new Error(`Invalid network ${network} for chain ${chain}`);
-      }
-
-      if (walletId != null) {
-        const k = keyFor(chain, walletId);
-        setOverrides((prev) => ({ ...prev, [k]: network }));
-      } else {
-        setGlobalNetworks((prev) => ({ ...prev, [chain]: network }));
-      }
+      manager.setNetwork(network);
     },
-    [chain, walletId, adapter, setOverrides, setGlobalNetworks]
+    [manager]
   );
 
   const toggle = useCallback(() => {
-    const next = adapter.getNextNetwork(currentNetwork);
-    setNetwork(next);
-  }, [currentNetwork, adapter, setNetwork]);
+    manager.toggleNetwork(globalNetworks, overrides);
+  }, [manager, globalNetworks, overrides]);
 
   const getDisplayName = useCallback(
     (network: NetworkEnum) => adapter.getNetworkDisplayName(network),
@@ -82,7 +82,14 @@ export function NetworkToggleProvider({
       getDisplayName,
       getNetworkColor,
     }),
-    [currentNetwork, adapter.supportedNetworks, toggle, setNetwork, getDisplayName, getNetworkColor]
+    [
+      currentNetwork,
+      adapter.supportedNetworks,
+      toggle,
+      setNetwork,
+      getDisplayName,
+      getNetworkColor,
+    ]
   );
 
   return (
@@ -95,8 +102,9 @@ export function NetworkToggleProvider({
 export function useNetworkToggleContext(): NetworkToggleContextValueProps {
   const context = useContext(NetworkToggleContext);
   if (!context) {
-    throw new Error("useNetworkToggleContext must be used within NetworkToggleProvider");
+    throw new Error(
+      "useNetworkToggleContext must be used within NetworkToggleProvider"
+    );
   }
   return context;
 }
-
