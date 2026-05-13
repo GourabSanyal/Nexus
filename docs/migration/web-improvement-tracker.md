@@ -1,6 +1,6 @@
 # Web improvement tracker (`apps/web`)
 
-Companion to `[apps/web/Rules.md](../../apps/web/Rules.md)`. Work **in slice order** below; one slice ≈ one PR unless notes say to pair. Update this file before ending each session.
+Companion to [`apps/web/Rules.md`](../../apps/web/Rules.md). Work **in slice order** below; one slice ≈ one PR unless notes say to pair. Update this file before ending each session.
 
 ## Tracker rules
 
@@ -16,7 +16,7 @@ Companion to `[apps/web/Rules.md](../../apps/web/Rules.md)`. Work **in slice ord
 
 | #   | Slice                           | State       | Primary files / area                                                                                 | Notes                                                                                    |
 | --- | ------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| 1   | `web-hooks-conditional-network` | Not Started | `useWalletFeatures.ts`, `useSendModal.ts`, `useTransactionHistory.ts`                                | Fix conditional `useNetworkManager`; same hook order every render                        |
+| 1   | `web-hooks-conditional-network` | Done        | `useWalletFeatures.ts`, `useSendModal.ts`, `useTransactionHistory.ts`, `useNetworkManager.ts`, `NetworkManager.ts` | `useNetworkManager` accepts `adapter: null`; `getEffectiveNetworkFromStores` for read path |
 | 2   | `web-network-authority`         | Not Started | `NetworkManager.ts`, `useNetworkManager.ts`, `NetworkToggleContext.tsx`, `NetworkToggleProvider.tsx` | Single effective-network path; remove `(manager as any)`; align with slice 1 if same PR  |
 | 3   | `web-select-wallet-by-id`       | Not Started | `@my-org/store` or `apps/web/app/lib/utils/` + call sites                                            | Deduplicate concat + `.find` for wallet by id                                            |
 | 4   | `web-types-send-wallet`         | Not Started | `IWalletAdapter.ts`, hooks, adapters                                                                 | Replace `any` on wallet / send paths; narrow `sendTransaction` (union or per-chain DTOs) |
@@ -34,9 +34,9 @@ Companion to `[apps/web/Rules.md](../../apps/web/Rules.md)`. Work **in slice ord
 
 | Bucket  | Items                                                                                |
 | ------- | ------------------------------------------------------------------------------------ |
-| Done    | —                                                                                    |
+| Done    | Slice **1** `web-hooks-conditional-network`                                          |
 | Running | —                                                                                    |
-| Next up | Start slice **1** (`web-hooks-conditional-network`); then **2** unless merged with 1 |
+| Next up | Slice **2** `web-network-authority`                                                    |
 
 
 ---
@@ -47,12 +47,12 @@ Use this section for handoff detail. Copy the template for the active slice; mar
 
 ### Slice 1: `web-hooks-conditional-network`
 
-- **PR / commit:** —
-- **Status:** Not Started
+- **PR / commit:** (local; commit on `feat/web-micro-frontend-migration`)
+- **Status:** Done
 - **Goal:** No conditional hook calls; `useNetworkManager` always runs with stable arity (internal no-op / early return if no wallet).
-- **Files (expected):** `apps/web/app/hooks/useWalletFeatures.ts`, `apps/web/app/components/ui/wallet/modals/hooks/useSendModal.ts`, `apps/web/app/components/ui/wallet/modals/hooks/useTransactionHistory.ts`
-- **Tests:** Smoke only unless you add a small hook test harness
-- **Recorded checks:** lint — / build — / smoke —
+- **Files changed:** `apps/web/app/hooks/useWalletFeatures.ts`, `apps/web/app/components/ui/wallet/modals/hooks/useSendModal.ts`, `apps/web/app/components/ui/wallet/modals/hooks/useTransactionHistory.ts`, `apps/web/app/hooks/useNetworkManager.ts`, `apps/web/app/lib/services/NetworkManager.ts`
+- **Tests:** Smoke recommended (wallet + network toggle + send + history modals)
+- **Recorded checks:** `yarn workspace web lint` (warnings pre-existing) / `yarn workspace web build` Pass / smoke — (run locally)
 
 ### Slice 2: `web-network-authority`
 
