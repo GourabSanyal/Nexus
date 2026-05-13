@@ -4,6 +4,21 @@ import { IWalletAdapter } from "@/app/lib/adapters/IWalletAdapter";
 const keyFor = (chain: ChainEnum, walletId?: number) =>
   walletId != null ? `${chain}:${walletId}` : "";
 
+/** Read effective cluster from Recoil-shaped maps (no adapter). */
+export function getEffectiveNetworkFromStores(
+  chain: ChainEnum,
+  walletId: number | undefined,
+  globalNetworks: Record<ChainEnum, NetworkEnum>,
+  overrides: Record<string, NetworkEnum>
+): NetworkEnum {
+  if (walletId != null) {
+    const k = keyFor(chain, walletId);
+    const o = overrides[k];
+    if (o) return o;
+  }
+  return globalNetworks[chain];
+}
+
 export class NetworkManager {
   private globalNetworks: Record<ChainEnum, NetworkEnum>;
   private overrides: Record<string, NetworkEnum>;
@@ -32,12 +47,12 @@ export class NetworkManager {
   }
 
   getEffectiveNetwork(): NetworkEnum {
-    if (this.walletId != null) {
-      const k = keyFor(this.chain, this.walletId);
-      const o = this.overrides[k];
-      if (o) return o;
-    }
-    return this.globalNetworks[this.chain];
+    return getEffectiveNetworkFromStores(
+      this.chain,
+      this.walletId,
+      this.globalNetworks,
+      this.overrides
+    );
   }
 
   setNetwork(network: NetworkEnum): void {

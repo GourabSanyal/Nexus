@@ -6,10 +6,13 @@ import {
   walletNetworkOverrideState,
 } from "@repo/store/src/atoms/networkState";
 import { IWalletAdapter } from "@/app/lib/adapters/IWalletAdapter";
-import { NetworkManager } from "@/app/lib/services/NetworkManager";
+import {
+  NetworkManager,
+  getEffectiveNetworkFromStores,
+} from "@/app/lib/services/NetworkManager";
 
 export const useNetworkManager = (
-  adapter: IWalletAdapter,
+  adapter: IWalletAdapter | null,
   chain: ChainEnum,
   walletId?: number
 ) => {
@@ -17,47 +20,46 @@ export const useNetworkManager = (
     useRecoilState(globalNetworkState);
   const [overrides, setOverrides] = useRecoilState(walletNetworkOverrideState);
 
-  // only recreate manager when adapter, chain, or walletId changes
-  // don't include globalNetworks/overrides in dep, they're object references that change
-  // even when values are the same
-  // the manager will read current values from recoil state
-  const manager = useMemo(
-    () => {
-      return new NetworkManager(
-        adapter,
+  const manager = useMemo(() => {
+    if (!adapter) return null;
+    return new NetworkManager(
+      adapter,
+      chain,
+      walletId,
+      globalNetworks,
+      overrides,
+      setGlobalNetworks,
+      setOverrides
+    );
+  }, [adapter, chain, walletId, setGlobalNetworks, setOverrides]);
+
+  const currentNetwork = useMemo(() => {
+    if (!adapter || !manager) {
+      return getEffectiveNetworkFromStores(
         chain,
         walletId,
         globalNetworks,
-        overrides,
-        setGlobalNetworks,
-        setOverrides
+        overrides
       );
-    },
-    // only depend on stable values, not recoil state objects
-    [adapter, chain, walletId, setGlobalNetworks, setOverrides]
-  );
-
-  // update manager's internal state references when recoil state changes
-  // this ensures manager always has latest values without recreating it
-  useMemo(() => {
-    if (manager) {
-      (manager as any).globalNetworks = globalNetworks;
-      (manager as any).overrides = overrides;
     }
-  }, [manager, globalNetworks, overrides]);
-
-  // makes currentNetwork reactive to recoil state changes
-  const currentNetwork = useMemo(() => {
-    const network = manager.getEffectiveNetwork();
-    return network;
-  }, [manager, globalNetworks, overrides]);
+    // NetworkManager reads latest Recoil snapshots; instance is memoized without those deps.
+    const m = manager as unknown as {
+      globalNetworks: typeof globalNetworks;
+      overrides: typeof overrides;
+    };
+    m.globalNetworks = globalNetworks;
+    m.overrides = overrides;
+    return manager.getEffectiveNetwork();
+  }, [adapter, manager, chain, walletId, globalNetworks, overrides]);
 
   const toggle = useCallback(() => {
+    if (!manager) return;
     manager.toggleNetwork();
   }, [manager]);
 
   const setNetwork = useCallback(
     (network: NetworkEnum) => {
+      if (!manager) return;
       manager.setNetwork(network);
     },
     [manager]
@@ -67,6 +69,6 @@ export const useNetworkManager = (
     currentNetwork,
     toggle,
     setNetwork,
-    availableNetworks: adapter.supportedNetworks,
+    availableNetworks: adapter?.supportedNetworks ?? [],
   };
 };
