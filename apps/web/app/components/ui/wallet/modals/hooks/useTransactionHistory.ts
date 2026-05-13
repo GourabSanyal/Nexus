@@ -44,15 +44,13 @@ export const useTransactionHistory = ({
 
   const chain = adapter?.chain || ChainEnum.Solana;
 
-  const networkManager = adapter
-    ? useNetworkManager(adapter, chain, walletId)
-    : null;
+  const networkManager = useNetworkManager(adapter, chain, walletId);
 
   // Use networkManager.currentNetwork directly,
-  // ensures the modal stays in sync with header toggle, 
+  // ensures the modal stays in sync with header toggle,
   // used reactive recoil management
   const currentCluster =
-    networkManager?.currentNetwork ||
+    networkManager.currentNetwork ||
     adapter?.getDefaultNetwork() ||
     NetworkEnum.Mainnet;
 
@@ -215,7 +213,6 @@ export const useTransactionHistory = ({
   }, [loadingStates, currentCluster, getCacheKey]);
 
   const handleClusterToggle = useCallback(() => {
-    if (!networkManager) return;
     networkManager.toggle();
   }, [networkManager]);
 

@@ -34,13 +34,11 @@ export const useSendModal = ({ walletId, chain }: UseSendModalProps): {
 
   const chainEnum: ChainEnum = adapter?.chain || chain;
 
-  const networkManager = adapter
-    ? useNetworkManager(adapter, chainEnum, walletId)
-    : null;
+  const networkManager = useNetworkManager(adapter, chainEnum, walletId);
 
   // Using networkManager.currentNetwork makes sure modals stays in sync with header toggle
   const currentNetwork =
-    networkManager?.currentNetwork ||
+    networkManager.currentNetwork ||
     adapter?.getDefaultNetwork() ||
     NetworkEnum.Mainnet;
 
@@ -50,7 +48,6 @@ export const useSendModal = ({ walletId, chain }: UseSendModalProps): {
   }, [wallet, currentNetwork, getBalance]);
 
   const handleNetworkToggle = () => {
-    if (!networkManager) return;
     networkManager.toggle();
   };
 

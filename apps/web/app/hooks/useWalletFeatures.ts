@@ -46,11 +46,9 @@ export function useWalletFeatures(wallet: Wallet | null | undefined): UseWalletF
     return wallet.type === "solana" ? ChainEnum.Solana : ChainEnum.Ethereum;
   }, [wallet]);
 
-  const networkManager = adapter
-    ? useNetworkManager(adapter, chain, wallet?.id)
-    : null;
+  const networkManager = useNetworkManager(adapter, chain, wallet?.id);
 
-  if (!wallet || !adapter || !networkManager) {
+  if (!wallet || !adapter) {
     return null;
   }
 
