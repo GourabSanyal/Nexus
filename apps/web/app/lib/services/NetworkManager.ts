@@ -4,7 +4,7 @@ import { IWalletAdapter } from "@/app/lib/adapters/IWalletAdapter";
 const keyFor = (chain: ChainEnum, walletId?: number) =>
   walletId != null ? `${chain}:${walletId}` : "";
 
-/** Read effective cluster from Recoil-shaped maps (no adapter). */
+/** Read effective cluster from Recoil-shaped maps (single source of truth). */
 export function getEffectiveNetworkFromStores(
   chain: ChainEnum,
   walletId: number | undefined,
@@ -19,39 +19,47 @@ export function getEffectiveNetworkFromStores(
   return globalNetworks[chain];
 }
 
+type SetGlobals = (
+  updater: (prev: Record<ChainEnum, NetworkEnum>) => Record<ChainEnum, NetworkEnum>
+) => void;
+type SetOverrides = (
+  updater: (prev: Record<string, NetworkEnum>) => Record<string, NetworkEnum>
+) => void;
+
+/**
+ * Mutations for per-chain / per-wallet network selection.
+ * Does not hold Recoil snapshots — pass latest maps into {@link getEffectiveNetwork} / {@link toggleNetwork}.
+ */
 export class NetworkManager {
-  private globalNetworks: Record<ChainEnum, NetworkEnum>;
-  private overrides: Record<string, NetworkEnum>;
-  private setGlobalNetworks: (updater: (prev: Record<ChainEnum, NetworkEnum>) => Record<ChainEnum, NetworkEnum>) => void;
-  private setOverrides: (updater: (prev: Record<string, NetworkEnum>) => Record<string, NetworkEnum>) => void;
-  private adapter: IWalletAdapter;
-  private chain: ChainEnum;
-  private walletId?: number;
+  private readonly setGlobalNetworks: SetGlobals;
+  private readonly setOverrides: SetOverrides;
+  private readonly adapter: IWalletAdapter;
+  private readonly chain: ChainEnum;
+  private readonly walletId?: number;
 
   constructor(
     adapter: IWalletAdapter,
     chain: ChainEnum,
     walletId: number | undefined,
-    globalNetworks: Record<ChainEnum, NetworkEnum>,
-    overrides: Record<string, NetworkEnum>,
-    setGlobalNetworks: (updater: (prev: Record<ChainEnum, NetworkEnum>) => Record<ChainEnum, NetworkEnum>) => void,
-    setOverrides: (updater: (prev: Record<string, NetworkEnum>) => Record<string, NetworkEnum>) => void
+    setGlobalNetworks: SetGlobals,
+    setOverrides: SetOverrides
   ) {
     this.adapter = adapter;
     this.chain = chain;
     this.walletId = walletId;
-    this.globalNetworks = globalNetworks;
-    this.overrides = overrides;
     this.setGlobalNetworks = setGlobalNetworks;
     this.setOverrides = setOverrides;
   }
 
-  getEffectiveNetwork(): NetworkEnum {
+  getEffectiveNetwork(
+    globalNetworks: Record<ChainEnum, NetworkEnum>,
+    overrides: Record<string, NetworkEnum>
+  ): NetworkEnum {
     return getEffectiveNetworkFromStores(
       this.chain,
       this.walletId,
-      this.globalNetworks,
-      this.overrides
+      globalNetworks,
+      overrides
     );
   }
 
@@ -68,10 +76,12 @@ export class NetworkManager {
     }
   }
 
-  toggleNetwork(): void {
-    const current = this.getEffectiveNetwork();
+  toggleNetwork(
+    globalNetworks: Record<ChainEnum, NetworkEnum>,
+    overrides: Record<string, NetworkEnum>
+  ): void {
+    const current = this.getEffectiveNetwork(globalNetworks, overrides);
     const next = this.adapter.getNextNetwork(current);
     this.setNetwork(next);
   }
 }
-
