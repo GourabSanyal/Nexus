@@ -1,6 +1,11 @@
 import { useMemo } from "react";
 import { ChainEnum, NetworkEnum } from "@repo/store/src/enums/network";
+import { TransactionResponse } from "@api-types/TransactionTypes";
 import { WalletAdapterFactory } from "@/app/lib/adapters/WalletAdapterFactory";
+import type {
+  AdapterWalletSendParams,
+  WalletSendResult,
+} from "@/app/lib/utils/sendTransaction";
 import { useNetworkManager } from "./useNetworkManager";
 import { Wallet } from "@/app/types/wallet/wallet";
 
@@ -20,10 +25,12 @@ interface UseWalletFeaturesReturn {
   formatBalance: (balance: number | bigint) => string;
 
   // Transactions
-  fetchTransactions: (network: NetworkEnum, limit?: number) => Promise<any>;
+  fetchTransactions: (
+    network: NetworkEnum,
+    limit?: number
+  ) => Promise<TransactionResponse>;
 
-  // Send (placeholder)
-  send: (params: any) => Promise<any>;
+  send: (params: AdapterWalletSendParams) => Promise<WalletSendResult>;
 
   // Validation
   validateAddress: (address: string) => boolean;
@@ -84,8 +91,7 @@ export function useWalletFeatures(wallet: Wallet | null | undefined): UseWalletF
       });
     },
 
-    // Send (placeholder)
-    send: async (params: any) => adapter.sendTransaction(params),
+    send: (params: AdapterWalletSendParams) => adapter.sendTransaction(params),
 
     // Validation
     validateAddress: (address: string) => adapter.validateAddress(address),
