@@ -5,7 +5,11 @@ import { TransactionResponse, TransactionRequest } from "@api-types/TransactionT
 import { getEthBalance } from "@/app/lib/utils/getEthBalance";
 import { fetchTransactions } from "@/app/lib/utils/fetchTransactions";
 import { validateAddress } from "@my-org/store";
-import { sendTransaction } from "@/app/lib/utils/sendTransaction";
+import {
+  sendTransaction,
+  type AdapterWalletSendParams,
+  type WalletSendResult,
+} from "@/app/lib/utils/sendTransaction";
 
 export class EthereumWalletAdapter implements IWalletAdapter {
   readonly chain = ChainEnum.Ethereum;
@@ -56,7 +60,9 @@ export class EthereumWalletAdapter implements IWalletAdapter {
     });
   }
 
-  async sendTransaction(params: any): Promise<any> {
+  async sendTransaction(
+    params: AdapterWalletSendParams
+  ): Promise<WalletSendResult> {
     return sendTransaction({
       ...params,
       chain: this.chain,
