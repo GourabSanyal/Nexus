@@ -10,13 +10,15 @@ import {
 import { WalletAdapterFactory } from "@/app/lib/adapters/WalletAdapterFactory";
 import { useNetworkManager } from "@/app/hooks/useNetworkManager";
 
+type WalletFromStore = NonNullable<ReturnType<typeof selectWalletById>>;
+
 interface UseSendModalProps {
   walletId: number;
   chain: ChainEnum.Solana | ChainEnum.Ethereum;
 }
 
 export const useSendModal = ({ walletId, chain }: UseSendModalProps): {
-  wallet: any;
+  wallet: WalletFromStore | undefined;
   currentNetwork: NetworkEnum;
   balance: string | bigint;
   handleNetworkToggle: () => void;
