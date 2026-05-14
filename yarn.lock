@@ -1248,6 +1248,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@my-org/store@workspace:packages/store"
   dependencies:
+    "@my-org/zod": "npm:*"
     "@types/recoil": "npm:^0.0.9"
     recoil: "npm:^0.7.7"
   peerDependencies:
@@ -1256,7 +1257,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@my-org/zod@workspace:packages/zod":
+"@my-org/zod@npm:*, @my-org/zod@workspace:packages/zod":
   version: 0.0.0-use.local
   resolution: "@my-org/zod@workspace:packages/zod"
   dependencies:
