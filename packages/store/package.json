@@ -5,6 +5,7 @@
   "types": "src/index.js",
   "private": true,
   "dependencies": {
+    "@my-org/zod": "*",
     "@types/recoil": "^0.0.9",
     "recoil": "^0.7.7"
   },
