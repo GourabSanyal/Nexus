@@ -1,10 +1,14 @@
 import { useMemo } from "react";
 import { useRecoilValue } from "recoil";
-import { ChainEnum, NetworkEnum } from "@my-org/store";
-import { walletState } from "@my-org/store";
+import {
+  ChainEnum,
+  NetworkEnum,
+  selectWalletById,
+  useWalletBalances,
+  walletState,
+} from "@my-org/store";
 import { WalletAdapterFactory } from "@/app/lib/adapters/WalletAdapterFactory";
 import { useNetworkManager } from "@/app/hooks/useNetworkManager";
-import { useWalletBalances } from "@my-org/store";
 
 interface UseSendModalProps {
   walletId: number;
@@ -21,10 +25,7 @@ export const useSendModal = ({ walletId, chain }: UseSendModalProps): {
   const walletStateValue = useRecoilValue(walletState);
   const { getBalance } = useWalletBalances();
 
-  const wallet = [
-    ...(walletStateValue.solanaWallets || []),
-    ...(walletStateValue.ethereumWallets || []),
-  ].find((w) => w.id === walletId);
+  const wallet = selectWalletById(walletStateValue, walletId);
 
   // Memoize adapter to prevent recreation on every render
   // not memoizing cause infinite loop
