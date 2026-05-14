@@ -12,5 +12,6 @@ export * from "./hooks/useWalletBalances";
 export * from "./hooks/useNetwork";
 export * from "./utils/validateAddress";
 export * from "./utils/formatDisplayAmount";
+export * from "./utils/selectWalletById";
 
 export * from "./persistence/recoilPersistConfig";
