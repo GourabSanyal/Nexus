@@ -3,5 +3,4 @@ export interface SendModalProps {
   onClose: () => void;
   chain: "solana" | "ethereum";
   walletId: number;
-  network: "solana" | "ethereum";
 }
