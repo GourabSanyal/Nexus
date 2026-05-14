@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { NetworkEnum, ChainEnum, NetworkConnectionEnum } from "@my-org/store";
+import { NetworkEnum, ChainEnum, NetworkConnectionEnum, selectWalletById } from "@my-org/store";
 import {
   transactionHistoryState,
   transactionHistoryLoadingState,
@@ -32,10 +32,7 @@ export const useTransactionHistory = ({
   );
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const wallet = [
-    ...(walletStateValue.solanaWallets || []),
-    ...(walletStateValue.ethereumWallets || []),
-  ].find((w) => w.id === walletId);
+  const wallet = selectWalletById(walletStateValue, walletId);
 
   // adapter memoized like useSendModal to prevent infinite loop
   const adapter: IWalletAdapter | null = useMemo(() => {
