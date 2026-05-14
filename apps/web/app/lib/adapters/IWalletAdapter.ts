@@ -1,6 +1,13 @@
 import { ChainEnum, NetworkEnum } from "@repo/store/src/enums/network";
 import { BalanceParams } from "@api-types/BalanceParams";
-import { TransactionResponse, TransactionRequest } from "@api-types/TransactionTypes";
+import {
+  TransactionResponse,
+  TransactionRequest,
+} from "@api-types/TransactionTypes";
+import type {
+  AdapterWalletSendParams,
+  WalletSendResult,
+} from "@/app/lib/utils/sendTransaction";
 
 export interface IWalletAdapter {
   readonly chain: ChainEnum;
@@ -17,7 +24,7 @@ export interface IWalletAdapter {
 
   // Transaction Operations
   fetchTransactions(params: TransactionRequest): Promise<TransactionResponse>;
-  sendTransaction(params: any): Promise<any>; // Placeholder for future implementation
+  sendTransaction(params: AdapterWalletSendParams): Promise<WalletSendResult>;
 
   // Address Operations
   validateAddress(address: string): boolean;
@@ -28,4 +35,3 @@ export interface IWalletAdapter {
   getNetworkColor(network: NetworkEnum): string;
   getCurrencySymbol(): string;
 }
-
