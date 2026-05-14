@@ -9,18 +9,20 @@ import { rustApiClient } from "@api-utils/rustApiClient";
 import { ChainEnum, NetworkEnum } from "@repo/store/src/enums/network";
 import { validateSendInput } from "@my-org/zod";
 
-interface SendTransactionParams {
+/** Full send payload including chain (used by `sendTransaction` util). */
+export type WalletSendParams = {
   chain: ChainEnum;
   cluster: NetworkEnum;
   from: string;
   privateKey: string;
   to: string;
   amount: string;
-}
+};
 
-interface SendTransactionResult {
-  id: string;
-}
+export type WalletSendResult = { id: string };
+
+/** Adapter-facing send args (`chain` is implied by the adapter implementation). */
+export type AdapterWalletSendParams = Omit<WalletSendParams, "chain">;
 
 const extractResponseErrorMessage = (responseData: unknown): string | null => {
   if (typeof responseData === "object" && responseData !== null) {
@@ -75,7 +77,7 @@ const sendEthereumTransaction = async ({
   privateKey,
   to,
   amount,
-}: Omit<SendTransactionParams, "chain">): Promise<SendTransactionResult> => {
+}: Omit<WalletSendParams, "chain">): Promise<WalletSendResult> => {
   const client = rustApiClient();
   const value = parseEther(amount);
   const valueHex = `0x${value.toString(16)}`;
@@ -123,7 +125,7 @@ const sendSolanaTransaction = async ({
   privateKey,
   to,
   amount,
-}: Omit<SendTransactionParams, "chain">): Promise<SendTransactionResult> => {
+}: Omit<WalletSendParams, "chain">): Promise<WalletSendResult> => {
   const client = rustApiClient();
   const lamports = decimalToAtomicUnits(amount, 9);
   const keypair = Keypair.fromSecretKey(
@@ -173,8 +175,8 @@ const sendSolanaTransaction = async ({
 };
 
 export const sendTransaction = async (
-  params: SendTransactionParams
-): Promise<SendTransactionResult> => {
+  params: WalletSendParams
+): Promise<WalletSendResult> => {
   const validationResult = validateSendInput({
     chain: params.chain,
     recipient: params.to,
