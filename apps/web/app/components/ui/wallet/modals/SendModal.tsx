@@ -32,7 +32,6 @@ const SendModal = ({
   onClose,
   chain,
   walletId,
-  network,
 }: SendModalProps) => {
   const chainEnum = chain === "solana" ? ChainEnum.Solana : ChainEnum.Ethereum;
   const {
