@@ -82,7 +82,6 @@ export function WalletRendererContent({
         onClose={() => closeSend(wallet.id)}
         chain={wallet.type}
         walletId={wallet.id}
-        network={wallet.type}
       />
       <HistoryModal
         isOpen={!!historyOpenById[wallet.id]}
