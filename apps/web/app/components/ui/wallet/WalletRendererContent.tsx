@@ -12,6 +12,7 @@ interface WalletRendererContentProps {
   getBalance: (walletId: number, network: "solana" | "ethereum", cluster?: string) => string | bigint;
   isRefreshing: boolean;
   onRefresh: () => void;
+  onRefreshBalanceQuietly: () => void;
   onEditName: (newName: string) => void;
   onDelete: () => void;
   onReceive: (id: number) => void;
@@ -30,6 +31,7 @@ export function WalletRendererContent({
   getBalance,
   isRefreshing,
   onRefresh,
+  onRefreshBalanceQuietly,
   onEditName,
   onDelete,
   onReceive,
@@ -87,7 +89,7 @@ export function WalletRendererContent({
         isOpen={!!historyOpenById[wallet.id]}
         onClose={() => closeHistory(wallet.id)}
         walletId={wallet.id}
-        onRefreshBalance={onRefresh}
+        onRefreshBalance={onRefreshBalanceQuietly}
       />
     </>
   );
