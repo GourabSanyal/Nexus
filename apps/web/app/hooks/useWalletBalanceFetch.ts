@@ -2,41 +2,37 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useSetRecoilState } from "recoil";
 import { useWalletBalances, useNetwork } from "@my-org/store";
 import { NetworkConnectionEnum } from "@repo/store/src/enums/network";
-import { transactionHistoryState } from "@repo/store/src/atoms/transactionHistoryState";
+import {
+  transactionHistoryState,
+  transactionHistoryLoadingState,
+} from "@repo/store/src/atoms/transactionHistoryState";
 import { toast } from "sonner";
 import { WalletAdapterFactory } from "@/app/lib/adapters/WalletAdapterFactory";
 import { Wallet } from "@/app/types/wallet/wallet";
+import { fetchWalletTransactionHistory } from "@/app/lib/services/transactionHistoryFetch";
 
 export function useWalletBalanceFetch(wallets: Wallet[]) {
   const { getBalance, setBalance } = useWalletBalances();
   const { getEffectiveNetwork } = useNetwork();
   const setTransactionHistory = useSetRecoilState(transactionHistoryState);
+  const setLoadingStates = useSetRecoilState(transactionHistoryLoadingState);
   const [refreshingById, setRefreshingById] = useState<Record<number, boolean>>(
     {}
   );
   const fetchedWalletsRef = useRef<Set<number>>(new Set());
 
   const fetchTransactionsForWallet = useCallback(
-    async (wallet: Wallet, network: string) => {
+    async (wallet: Wallet, cluster: ReturnType<typeof getEffectiveNetwork>) => {
       try {
         const adapter = WalletAdapterFactory.create(wallet.type);
-        const clusterString = network.toLowerCase();
-
-        const response = await adapter.fetchTransactions({
-          address: wallet.publicKey,
-          cluster: network,
-          limit: 20,
+        await fetchWalletTransactionHistory({
+          walletId: wallet.id,
+          publicKey: wallet.publicKey,
+          cluster,
+          adapter,
+          setTransactionHistory,
+          setLoadingStates,
         });
-
-        const fetchedTransactions = response.transactions || [];
-
-        setTransactionHistory((prev) => ({
-          ...prev,
-          [wallet.id.toString()]: {
-            ...(prev[wallet.id.toString()] || {}),
-            [clusterString]: fetchedTransactions,
-          },
-        }));
       } catch (error: unknown) {
         console.error(
           `Error fetching transactions for wallet ${wallet.id}:`,
@@ -44,15 +40,23 @@ export function useWalletBalanceFetch(wallets: Wallet[]) {
         );
       }
     },
-    [setTransactionHistory]
+    [setTransactionHistory, setLoadingStates]
   );
 
   const fetchBalanceForWallet = useCallback(
     async (
       wallet: Wallet,
-      options: { showLoading?: boolean; forceRefresh?: boolean; fetchTransactions?: boolean } = {}
+      options: {
+        showLoading?: boolean;
+        forceRefresh?: boolean;
+        fetchTransactions?: boolean;
+      } = {}
     ) => {
-      const { showLoading = false, forceRefresh = false, fetchTransactions = false } = options;
+      const {
+        showLoading = false,
+        forceRefresh = false,
+        fetchTransactions = false,
+      } = options;
 
       try {
         if (showLoading) {
@@ -88,10 +92,8 @@ export function useWalletBalanceFetch(wallets: Wallet[]) {
           setBalance(wallet.id, wallet.type, balance.toString(), currentNetwork);
         }
 
-        // When requested, also fetch and cache transactions in background
-        // Don't await - let animation stop after balance is fetched
         if (fetchTransactions) {
-          fetchTransactionsForWallet(wallet, currentNetwork);
+          void fetchTransactionsForWallet(wallet, currentNetwork);
         }
       } catch (error: unknown) {
         console.error(`Error fetching balance for wallet ${wallet.id}:`, error);
