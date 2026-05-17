@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useSetRecoilState } from "recoil";
-import { useWalletBalances, useNetwork } from "@my-org/store";
-import { NetworkConnectionEnum } from "@repo/store/src/enums/network";
+import { useRecoilValue, useSetRecoilState } from "recoil";
+import { useWalletBalances } from "@my-org/store";
+import {
+  globalNetworkState,
+  walletNetworkOverrideState,
+} from "@repo/store/src/atoms/networkState";
+import { NetworkConnectionEnum, NetworkEnum } from "@repo/store/src/enums/network";
+import { getEffectiveNetworkFromStores } from "@/app/lib/services/NetworkManager";
 import {
   transactionHistoryState,
   transactionHistoryLoadingState,
@@ -13,7 +18,8 @@ import { fetchWalletTransactionHistory } from "@/app/lib/services/transactionHis
 
 export function useWalletBalanceFetch(wallets: Wallet[]) {
   const { getBalance, setBalance } = useWalletBalances();
-  const { getEffectiveNetwork } = useNetwork();
+  const globalNetworks = useRecoilValue(globalNetworkState);
+  const overrides = useRecoilValue(walletNetworkOverrideState);
   const setTransactionHistory = useSetRecoilState(transactionHistoryState);
   const setLoadingStates = useSetRecoilState(transactionHistoryLoadingState);
   const [refreshingById, setRefreshingById] = useState<Record<number, boolean>>(
@@ -22,7 +28,7 @@ export function useWalletBalanceFetch(wallets: Wallet[]) {
   const fetchedWalletsRef = useRef<Set<number>>(new Set());
 
   const fetchTransactionsForWallet = useCallback(
-    async (wallet: Wallet, cluster: ReturnType<typeof getEffectiveNetwork>) => {
+    async (wallet: Wallet, cluster: NetworkEnum) => {
       try {
         const adapter = WalletAdapterFactory.create(wallet.type);
         await fetchWalletTransactionHistory({
@@ -65,7 +71,12 @@ export function useWalletBalanceFetch(wallets: Wallet[]) {
 
         const adapter = WalletAdapterFactory.create(wallet.type);
         const chain = adapter.chain;
-        const currentNetwork = getEffectiveNetwork(chain, wallet.id);
+        const currentNetwork = getEffectiveNetworkFromStores(
+          chain,
+          wallet.id,
+          globalNetworks,
+          overrides
+        );
 
         const cachedBalance = getBalance(
           wallet.id,
@@ -122,7 +133,7 @@ export function useWalletBalanceFetch(wallets: Wallet[]) {
         }
       }
     },
-    [getBalance, setBalance, getEffectiveNetwork, fetchTransactionsForWallet]
+    [getBalance, setBalance, globalNetworks, overrides, fetchTransactionsForWallet]
   );
 
   const refresh = useCallback(
