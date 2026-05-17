@@ -54,6 +54,7 @@ export const useTransactionHistory = ({
   const transactionHistoryRef = useRef(transactionHistory);
   const walletRef = useRef(wallet);
   const adapterRef = useRef(adapter);
+  const onRefreshBalanceRef = useRef(onRefreshBalance);
 
   useEffect(() => {
     transactionHistoryRef.current = transactionHistory;
@@ -66,6 +67,10 @@ export const useTransactionHistory = ({
   useEffect(() => {
     adapterRef.current = adapter;
   }, [adapter]);
+
+  useEffect(() => {
+    onRefreshBalanceRef.current = onRefreshBalance;
+  }, [onRefreshBalance]);
 
   const getCacheKey = useCallback(
     (cluster: NetworkEnum) => {
@@ -84,7 +89,10 @@ export const useTransactionHistory = ({
       forceRefresh: boolean = false,
       refreshBalanceOnChange: boolean = false
     ) => {
-      if (!adapterRef.current || !walletRef.current) return;
+      if (!adapterRef.current || !walletRef.current) {
+        setIsRefreshing(false);
+        return;
+      }
 
       const cacheKey = getCacheKey(cluster);
       const clusterString = getClusterString(cluster);
@@ -100,9 +108,14 @@ export const useTransactionHistory = ({
       try {
         const currentWallet = walletRef.current;
         const currentAdapter = adapterRef.current;
-        if (!currentWallet || !currentAdapter) return;
+        if (!currentWallet || !currentAdapter) {
+          setIsRefreshing(false);
+          return;
+        }
 
-        if (chain === ChainEnum.Ethereum) {
+        const currentChain = currentAdapter.chain;
+
+        if (currentChain === ChainEnum.Ethereum) {
           console.log("📤 [ETH Hook] Sending request to adapter.fetchTransactions", {
             address: currentWallet.publicKey,
             cluster,
@@ -122,7 +135,7 @@ export const useTransactionHistory = ({
           (fetchedTransactions[0]?.signature || "") !==
             (cachedData[0]?.signature || "");
 
-        if (chain === ChainEnum.Ethereum) {
+        if (currentChain === ChainEnum.Ethereum) {
           console.log("✅ [ETH Hook] Received data from API in useTransactionHistory", {
             transactionCount: response.transactions?.length || 0,
             transactions: response.transactions,
@@ -141,11 +154,11 @@ export const useTransactionHistory = ({
         }));
 
         // Refresh wallet header balance only if transaction history changed.
-        if (refreshBalanceOnChange && hasHistoryChanged && onRefreshBalance) {
-          onRefreshBalance();
+        if (refreshBalanceOnChange && hasHistoryChanged && onRefreshBalanceRef.current) {
+          onRefreshBalanceRef.current();
         }
 
-        if (chain === ChainEnum.Ethereum) {
+        if (currentChain === ChainEnum.Ethereum) {
           console.log("💾 [ETH Hook] Data stored in transactionHistoryState", {
             walletId,
             cluster: clusterString,
@@ -223,7 +236,7 @@ export const useTransactionHistory = ({
     }
     setIsRefreshing(true);
     await fetchTransactionsRef.current(currentCluster, true, true);
-  }, [currentCluster, chain, walletId, onRefreshBalance]);
+  }, [currentCluster, chain, walletId]);
 
   return {
     wallet,
