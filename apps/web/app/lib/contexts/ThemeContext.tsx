@@ -1,26 +1,33 @@
-import { createContext, useState, useContext, useEffect } from 'react';
+import { createContext, useState, useContext, useEffect } from "react";
+import {
+  DARK_MODE_STORAGE_KEY,
+  applyDarkModeClass,
+  readStoredDarkMode,
+} from "../theme/themeInit";
 
 const ThemeContext = createContext({
   isDarkMode: false,
   toggleTheme: () => {},
 });
 
-export const ThemeProvider = ({ children } : { children: React.ReactNode }) => {
+export const ThemeProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    const isDark = localStorage.getItem('darkMode') === 'true';
+    const isDark = readStoredDarkMode();
     setIsDarkMode(isDark);
-    setIsInitialized(true);
-    document.documentElement.classList.toggle('dark', isDark);
+    applyDarkModeClass(isDark);
   }, []);
 
   const toggleTheme = () => {
     const newMode = !isDarkMode;
     setIsDarkMode(newMode);
-    localStorage.setItem('darkMode', newMode.toString());
-    document.documentElement.classList.toggle('dark', newMode);
+    localStorage.setItem(DARK_MODE_STORAGE_KEY, newMode.toString());
+    applyDarkModeClass(newMode);
   };
 
   return (
