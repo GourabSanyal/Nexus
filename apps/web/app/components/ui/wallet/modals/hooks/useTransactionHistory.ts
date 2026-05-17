@@ -1,6 +1,11 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
-import { NetworkEnum, ChainEnum, NetworkConnectionEnum, selectWalletById } from "@my-org/store";
+import { useState, useEffect, useCallback, useRef, useMemo, useReducer } from "react";
+import { useRecoilValue, useSetRecoilState } from "recoil";
+import {
+  NetworkEnum,
+  ChainEnum,
+  NetworkConnectionEnum,
+  selectWalletById,
+} from "@my-org/store";
 import {
   transactionHistoryState,
   transactionHistoryLoadingState,
@@ -11,6 +16,17 @@ import { toast } from "sonner";
 import { WalletAdapterFactory } from "@/app/lib/adapters/WalletAdapterFactory";
 import { useNetworkManager } from "@/app/hooks/useNetworkManager";
 import { IWalletAdapter } from "@/app/lib/adapters/IWalletAdapter";
+import {
+  historyCacheKey,
+  hasCachedTransactions,
+  hasHistoryChanged,
+  readCachedTransactions,
+} from "../utils/transactionHistoryCache";
+import {
+  fetchWalletTransactionHistory,
+  getInFlightTransactionHistoryFetch,
+  getLatestTransactions,
+} from "@/app/lib/services/transactionHistoryFetch";
 
 interface UseTransactionHistoryProps {
   walletId: number;
@@ -18,23 +34,34 @@ interface UseTransactionHistoryProps {
   onRefreshBalance?: () => void;
 }
 
+const getFetchErrorMessage = (error: unknown): string => {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error &&
+    typeof (error as { message: unknown }).message === "string"
+  ) {
+    return (error as { message: string }).message;
+  }
+  return "";
+};
+
 export const useTransactionHistory = ({
   walletId,
   isOpen,
   onRefreshBalance,
 }: UseTransactionHistoryProps) => {
   const walletStateValue = useRecoilValue(walletState);
-  const [transactionHistory, setTransactionHistory] = useRecoilState(
-    transactionHistoryState
-  );
-  const [loadingStates, setLoadingStates] = useRecoilState(
-    transactionHistoryLoadingState
-  );
+  const transactionHistory = useRecoilValue(transactionHistoryState);
+  const setTransactionHistory = useSetRecoilState(transactionHistoryState);
+  const loadingStates = useRecoilValue(transactionHistoryLoadingState);
+  const setLoadingStates = useSetRecoilState(transactionHistoryLoadingState);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [fetchVersion, incrementFetchVersion] = useReducer((x) => x + 1, 0);
+  const prevLoadingRef = useRef<boolean>(false);
 
   const wallet = selectWalletById(walletStateValue, walletId);
 
-  // adapter memoized like useSendModal to prevent infinite loop
   const adapter: IWalletAdapter | null = useMemo(() => {
     return wallet ? WalletAdapterFactory.create(wallet.type) : null;
   }, [wallet?.type]);
@@ -43,13 +70,22 @@ export const useTransactionHistory = ({
 
   const networkManager = useNetworkManager(adapter, chain, walletId);
 
-  // Use networkManager.currentNetwork directly,
-  // ensures the modal stays in sync with header toggle,
-  // used reactive recoil management
   const currentCluster =
     networkManager.currentNetwork ||
     adapter?.getDefaultNetwork() ||
     NetworkEnum.Mainnet;
+
+  const cacheKey = historyCacheKey(walletId, currentCluster);
+  const isCurrentlyLoading = loadingStates[cacheKey] || false;
+
+  // Bump version when loading transitions from true→false (fetch completed).
+  // This ensures useMemo re-computes with fresh module cache data.
+  useEffect(() => {
+    if (prevLoadingRef.current && !isCurrentlyLoading && isOpen) {
+      incrementFetchVersion();
+    }
+    prevLoadingRef.current = isCurrentlyLoading;
+  }, [isCurrentlyLoading, isOpen]);
 
   const transactionHistoryRef = useRef(transactionHistory);
   const walletRef = useRef(wallet);
@@ -72,102 +108,56 @@ export const useTransactionHistory = ({
     onRefreshBalanceRef.current = onRefreshBalance;
   }, [onRefreshBalance]);
 
-  const getCacheKey = useCallback(
-    (cluster: NetworkEnum) => {
-      return `${walletId}:${cluster}`;
-    },
-    [walletId]
-  );
-
-  const getClusterString = useCallback((cluster: NetworkEnum): string => {
-    return cluster.toLowerCase();
-  }, []);
-
   const fetchTransactions = useCallback(
     async (
       cluster: NetworkEnum,
-      forceRefresh: boolean = false,
-      refreshBalanceOnChange: boolean = false
+      options: { forceRefresh?: boolean; refreshBalanceOnChange?: boolean } = {}
     ) => {
-      if (!adapterRef.current || !walletRef.current) {
+      const { forceRefresh = false, refreshBalanceOnChange = false } = options;
+
+      const currentWallet = walletRef.current;
+      const currentAdapter = adapterRef.current;
+      if (!currentWallet || !currentAdapter) {
         setIsRefreshing(false);
         return;
       }
 
-      const cacheKey = getCacheKey(cluster);
-      const clusterString = getClusterString(cluster);
+      const cachedData = readCachedTransactions(
+        transactionHistoryRef.current,
+        walletId,
+        cluster
+      );
 
-      const currentHistory = transactionHistoryRef.current;
-      const cachedData = currentHistory[walletId.toString()]?.[clusterString] || [];
-      if (!forceRefresh && cachedData && cachedData.length > 0) {
+      if (!forceRefresh && hasCachedTransactions(cachedData)) {
         return;
       }
 
-      setLoadingStates((prev) => ({ ...prev, [cacheKey]: true }));
-
       try {
-        const currentWallet = walletRef.current;
-        const currentAdapter = adapterRef.current;
-        if (!currentWallet || !currentAdapter) {
-          setIsRefreshing(false);
-          return;
-        }
-
-        const currentChain = currentAdapter.chain;
-
-        if (currentChain === ChainEnum.Ethereum) {
-          console.log("📤 [ETH Hook] Sending request to adapter.fetchTransactions", {
-            address: currentWallet.publicKey,
-            cluster,
-            limit: 20,
-            walletId,
-          });
-        }
-
-        const response = await currentAdapter.fetchTransactions({
-          address: currentWallet.publicKey,
-          cluster: cluster as string,
-          limit: 20,
+        const fetchedTransactions = await fetchWalletTransactionHistory({
+          walletId,
+          publicKey: currentWallet.publicKey,
+          cluster,
+          adapter: currentAdapter,
+          setTransactionHistory,
+          setLoadingStates,
         });
-        const fetchedTransactions = response.transactions || [];
-        const hasHistoryChanged =
-          fetchedTransactions.length !== cachedData.length ||
-          (fetchedTransactions[0]?.signature || "") !==
-            (cachedData[0]?.signature || "");
 
-        if (currentChain === ChainEnum.Ethereum) {
-          console.log("✅ [ETH Hook] Received data from API in useTransactionHistory", {
-            transactionCount: response.transactions?.length || 0,
-            transactions: response.transactions,
-            pagination: response.pagination,
-            walletId,
-            cluster,
-          });
-        }
+        const historyChanged = hasHistoryChanged(
+          cachedData,
+          fetchedTransactions
+        );
 
-        setTransactionHistory((prev) => ({
-          ...prev,
-          [walletId.toString()]: {
-            ...(prev[walletId.toString()] || {}),
-            [clusterString]: fetchedTransactions,
-          },
-        }));
-
-        // Refresh wallet header balance only if transaction history changed.
-        if (refreshBalanceOnChange && hasHistoryChanged && onRefreshBalanceRef.current) {
+        if (
+          refreshBalanceOnChange &&
+          historyChanged &&
+          onRefreshBalanceRef.current
+        ) {
           onRefreshBalanceRef.current();
         }
-
-        if (currentChain === ChainEnum.Ethereum) {
-          console.log("💾 [ETH Hook] Data stored in transactionHistoryState", {
-            walletId,
-            cluster: clusterString,
-            transactionCount: response.transactions?.length || 0,
-          });
-        }
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Error fetching transactions:", error);
-        if (error?.message?.includes(NetworkConnectionEnum.NoInternet)) {
+        const message = getFetchErrorMessage(error);
+        if (message.includes(NetworkConnectionEnum.NoInternet)) {
           toast.warning(
             "Failed to fetch transactions. Please check your internet connection."
           );
@@ -175,17 +165,10 @@ export const useTransactionHistory = ({
           toast.error("Failed to fetch transactions. Please try again.");
         }
       } finally {
-        setLoadingStates((prev) => ({ ...prev, [cacheKey]: false }));
         setIsRefreshing(false);
       }
     },
-    [
-      walletId,
-      getCacheKey,
-      getClusterString,
-      setLoadingStates,
-      setTransactionHistory,
-    ]
+    [walletId, setTransactionHistory, setLoadingStates]
   );
 
   const fetchTransactionsRef = useRef(fetchTransactions);
@@ -193,50 +176,69 @@ export const useTransactionHistory = ({
     fetchTransactionsRef.current = fetchTransactions;
   }, [fetchTransactions]);
 
+  // On open: join in-flight header fetch or load if no cache.
   useEffect(() => {
     if (!isOpen || !wallet || !adapter) return;
-    // Fetch only the currently selected network to keep modal load fast.
-    fetchTransactionsRef.current(currentCluster, false, false);
+
+    const cluster = currentCluster;
+
+    const runOnOpen = async () => {
+      const inFlight = getInFlightTransactionHistoryFetch(walletId, cluster);
+      if (inFlight) {
+        try {
+          await inFlight;
+        } catch {
+          // Errors surfaced by the fetch originator.
+        }
+        return;
+      }
+
+      const cachedData = readCachedTransactions(
+        transactionHistoryRef.current,
+        walletId,
+        cluster
+      );
+      if (!hasCachedTransactions(cachedData)) {
+        await fetchTransactionsRef.current(cluster, {
+          forceRefresh: true,
+          refreshBalanceOnChange: false,
+        });
+      }
+    };
+
+    void runOnOpen();
   }, [isOpen, walletId, wallet, adapter, currentCluster]);
 
-  // use useMemo to ensure it updates when cluster or history changes
+  // Derive transactions: prefer module-level cache (instant), fall back to Recoil.
+  // Re-compute when fetchVersion bumps (any fetch completes) or Recoil state updates.
   const currentTransactions = useMemo((): TransactionInfo[] => {
-    const clusterString = getClusterString(currentCluster);
-    const transactions = transactionHistory[walletId.toString()]?.[clusterString] || [];
-    
-    if (chain === ChainEnum.Ethereum && transactions.length > 0) {
-      console.log("📖 [ETH Hook] Retrieved transactions from state for rendering", {
-        walletId,
-        cluster: clusterString,
-        transactionCount: transactions.length,
-        transactions,
-      });
+    const fromModuleCache = getLatestTransactions(walletId, currentCluster);
+    if (fromModuleCache) {
+      return fromModuleCache;
     }
-    
-    return transactions;
-  }, [transactionHistory, walletId, currentCluster, getClusterString, chain]);
+    return readCachedTransactions(transactionHistory, walletId, currentCluster);
+  }, [transactionHistory, walletId, currentCluster, fetchVersion]);
 
-  // use useMemo to ensure same as currentTransactions
+  const hasCachedList = useMemo(
+    () => hasCachedTransactions(currentTransactions),
+    [currentTransactions]
+  );
+
   const loading = useMemo((): boolean => {
-    const cacheKey = getCacheKey(currentCluster);
     return loadingStates[cacheKey] || false;
-  }, [loadingStates, currentCluster, getCacheKey]);
+  }, [loadingStates, cacheKey]);
 
   const handleClusterToggle = useCallback(() => {
     networkManager.toggle();
   }, [networkManager]);
 
   const handleRefresh = useCallback(async () => {
-    if (chain === ChainEnum.Ethereum) {
-      console.log("📥 [ETH Hook] Received refresh request in useTransactionHistory", {
-        walletId,
-        currentCluster,
-        chain,
-      });
-    }
     setIsRefreshing(true);
-    await fetchTransactionsRef.current(currentCluster, true, true);
-  }, [currentCluster, chain, walletId]);
+    await fetchTransactionsRef.current(currentCluster, {
+      forceRefresh: true,
+      refreshBalanceOnChange: true,
+    });
+  }, [currentCluster]);
 
   return {
     wallet,
@@ -244,6 +246,7 @@ export const useTransactionHistory = ({
     currentTransactions,
     loading,
     isRefreshing,
+    hasCachedList,
     handleClusterToggle,
     handleRefresh,
   };
