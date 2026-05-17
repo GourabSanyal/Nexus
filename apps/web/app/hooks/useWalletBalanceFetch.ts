@@ -48,7 +48,12 @@ export function useWalletBalanceFetch(wallets: Wallet[]) {
   );
 
   const fetchBalanceForWallet = useCallback(
-    async (wallet: Wallet, showLoading = false) => {
+    async (
+      wallet: Wallet,
+      options: { showLoading?: boolean; forceRefresh?: boolean; fetchTransactions?: boolean } = {}
+    ) => {
+      const { showLoading = false, forceRefresh = false, fetchTransactions = false } = options;
+
       try {
         if (showLoading) {
           setRefreshingById((p) => ({ ...p, [wallet.id]: true }));
@@ -65,7 +70,7 @@ export function useWalletBalanceFetch(wallets: Wallet[]) {
         );
 
         if (
-          !showLoading &&
+          !forceRefresh &&
           cachedBalance &&
           cachedBalance !== "0" &&
           cachedBalance !== BigInt(0)
@@ -83,9 +88,10 @@ export function useWalletBalanceFetch(wallets: Wallet[]) {
           setBalance(wallet.id, wallet.type, balance.toString(), currentNetwork);
         }
 
-        // When manually refreshing, also fetch and cache transactions
-        if (showLoading) {
-          await fetchTransactionsForWallet(wallet, currentNetwork);
+        // When requested, also fetch and cache transactions in background
+        // Don't await - let animation stop after balance is fetched
+        if (fetchTransactions) {
+          fetchTransactionsForWallet(wallet, currentNetwork);
         }
       } catch (error: unknown) {
         console.error(`Error fetching balance for wallet ${wallet.id}:`, error);
@@ -119,7 +125,22 @@ export function useWalletBalanceFetch(wallets: Wallet[]) {
 
   const refresh = useCallback(
     async (wallet: Wallet) => {
-      await fetchBalanceForWallet(wallet, true);
+      await fetchBalanceForWallet(wallet, {
+        showLoading: true,
+        forceRefresh: true,
+        fetchTransactions: true,
+      });
+    },
+    [fetchBalanceForWallet]
+  );
+
+  const refreshBalanceQuietly = useCallback(
+    async (wallet: Wallet) => {
+      await fetchBalanceForWallet(wallet, {
+        showLoading: false,
+        forceRefresh: true,
+        fetchTransactions: false,
+      });
     },
     [fetchBalanceForWallet]
   );
@@ -128,7 +149,11 @@ export function useWalletBalanceFetch(wallets: Wallet[]) {
     wallets.forEach((wallet) => {
       if (!fetchedWalletsRef.current.has(wallet.id)) {
         fetchedWalletsRef.current.add(wallet.id);
-        fetchBalanceForWallet(wallet, false);
+        fetchBalanceForWallet(wallet, {
+          showLoading: false,
+          forceRefresh: false,
+          fetchTransactions: false,
+        });
       }
     });
   }, [wallets, fetchBalanceForWallet]);
@@ -137,5 +162,6 @@ export function useWalletBalanceFetch(wallets: Wallet[]) {
     getBalance,
     refreshingById,
     refresh,
+    refreshBalanceQuietly,
   };
 }
