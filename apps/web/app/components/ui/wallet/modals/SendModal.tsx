@@ -8,16 +8,9 @@ import {
   DialogDescription,
 } from "../../dialog/dialog";
 import { Button } from "../../button/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "../../input";
 import { useState, useMemo } from "react";
 import { formatDisplayAmount, getChainAmountDecimals } from "@my-org/store";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@components/ui/tooltip";
 import { ClusterToggle } from "../sections/header/ClusterToggle";
 import { useSendModal } from "./hooks/useSendModal";
 import { ChainEnum } from "@my-org/store";
@@ -129,39 +122,6 @@ const SendModal = ({
             />
           </div>
         </DialogHeader>
-        <Tabs defaultValue="paste">
-          <TabsList className="grid grid-cols-3 w-full">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="cursor-not-allowed">
-                    <TabsTrigger value="scan" disabled>
-                      Scan QR
-                    </TabsTrigger>
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Coming soon...</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="cursor-not-allowed">
-                    <TabsTrigger value="import" disabled>
-                      Import Image
-                    </TabsTrigger>
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Coming soon...</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            <TabsTrigger value="paste">Paste</TabsTrigger>
-          </TabsList>
-        </Tabs>
         <div className="space-y-3">
           <div className="text-sm text-muted-foreground">
             Balance: {displayBalance}
