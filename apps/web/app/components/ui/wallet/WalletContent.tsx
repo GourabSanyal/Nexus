@@ -41,10 +41,6 @@ export const CryptoWalletContent = () => {
 
   useEffect(() => setIsHydrated(true), []);
 
-  useEffect(() => {
-    document.body.classList.toggle("dark", isDarkMode);
-  }, [isDarkMode]);
-
   const generateWallet = async () => {
     const newMnemonic = generateMnemonic();
     setMnemonic(newMnemonic);
