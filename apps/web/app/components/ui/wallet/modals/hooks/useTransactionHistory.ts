@@ -21,11 +21,13 @@ import {
   hasCachedTransactions,
   hasHistoryChanged,
   readCachedTransactions,
+  TransactionHistoryStore,
 } from "../utils/transactionHistoryCache";
 import {
   fetchWalletTransactionHistory,
   getInFlightTransactionHistoryFetch,
   getLatestTransactions,
+  subscribeTransactionHistoryUpdated,
 } from "@/app/lib/services/transactionHistoryFetch";
 
 interface UseTransactionHistoryProps {
@@ -44,6 +46,23 @@ const getFetchErrorMessage = (error: unknown): string => {
     return (error as { message: string }).message;
   }
   return "";
+};
+
+/** Prefer fresher of Recoil vs in-memory fetch cache (empty module `[]` must not block Recoil). */
+const resolveDisplayTransactions = (
+  recoilHistory: TransactionHistoryStore,
+  walletId: number,
+  cluster: NetworkEnum
+): TransactionInfo[] => {
+  const fromRecoil = readCachedTransactions(recoilHistory, walletId, cluster);
+  const fromModule = getLatestTransactions(walletId, cluster) ?? [];
+
+  if (!fromModule.length) return fromRecoil;
+  if (!fromRecoil.length) return fromModule;
+  if (hasHistoryChanged(fromRecoil, fromModule)) {
+    return fromModule.length >= fromRecoil.length ? fromModule : fromRecoil;
+  }
+  return fromRecoil;
 };
 
 export const useTransactionHistory = ({
@@ -78,8 +97,7 @@ export const useTransactionHistory = ({
   const cacheKey = historyCacheKey(walletId, currentCluster);
   const isCurrentlyLoading = loadingStates[cacheKey] || false;
 
-  // Bump version when loading transitions from true→false (fetch completed).
-  // This ensures useMemo re-computes with fresh module cache data.
+  // Re-read list when background fetch completes (loading true → false).
   useEffect(() => {
     if (prevLoadingRef.current && !isCurrentlyLoading && isOpen) {
       incrementFetchVersion();
@@ -176,6 +194,15 @@ export const useTransactionHistory = ({
     fetchTransactionsRef.current = fetchTransactions;
   }, [fetchTransactions]);
 
+  // While open: bump when fetch service writes (header refresh path).
+  useEffect(() => {
+    if (!isOpen) return;
+
+    return subscribeTransactionHistoryUpdated(walletId, currentCluster, () => {
+      incrementFetchVersion();
+    });
+  }, [isOpen, walletId, currentCluster]);
+
   // On open: join in-flight header fetch or load if no cache.
   useEffect(() => {
     if (!isOpen || !wallet || !adapter) return;
@@ -190,6 +217,7 @@ export const useTransactionHistory = ({
         } catch {
           // Errors surfaced by the fetch originator.
         }
+        incrementFetchVersion();
         return;
       }
 
@@ -209,14 +237,12 @@ export const useTransactionHistory = ({
     void runOnOpen();
   }, [isOpen, walletId, wallet, adapter, currentCluster]);
 
-  // Derive transactions: prefer module-level cache (instant), fall back to Recoil.
-  // Re-compute when fetchVersion bumps (any fetch completes) or Recoil state updates.
   const currentTransactions = useMemo((): TransactionInfo[] => {
-    const fromModuleCache = getLatestTransactions(walletId, currentCluster);
-    if (fromModuleCache) {
-      return fromModuleCache;
-    }
-    return readCachedTransactions(transactionHistory, walletId, currentCluster);
+    return resolveDisplayTransactions(
+      transactionHistory,
+      walletId,
+      currentCluster
+    );
   }, [transactionHistory, walletId, currentCluster, fetchVersion]);
 
   const hasCachedList = useMemo(
