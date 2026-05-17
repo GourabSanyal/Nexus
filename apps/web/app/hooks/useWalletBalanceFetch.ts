@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useSetRecoilState } from "recoil";
 import { useWalletBalances, useNetwork } from "@my-org/store";
 import { NetworkConnectionEnum } from "@repo/store/src/enums/network";
+import { transactionHistoryState } from "@repo/store/src/atoms/transactionHistoryState";
 import { toast } from "sonner";
 import { WalletAdapterFactory } from "@/app/lib/adapters/WalletAdapterFactory";
 import { Wallet } from "@/app/types/wallet/wallet";
@@ -8,10 +10,42 @@ import { Wallet } from "@/app/types/wallet/wallet";
 export function useWalletBalanceFetch(wallets: Wallet[]) {
   const { getBalance, setBalance } = useWalletBalances();
   const { getEffectiveNetwork } = useNetwork();
+  const setTransactionHistory = useSetRecoilState(transactionHistoryState);
   const [refreshingById, setRefreshingById] = useState<Record<number, boolean>>(
     {}
   );
   const fetchedWalletsRef = useRef<Set<number>>(new Set());
+
+  const fetchTransactionsForWallet = useCallback(
+    async (wallet: Wallet, network: string) => {
+      try {
+        const adapter = WalletAdapterFactory.create(wallet.type);
+        const clusterString = network.toLowerCase();
+
+        const response = await adapter.fetchTransactions({
+          address: wallet.publicKey,
+          cluster: network,
+          limit: 20,
+        });
+
+        const fetchedTransactions = response.transactions || [];
+
+        setTransactionHistory((prev) => ({
+          ...prev,
+          [wallet.id.toString()]: {
+            ...(prev[wallet.id.toString()] || {}),
+            [clusterString]: fetchedTransactions,
+          },
+        }));
+      } catch (error: unknown) {
+        console.error(
+          `Error fetching transactions for wallet ${wallet.id}:`,
+          error
+        );
+      }
+    },
+    [setTransactionHistory]
+  );
 
   const fetchBalanceForWallet = useCallback(
     async (wallet: Wallet, showLoading = false) => {
@@ -48,6 +82,11 @@ export function useWalletBalanceFetch(wallets: Wallet[]) {
         if (balance !== undefined && balance !== null) {
           setBalance(wallet.id, wallet.type, balance.toString(), currentNetwork);
         }
+
+        // When manually refreshing, also fetch and cache transactions
+        if (showLoading) {
+          await fetchTransactionsForWallet(wallet, currentNetwork);
+        }
       } catch (error: unknown) {
         console.error(`Error fetching balance for wallet ${wallet.id}:`, error);
         const message =
@@ -75,7 +114,7 @@ export function useWalletBalanceFetch(wallets: Wallet[]) {
         }
       }
     },
-    [getBalance, setBalance, getEffectiveNetwork]
+    [getBalance, setBalance, getEffectiveNetwork, fetchTransactionsForWallet]
   );
 
   const refresh = useCallback(
