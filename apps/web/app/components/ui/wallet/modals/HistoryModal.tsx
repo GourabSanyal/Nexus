@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   Dialog,
   DialogContent,
@@ -16,7 +17,8 @@ import { useTransactionHistory } from "./hooks/useTransactionHistory";
 import { TransactionItem } from "./components/TransactionItem";
 import { HistoryModalProps } from "@/app/types/components/HistoryModalProps";
 import { WalletAdapterFactory } from "@/app/lib/adapters/WalletAdapterFactory";
-import { ChainEnum } from "@my-org/store";
+
+const listItemTransition = { duration: 0.28, ease: [0.25, 0.1, 0.25, 1] as const };
 
 const HistoryModal = ({ isOpen, onClose, walletId, onRefreshBalance }: HistoryModalProps) => {
   const {
@@ -25,6 +27,7 @@ const HistoryModal = ({ isOpen, onClose, walletId, onRefreshBalance }: HistoryMo
     currentTransactions,
     loading,
     isRefreshing,
+    hasCachedList,
     handleClusterToggle,
     handleRefresh,
   } = useTransactionHistory({ walletId, isOpen, onRefreshBalance });
@@ -60,17 +63,12 @@ const HistoryModal = ({ isOpen, onClose, walletId, onRefreshBalance }: HistoryMo
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => {
-                  if (chain === ChainEnum.Ethereum) {
-                    console.log("🔄 [ETH UI] Button clicked - Refresh request sent from HistoryModal");
-                  }
-                  handleRefresh();
-                }}
+                onClick={handleRefresh}
                 disabled={isRefreshing || loading}
                 className="h-8 w-8"
               >
                 <RefreshCw
-                  className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+                  className={`h-4 w-4 ${isRefreshing || loading ? "animate-spin" : ""}`}
                 />
               </Button>
             </div>
@@ -78,33 +76,37 @@ const HistoryModal = ({ isOpen, onClose, walletId, onRefreshBalance }: HistoryMo
         </DialogHeader>
 
         <div className="mt-4">
-          {loading ? (
+          {loading && !hasCachedList ? (
             <TransactionHistorySkeleton count={5} />
           ) : currentTransactions.length === 0 ? (
             <div className="text-center py-8 text-sm text-muted-foreground">
               No transactions yet.
             </div>
           ) : (
-            <div className="space-y-3">
-              {(() => {
-                if (chain === ChainEnum.Ethereum && currentTransactions.length > 0) {
-                  console.log("🎨 [ETH UI] Rendering transactions in HistoryModal", {
-                    count: currentTransactions.length,
-                    transactions: currentTransactions,
-                    cluster: currentCluster,
-                  });
-                }
-                return currentTransactions.map((tx) => (
-                  <TransactionItem
+            <motion.div layout className="flex flex-col gap-3">
+              <AnimatePresence initial={false} mode="popLayout">
+                {currentTransactions.map((tx) => (
+                  <motion.div
                     key={tx.signature}
-                    transaction={tx}
-                    cluster={currentCluster}
-                    chain={chain}
-                    currencySymbol={wallet?.type === "ethereum" ? "ETH" : "SOL"}
-                  />
-                ));
-              })()}
-            </div>
+                    layout
+                    initial={{ opacity: 0, y: -12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={listItemTransition}
+                    className="overflow-hidden"
+                  >
+                    <TransactionItem
+                      transaction={tx}
+                      cluster={currentCluster}
+                      chain={chain}
+                      currencySymbol={
+                        wallet?.type === "ethereum" ? "ETH" : "SOL"
+                      }
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
           )}
         </div>
       </DialogContent>
