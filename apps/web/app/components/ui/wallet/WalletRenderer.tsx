@@ -19,7 +19,7 @@ export const WalletRenderer = ({ wallets }: WalletRendererProps) => {
     openHistory,
     closeHistory,
   } = usePerWalletModalState();
-  const { getBalance, refreshingById, refresh } =
+  const { getBalance, refreshingById, refresh, refreshBalanceQuietly } =
     useWalletBalanceFetch(wallets);
 
   return (
@@ -41,6 +41,7 @@ export const WalletRenderer = ({ wallets }: WalletRendererProps) => {
                 getBalance={getBalance}
                 isRefreshing={!!refreshingById[wallet.id]}
                 onRefresh={() => refresh(wallet)}
+                onRefreshBalanceQuietly={() => refreshBalanceQuietly(wallet)}
                 onEditName={(newName: string) =>
                   editWalletName(wallet.id, newName, wallet.type)
                 }
