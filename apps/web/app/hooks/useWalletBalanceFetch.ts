@@ -6,7 +6,7 @@ import {
   walletNetworkOverrideState,
 } from "@repo/store/src/atoms/networkState";
 import { NetworkConnectionEnum, NetworkEnum } from "@repo/store/src/enums/network";
-import { getEffectiveNetworkFromStores } from "@/app/lib/services/NetworkManager";
+import { getEffectiveNetworkFromStores } from "@my-org/store";
 import {
   transactionHistoryState,
   transactionHistoryLoadingState,
