@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Dialog,
@@ -16,13 +15,13 @@ import { Button } from "../../button/button";
 import { useTransactionHistory } from "./hooks/useTransactionHistory";
 import { TransactionItem } from "./components/TransactionItem";
 import { HistoryModalProps } from "@/app/types/components/HistoryModalProps";
-import { WalletAdapterFactory } from "@/app/lib/adapters/WalletAdapterFactory";
-
 const listItemTransition = { duration: 0.28, ease: [0.25, 0.1, 0.25, 1] as const };
 
 const HistoryModal = ({ isOpen, onClose, walletId, onRefreshBalance }: HistoryModalProps) => {
   const {
     wallet,
+    chain,
+    currencySymbol,
     currentCluster,
     currentTransactions,
     loading,
@@ -31,12 +30,6 @@ const HistoryModal = ({ isOpen, onClose, walletId, onRefreshBalance }: HistoryMo
     handleClusterToggle,
     handleRefresh,
   } = useTransactionHistory({ walletId, isOpen, onRefreshBalance });
-
-  const chain = useMemo(() => {
-    if (!wallet) return null;
-    const adapter = WalletAdapterFactory.create(wallet.type);
-    return adapter.chain;
-  }, [wallet]);
 
   if (!wallet || !chain) {
     return null;
@@ -99,9 +92,7 @@ const HistoryModal = ({ isOpen, onClose, walletId, onRefreshBalance }: HistoryMo
                       transaction={tx}
                       cluster={currentCluster}
                       chain={chain}
-                      currencySymbol={
-                        wallet?.type === "ethereum" ? "ETH" : "SOL"
-                      }
+                      currencySymbol={currencySymbol}
                     />
                   </motion.div>
                 ))}
