@@ -50,12 +50,8 @@ export const SeedPhraseForm: React.FC<SeedPhraseFormProps> = ({
   const handleImport = async (data: ImportWalletSchema) => {
     setIsImporting(true);
     // temporary - simulating import process with setTimeout
-    await new Promise((resolve) =>
-      setTimeout(() => {
-        console.log("Importing wallet with data:", data);
-        resolve(true);
-      }, 2000)
-    );
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    void data;
     setIsImporting(false);
   };
 
