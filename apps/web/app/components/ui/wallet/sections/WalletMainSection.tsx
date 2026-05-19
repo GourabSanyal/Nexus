@@ -31,8 +31,7 @@ export default function WalletMainSection({
   const [warnOpen, setWarnOpen] = useState<boolean>(false);
   const [step, setStep] = useState<"warn" | "password">("warn");
 
-  const onPasswordSubmit = (data: { password: string }) => {
-    console.log("password data", data);
+  const onPasswordSubmit = (_data: { password: string }) => {
     setIsPrivateVisible(true);
     setWarnOpen(false);
     setStep("warn");
