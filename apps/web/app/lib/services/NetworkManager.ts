@@ -1,23 +1,11 @@
 import { ChainEnum, NetworkEnum } from "@repo/store/src/enums/network";
+import {
+  getEffectiveNetworkFromStores,
+  networkKeyFor,
+} from "@my-org/store";
 import { IWalletAdapter } from "@/app/lib/adapters/IWalletAdapter";
 
-const keyFor = (chain: ChainEnum, walletId?: number) =>
-  walletId != null ? `${chain}:${walletId}` : "";
-
-/** Read effective cluster from Recoil-shaped maps (single source of truth). */
-export function getEffectiveNetworkFromStores(
-  chain: ChainEnum,
-  walletId: number | undefined,
-  globalNetworks: Record<ChainEnum, NetworkEnum>,
-  overrides: Record<string, NetworkEnum>
-): NetworkEnum {
-  if (walletId != null) {
-    const k = keyFor(chain, walletId);
-    const o = overrides[k];
-    if (o) return o;
-  }
-  return globalNetworks[chain];
-}
+export { getEffectiveNetworkFromStores } from "@my-org/store";
 
 type SetGlobals = (
   updater: (prev: Record<ChainEnum, NetworkEnum>) => Record<ChainEnum, NetworkEnum>
@@ -69,7 +57,7 @@ export class NetworkManager {
     }
 
     if (this.walletId != null) {
-      const k = keyFor(this.chain, this.walletId);
+      const k = networkKeyFor(this.chain, this.walletId);
       this.setOverrides((prev) => ({ ...prev, [k]: network }));
     } else {
       this.setGlobalNetworks((prev) => ({ ...prev, [this.chain]: network }));
