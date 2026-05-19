@@ -6,7 +6,9 @@
     "dev": "next dev --turbo",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
@@ -60,6 +62,7 @@
     "store": "*",
     "tailwindcss": "^3.4.10",
     "typescript": "^5",
+    "vitest": "^4.1.4",
     "webpack": "^5.0.0",
     "zod": "3.23.8"
   }
