@@ -1,21 +1,18 @@
 {
-    "compilerOptions": {
-      "target": "ESNext",
-      "module": "ESNext",
-      "moduleResolution": "Node",
-      "noEmit": true,
-      "strict": true,
-      "esModuleInterop": true,
-      "skipLibCheck": true,
-      "forceConsistentCasingInFileNames": true,
-      "baseUrl": ".",
-      "paths": {
-        "@/*": ["../../apps/web/*"],
-        "@repo/*": ["../../packages/*"],
-        "@constants/*": ["../../packages/constants/*"]
-      }
-    },
-    "include": ["src"],
-    "exclude": ["node_modules"]
-  }
-  
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "noEmit": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "@repo/*": ["../../packages/*"]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["node_modules"]
+}
