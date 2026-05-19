@@ -108,8 +108,8 @@ export const useImportWalletForm = () => {
         currentPhase: 'validation',
       }));
 
-      console.log('Importing wallet with data:', data);
       // TODO: Implement actual wallet import logic
+      void data;
 
     } catch (error) {
       setImportState(prev => ({
