@@ -9,7 +9,7 @@ export * from "./enums/network";
 
 export * from "./hooks/useWalletOperations";
 export * from "./hooks/useWalletBalances";
-export * from "./hooks/useNetwork";
+export * from "./utils/getEffectiveNetworkFromStores";
 export * from "./utils/validateAddress";
 export * from "./utils/formatDisplayAmount";
 export * from "./utils/selectWalletById";
