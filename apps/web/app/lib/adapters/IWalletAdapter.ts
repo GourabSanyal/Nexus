@@ -30,8 +30,11 @@ export interface IWalletAdapter {
   validateAddress(address: string): boolean;
   formatAddress(address: string): string;
 
-  // UI Helpers
+  // UI Helpers (delegate to chainPresentation internals)
   getNetworkDisplayName(network: NetworkEnum): string;
   getNetworkColor(network: NetworkEnum): string;
   getCurrencySymbol(): string;
+  getChainLabel(): string;
+  getExplorerTransactionUrl(signature: string, network: NetworkEnum): string;
+  buildReceivePaymentUri(publicKey: string, network: NetworkEnum): string;
 }
