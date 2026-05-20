@@ -10,6 +10,11 @@ import {
   type AdapterWalletSendParams,
   type WalletSendResult,
 } from "@/app/lib/utils/sendTransaction";
+import {
+  buildExplorerTransactionUrl as explorerUrlForChain,
+  buildReceivePaymentUri as receiveUriForChain,
+  chainLabelFor,
+} from "./chainPresentation";
 
 export class EthereumWalletAdapter implements IWalletAdapter {
   readonly chain = ChainEnum.Ethereum;
@@ -105,5 +110,17 @@ export class EthereumWalletAdapter implements IWalletAdapter {
 
   getCurrencySymbol(): string {
     return "ETH";
+  }
+
+  getChainLabel(): string {
+    return chainLabelFor(this.chain);
+  }
+
+  getExplorerTransactionUrl(signature: string, network: NetworkEnum): string {
+    return explorerUrlForChain(this.chain, signature, network);
+  }
+
+  buildReceivePaymentUri(publicKey: string, network: NetworkEnum): string {
+    return receiveUriForChain(this.chain, publicKey, network);
   }
 }
