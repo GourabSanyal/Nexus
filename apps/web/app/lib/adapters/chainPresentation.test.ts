@@ -1,22 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { ChainEnum, NetworkEnum } from "@my-org/store";
 import {
+  buildExplorerTransactionUrl,
   buildReceivePaymentUri,
-  getChainLabel,
-  getCurrencySymbol,
-  getExplorerTransactionUrl,
+  chainLabelFor,
 } from "./chainPresentation";
-
-describe("chainPresentation", () => {
-  it("returns currency symbols per chain", () => {
-    expect(getCurrencySymbol(ChainEnum.Solana)).toBe("SOL");
-    expect(getCurrencySymbol(ChainEnum.Ethereum)).toBe("ETH");
-  });
-
+describe("chainPresentation (adapter internals)", () => {
   it("builds Solana explorer URLs", () => {
-    const url = getExplorerTransactionUrl(
-      "sig123",
+    const url = buildExplorerTransactionUrl(
       ChainEnum.Solana,
+      "sig123",
       NetworkEnum.Devnet
     );
     expect(url).toContain("explorer.solana.com");
@@ -25,15 +18,15 @@ describe("chainPresentation", () => {
 
   it("builds Ethereum receive URIs with chain id", () => {
     const uri = buildReceivePaymentUri(
-      "0xabc",
       ChainEnum.Ethereum,
+      "0xabc",
       NetworkEnum.Sepolia
     );
     expect(uri).toBe("ethereum:0xabc?chainId=11155111");
   });
 
   it("labels chains for UI copy", () => {
-    expect(getChainLabel(ChainEnum.Solana)).toBe("Solana");
-    expect(getChainLabel(ChainEnum.Ethereum)).toBe("Ethereum");
+    expect(chainLabelFor(ChainEnum.Solana)).toBe("Solana");
+    expect(chainLabelFor(ChainEnum.Ethereum)).toBe("Ethereum");
   });
 });
