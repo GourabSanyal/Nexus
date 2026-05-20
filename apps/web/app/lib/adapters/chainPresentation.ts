@@ -1,31 +1,29 @@
 import { ChainEnum, NetworkEnum } from "@my-org/store";
 
-export const getCurrencySymbol = (chain: ChainEnum): string =>
-  chain === ChainEnum.Ethereum ? "ETH" : "SOL";
-
-export const getExplorerTransactionUrl = (
-  signature: string,
+/** Shared chain presentation rules — call via `IWalletAdapter`, not from UI. */
+export function buildExplorerTransactionUrl(
   chain: ChainEnum,
-  cluster: NetworkEnum
-): string => {
+  signature: string,
+  network: NetworkEnum
+): string {
   if (chain === ChainEnum.Solana) {
     const clusterString =
-      cluster === NetworkEnum.Mainnet ? "mainnet" : "devnet";
+      network === NetworkEnum.Mainnet ? "mainnet" : "devnet";
     return `https://explorer.solana.com/tx/${signature}?cluster=${clusterString}`;
   }
 
-  if (cluster === NetworkEnum.Sepolia) {
+  if (network === NetworkEnum.Sepolia) {
     return `https://sepolia.etherscan.io/tx/${signature}`;
   }
 
   return `https://etherscan.io/tx/${signature}`;
-};
+}
 
-export const buildReceivePaymentUri = (
-  publicKey: string,
+export function buildReceivePaymentUri(
   chain: ChainEnum,
+  publicKey: string,
   network: NetworkEnum
-): string => {
+): string {
   if (chain === ChainEnum.Solana) {
     const cluster = network === NetworkEnum.Devnet ? "devnet" : "mainnet-beta";
     return `solana:${publicKey}?cluster=${cluster}`;
@@ -37,7 +35,8 @@ export const buildReceivePaymentUri = (
   }
 
   return publicKey;
-};
+}
 
-export const getChainLabel = (chain: ChainEnum): string =>
-  chain === ChainEnum.Solana ? "Solana" : "Ethereum";
+export function chainLabelFor(chain: ChainEnum): string {
+  return chain === ChainEnum.Solana ? "Solana" : "Ethereum";
+}
