@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { ChainEnum, NetworkEnum } from "@repo/store/src/enums/network";
 import { TransactionResponse } from "@api-types/TransactionTypes";
-import { WalletAdapterFactory } from "@/app/lib/adapters/WalletAdapterFactory";
+import { useWalletAdapter } from "@/app/lib/adapters/useWalletAdapter";
 import type {
   AdapterWalletSendParams,
   WalletSendResult,
@@ -43,15 +43,8 @@ interface UseWalletFeaturesReturn {
 }
 
 export function useWalletFeatures(wallet: Wallet | null | undefined): UseWalletFeaturesReturn | null {
-  const adapter = useMemo(() => {
-    if (!wallet) return null;
-    return WalletAdapterFactory.create(wallet.type);
-  }, [wallet]);
-
-  const chain = useMemo(() => {
-    if (!wallet) return ChainEnum.Solana;
-    return wallet.type === "solana" ? ChainEnum.Solana : ChainEnum.Ethereum;
-  }, [wallet]);
+  const adapter = useWalletAdapter(wallet?.type);
+  const chain = adapter?.chain ?? ChainEnum.Solana;
 
   const networkManager = useNetworkManager(adapter, chain, wallet?.id);
 
