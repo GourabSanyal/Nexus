@@ -12,11 +12,9 @@ import { useState, useMemo } from "react";
 import { formatDisplayAmount, getChainAmountDecimals } from "@my-org/store";
 import { ClusterToggle } from "../sections/header/ClusterToggle";
 import { useSendModal } from "./hooks/useSendModal";
-import { ChainEnum } from "@my-org/store";
 import { sendTransaction } from "@/app/lib/utils/sendTransaction";
 import { toast } from "sonner";
 import { validateSendInput } from "@my-org/zod";
-import { getCurrencySymbol } from "@/app/lib/utils/chainPresentation";
 import { SendModalProps } from "@/app/types/wallet";
 import { SendModalForm } from "./send/SendModalForm";
 import { getSendErrorMessage } from "./send/getSendErrorMessage";
@@ -27,15 +25,14 @@ const SendModal = ({
   chain,
   walletId,
 }: SendModalProps) => {
-  const chainEnum = chain === "solana" ? ChainEnum.Solana : ChainEnum.Ethereum;
-  const currencySymbol = getCurrencySymbol(chainEnum);
   const {
     wallet,
+    adapter,
     currentNetwork,
     balance,
     handleNetworkToggle,
     chainEnum: chainEnumFromHook,
-  } = useSendModal({ walletId, chain: chainEnum });
+  } = useSendModal({ walletId });
 
   const [recipient, setRecipient] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
@@ -74,9 +71,11 @@ const SendModal = ({
   const isAddressValid = Boolean(recipient) && !fieldErrors.recipient;
   const isAmountValid = Boolean(amount) && !fieldErrors.amount;
 
-  if (!wallet) {
+  if (!wallet || !adapter) {
     return null;
   }
+
+  const currencySymbol = adapter.getCurrencySymbol();
 
   const handleSend = async () => {
     if (!isAmountValid || !isAddressValid || isSending) return;

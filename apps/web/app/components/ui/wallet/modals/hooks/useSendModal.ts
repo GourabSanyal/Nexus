@@ -7,18 +7,19 @@ import {
   useWalletBalances,
   walletState,
 } from "@my-org/store";
-import { WalletAdapterFactory } from "@/app/lib/adapters/WalletAdapterFactory";
 import { useNetworkManager } from "@/app/hooks/useNetworkManager";
+import { useWalletAdapter } from "@/app/lib/adapters/useWalletAdapter";
+import type { IWalletAdapter } from "@/app/lib/adapters/IWalletAdapter";
 
 type WalletFromStore = NonNullable<ReturnType<typeof selectWalletById>>;
 
 interface UseSendModalProps {
   walletId: number;
-  chain: ChainEnum.Solana | ChainEnum.Ethereum;
 }
 
-export const useSendModal = ({ walletId, chain }: UseSendModalProps): {
+export const useSendModal = ({ walletId }: UseSendModalProps): {
   wallet: WalletFromStore | undefined;
+  adapter: IWalletAdapter | null;
   currentNetwork: NetworkEnum;
   balance: string | bigint;
   handleNetworkToggle: () => void;
@@ -28,18 +29,11 @@ export const useSendModal = ({ walletId, chain }: UseSendModalProps): {
   const { getBalance } = useWalletBalances();
 
   const wallet = selectWalletById(walletStateValue, walletId);
-
-  // Memoize adapter to prevent recreation on every render
-  // not memoizing cause infinite loop
-  const adapter = useMemo(() => {
-    return wallet ? WalletAdapterFactory.create(wallet.type) : null;
-  }, [wallet?.type]);
-
-  const chainEnum: ChainEnum = adapter?.chain || chain;
+  const adapter = useWalletAdapter(wallet?.type);
+  const chainEnum: ChainEnum = adapter?.chain ?? ChainEnum.Solana;
 
   const networkManager = useNetworkManager(adapter, chainEnum, walletId);
 
-  // Using networkManager.currentNetwork makes sure modals stays in sync with header toggle
   const currentNetwork =
     networkManager.currentNetwork ||
     adapter?.getDefaultNetwork() ||
@@ -56,6 +50,7 @@ export const useSendModal = ({ walletId, chain }: UseSendModalProps): {
 
   return {
     wallet,
+    adapter,
     currentNetwork,
     balance,
     handleNetworkToggle,
