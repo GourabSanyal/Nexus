@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { useRecoilValue } from "recoil";
 import {
   ChainEnum,
@@ -6,9 +5,8 @@ import {
   selectWalletById,
   walletState,
 } from "@my-org/store";
-import { WalletAdapterFactory } from "@/app/lib/adapters/WalletAdapterFactory";
 import { useNetworkManager } from "@/app/hooks/useNetworkManager";
-import { IWalletAdapter } from "@/app/lib/adapters/IWalletAdapter";
+import { useWalletAdapter } from "@/app/lib/adapters/useWalletAdapter";
 import { useTransactionHistoryFetch } from "./useTransactionHistoryFetch";
 import { useTransactionHistoryDisplay } from "./useTransactionHistoryDisplay";
 
@@ -26,9 +24,7 @@ export const useTransactionHistory = ({
   const walletStateValue = useRecoilValue(walletState);
   const wallet = selectWalletById(walletStateValue, walletId);
 
-  const adapter: IWalletAdapter | null = useMemo(() => {
-    return wallet ? WalletAdapterFactory.create(wallet.type) : null;
-  }, [wallet?.type]);
+  const adapter = useWalletAdapter(wallet?.type);
 
   const chain = adapter?.chain ?? ChainEnum.Solana;
   const networkManager = useNetworkManager(adapter, chain, walletId);
@@ -60,6 +56,7 @@ export const useTransactionHistory = ({
 
   return {
     wallet,
+    adapter,
     chain,
     currentCluster,
     currentTransactions,
@@ -68,6 +65,5 @@ export const useTransactionHistory = ({
     hasCachedList,
     handleClusterToggle,
     handleRefresh,
-    currencySymbol: adapter?.getCurrencySymbol() ?? "SOL",
   };
 };

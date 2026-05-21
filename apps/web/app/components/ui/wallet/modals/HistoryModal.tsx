@@ -20,8 +20,8 @@ const listItemTransition = { duration: 0.28, ease: [0.25, 0.1, 0.25, 1] as const
 const HistoryModal = ({ isOpen, onClose, walletId, onRefreshBalance }: HistoryModalProps) => {
   const {
     wallet,
+    adapter,
     chain,
-    currencySymbol,
     currentCluster,
     currentTransactions,
     loading,
@@ -31,7 +31,7 @@ const HistoryModal = ({ isOpen, onClose, walletId, onRefreshBalance }: HistoryMo
     handleRefresh,
   } = useTransactionHistory({ walletId, isOpen, onRefreshBalance });
 
-  if (!wallet || !chain) {
+  if (!wallet || !chain || !adapter) {
     return null;
   }
 
@@ -91,8 +91,7 @@ const HistoryModal = ({ isOpen, onClose, walletId, onRefreshBalance }: HistoryMo
                     <TransactionItem
                       transaction={tx}
                       cluster={currentCluster}
-                      chain={chain}
-                      currencySymbol={currencySymbol}
+                      adapter={adapter}
                     />
                   </motion.div>
                 ))}
