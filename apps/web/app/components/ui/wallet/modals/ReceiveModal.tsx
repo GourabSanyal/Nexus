@@ -11,20 +11,23 @@ import { Copy } from "lucide-react";
 import { copyToClipboard } from "@/app/lib/utils/clipboard";
 import { QRCode } from "@/app/components/ui/qrcode/QRCode";
 import { ReceiveModalProps } from "@/app/types/wallet/ReceiveModalProps";
-import {
-  buildReceivePaymentUri,
-  getChainLabel,
-} from "@/app/lib/utils/chainPresentation";
+import { useWalletAdapter } from "@/app/lib/adapters/useWalletAdapter";
 
 const ReceiveModal = ({
   isOpen,
   onClose,
   publicKey,
-  chain,
+  walletType,
   network,
 }: ReceiveModalProps) => {
-  const qrValue = buildReceivePaymentUri(publicKey, chain, network);
-  const chainLabel = getChainLabel(chain);
+  const adapter = useWalletAdapter(walletType);
+
+  if (!adapter) {
+    return null;
+  }
+
+  const qrValue = adapter.buildReceivePaymentUri(publicKey, network);
+  const chainLabel = adapter.getChainLabel();
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
