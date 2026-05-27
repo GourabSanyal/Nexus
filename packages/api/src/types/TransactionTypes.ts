@@ -28,5 +28,21 @@ export interface TransactionRequest {
   address: string;
   cluster: string;
   limit?: number;
+  /** Fetch transactions older than this signature (for "load more" pagination) */
+  cursor?: string;
+  /** Stop fetching when this signature is found (for incremental sync - fetch only new txs) */
+  untilSignature?: string;
 }
+
+/** Persisted cache entry: list of transactions + pagination metadata for that wallet+cluster. */
+export interface CachedTransactionData {
+  transactions: TransactionInfo[];
+  pagination: PaginationInfo | null;
+}
+
+/** Recoil store shape: Record<walletId, Record<cluster, CachedTransactionData>>. */
+export type TransactionHistoryStore = Record<
+  string,
+  Record<string, CachedTransactionData>
+>;
 
