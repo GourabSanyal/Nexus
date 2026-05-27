@@ -2,8 +2,6 @@
 
 mod api;
 mod chains;
-mod config;
-mod handlers;
 mod models;
 mod services;
 mod wasm_exports;

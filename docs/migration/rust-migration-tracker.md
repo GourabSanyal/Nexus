@@ -46,9 +46,14 @@
 | Shared neutral RPC transport (`rpc_client`)                             | Done        | `packages/rust-apis/src/services/rpc_client.rs`, `packages/rust-apis/src/services/solana_rpc.rs`, `packages/rust-apis/src/services/ethereum_rpc.rs` |
 | Chain registry registration pattern (`register`)                        | Done        | `packages/rust-apis/src/chains/registry.rs`                                                                                                         |
 | Env header support for Ethereum (`ETHEREUM_MAINNET`/`ETHEREUM_SEPOLIA`) | Done        | `packages/rust-apis/src/env.ts`, `packages/rust-apis/src/api/wallet_routes.rs`                                                                      |
-| Complexity reduction in routing/handlers                                | In Progress | `packages/rust-apis/src/lib.rs`, `packages/rust-apis/src/api/wallet_routes.rs`                                                                      |
-| Complexity reduction in transaction services                            | In Progress | `packages/rust-apis/src/services/solana_rpc.rs`, `packages/rust-apis/src/services/ethereum_rpc.rs`                                                  |
+| Complexity reduction in routing/handlers                                | Done        | `packages/rust-apis/src/lib.rs` (168 → 42 LOC), `packages/rust-apis/src/worker/{http,routes}.rs`, `packages/rust-apis/src/wasm_exports.rs`           |
+| Complexity reduction in transaction services                            | Done        | `packages/rust-apis/src/services/solana_rpc/{balance,signatures,parser,details,send,mod}.rs` (368 → 6 files, max 136 LOC), `packages/rust-apis/src/services/ethereum_rpc/{balance,transactions,parser,send,mod}.rs` (241 → 5 files, max 116 LOC) |
+| Shared RPC envelope helper (`json_rpc_call`)                            | Done        | `packages/rust-apis/src/services/rpc_client.rs`                                                                                                     |
+| Shared parsing utility (`value_as_string`)                              | Done        | `packages/rust-apis/src/services/util.rs`                                                                                                           |
+| Centralised tx-limit clamping (`TransactionFetchOptions::effective_limit`) | Done     | `packages/rust-apis/src/chains/transaction_options.rs`, `packages/rust-apis/src/chains/{solana,ethereum}.rs`                                        |
+| Cursor-based transaction pagination (`cursor`, `untilSignature`)        | Done        | `packages/rust-apis/src/api/wallet/{body,transactions}.rs`, `packages/rust-apis/src/chains/{traits,transaction_options,solana,ethereum}.rs`, `packages/rust-apis/src/services/{solana_rpc,ethereum_rpc,solana_fetch_options,ethereum_fetch_options}.rs` |
 | Per-chain folder split (`chains/<newchain>/adapter.rs`)                 | Not Started | pending                                                                                                                                             |
+| Dead/empty module removal (G1)                                          | Done        | removed `src/config.rs`, `src/handlers/{mod,wallet_handler,transaction_handler}.rs`, `src/api/history_rooutes.rs`, `src/models/wallet.rs`; cleaned `lib.rs` / `api/mod.rs` / `models/mod.rs` |
 
 
 ## Slice Ledger
@@ -184,6 +189,18 @@
   - ADR link: pending `docs/adr/ADR-002-chain-registry.md`
 - 2026-04-29: Removed wildcard service re-exports and switched to explicit module paths.
   - Rationale: avoid symbol ambiguity between Solana/Ethereum RPC helpers.
+  - ADR link: pending
+- 2026-05-27: Refactored `services/solana_rpc.rs` (368 LOC) and `services/ethereum_rpc.rs` (241 LOC) into per-responsibility submodule folders (`balance`, `signatures`/`transactions`, `parser`, `details` (solana only), `send`) with `mod.rs` re-exporting the public API. No call-site changes required.
+  - Rationale: enforce Rules.md `<= 150` LOC + single-responsibility constraints; allow each chain service to evolve independently behind the existing `BlockchainAdapter` strategy boundary.
+  - ADR link: pending
+- 2026-05-27: Lifted JSON-RPC envelope (`json_rpc_call`) into shared `services/rpc_client.rs` and the `value_as_string` parse-or-error helper into `services/util.rs`; centralised tx-limit clamping into `TransactionFetchOptions::effective_limit()` (used by both chain adapters and the direct WASM export). Chain `*FetchOptions.limit` is now a pre-clamped `usize` instead of `Option<usize>`.
+  - Rationale: eliminate the only genuine cross-chain duplication (the 4× repeated `unwrap_or(20).min(100)` and the repeated `result.as_str().map(...).ok_or_else(...)` pattern) without violating Rules.md "avoid hardcoded `match` trees for chain selection" / "never import one chain service from another".
+  - ADR link: pending
+- 2026-05-27: Split `lib.rs` (168 LOC) into a thin crate entry (`lib.rs` 42 LOC) + `worker/{http,routes}.rs` (HTTP plumbing + dispatch table) + `wasm_exports.rs` (direct `#[wasm_bindgen]` JS exports).
+  - Rationale: separate Cloudflare Worker concerns from direct-WASM concerns; new routes/chains/exports no longer need to touch the crate root.
+  - ADR link: pending
+- 2026-05-27: Removed dead/empty modules: `src/config.rs`, `src/handlers/{mod,wallet_handler,transaction_handler}.rs`, `src/api/history_rooutes.rs` (typo file), and `src/models/wallet.rs`. Cleaned up parent declarations in `lib.rs`, `api/mod.rs`, and `models/mod.rs`.
+  - Rationale: every deleted file was a comment-only placeholder with no callers; keeping them inflated the module graph and signalled work that no longer exists.
   - ADR link: pending
 
 ## Edge-Case Coverage Matrix
