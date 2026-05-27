@@ -2,6 +2,7 @@ use crate::chains::traits::{
     BalanceFuture, BalanceResult, BlockchainAdapter, SendFuture, SendPrepareFuture,
     SendPrepareResult, SendResult, TransactionsFuture, TransactionsResult,
 };
+use crate::chains::transaction_options::TransactionFetchOptions;
 use crate::services;
 
 pub struct EthereumAdapter;
@@ -58,20 +59,26 @@ impl BlockchainAdapter for EthereumAdapter {
         &'a self,
         address: &'a str,
         cluster: Option<&'a str>,
-        limit: Option<usize>,
+        options: TransactionFetchOptions<'a>,
         rpc_override: Option<&'a str>,
     ) -> TransactionsFuture<'a> {
         Box::pin(async move {
             let (_, rpc) = Self::resolve_rpc(cluster, rpc_override)?;
+            let limit = options.effective_limit();
+            let fetch_options = services::ethereum_rpc::EthFetchOptions {
+                limit,
+                page_key: options.cursor,
+                until_hash: options.until_signature,
+            };
             let (transactions, has_more, next_cursor) =
-                services::ethereum_rpc::get_transactions(address, &rpc, limit)
+                services::ethereum_rpc::get_transactions(address, &rpc, fetch_options)
                     .await
                     .map_err(|e| e.to_string())?;
             Ok(TransactionsResult {
                 transactions,
                 has_more,
                 next_cursor,
-                limit: limit.unwrap_or(20).min(100),
+                limit,
             })
         })
     }
