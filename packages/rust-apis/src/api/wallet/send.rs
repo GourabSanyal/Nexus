@@ -104,7 +104,11 @@ pub async fn handle_send(req: &web_sys::Request, chain: &str) -> (u16, String) {
         }
         Err(error) => {
             console::log_1(
-                &format!("[rust-apis] handle_send error chain={} error={}", chain, error).into(),
+                &format!(
+                    "[rust-apis] handle_send error chain={} error={}",
+                    chain, error
+                )
+                .into(),
             );
             map_wallet_error(error)
         }
