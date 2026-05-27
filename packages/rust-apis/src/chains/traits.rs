@@ -1,6 +1,7 @@
 use std::future::Future;
 use std::pin::Pin;
 
+use crate::chains::transaction_options::TransactionFetchOptions;
 use crate::models::transaction::TransactionInfo;
 
 pub struct BalanceResult {
@@ -42,7 +43,7 @@ pub trait BlockchainAdapter {
         &'a self,
         address: &'a str,
         cluster: Option<&'a str>,
-        limit: Option<usize>,
+        options: TransactionFetchOptions<'a>,
         rpc_override: Option<&'a str>,
     ) -> TransactionsFuture<'a>;
     fn prepare_send<'a>(
