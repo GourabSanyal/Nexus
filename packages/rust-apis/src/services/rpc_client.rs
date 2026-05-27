@@ -1,5 +1,5 @@
 use anyhow::Result;
-use serde_json::Value;
+use serde_json::{json, Value};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::JsFuture;
@@ -15,6 +15,15 @@ pub async fn make_rpc_request(rpc_url: &str, request_body: Value) -> Result<Valu
     }
 
     Ok(response_data)
+}
+
+/// JSON-RPC 2.0 envelope helper: builds the request, returns `result` (or errors).
+pub async fn json_rpc_call(rpc_url: &str, method: &str, params: Value) -> Result<Value> {
+    let body = json!({"id": 1, "jsonrpc": "2.0", "method": method, "params": params});
+    let data = make_rpc_request(rpc_url, body).await?;
+    data.get("result")
+        .cloned()
+        .ok_or_else(|| anyhow::anyhow!("Missing result for {method}"))
 }
 
 fn build_request(rpc_url: &str, request_body: Value) -> Result<Request> {
