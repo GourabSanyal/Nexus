@@ -4,6 +4,7 @@ use crate::chains::traits::{
     BalanceFuture, BalanceResult, BlockchainAdapter, SendFuture, SendPrepareFuture,
     SendPrepareResult, SendResult, TransactionsFuture, TransactionsResult,
 };
+use crate::chains::transaction_options::TransactionFetchOptions;
 use crate::services;
 
 pub struct SolanaAdapter;
@@ -67,13 +68,19 @@ impl BlockchainAdapter for SolanaAdapter {
         &'a self,
         address: &'a str,
         cluster: Option<&'a str>,
-        limit: Option<usize>,
+        options: TransactionFetchOptions<'a>,
         rpc_override: Option<&'a str>,
     ) -> TransactionsFuture<'a> {
         Box::pin(async move {
             let (_, rpc_url) = Self::resolve_rpc(cluster, rpc_override)?;
+            let limit = options.effective_limit();
+            let fetch_options = services::solana_rpc::SolanaFetchOptions {
+                limit,
+                before: options.cursor,
+                until: options.until_signature,
+            };
             let (transactions, has_more, next_cursor) =
-                services::solana_rpc::get_transactions(address, &rpc_url, limit)
+                services::solana_rpc::get_transactions(address, &rpc_url, fetch_options)
                     .await
                     .map_err(|e| e.to_string())?;
 
@@ -81,7 +88,7 @@ impl BlockchainAdapter for SolanaAdapter {
                 transactions,
                 has_more,
                 next_cursor,
-                limit: limit.unwrap_or(20).min(100),
+                limit,
             })
         })
     }
