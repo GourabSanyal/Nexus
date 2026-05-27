@@ -34,6 +34,9 @@ export const useTransactionHistoryDisplay = ({
       walletId,
       currentCluster
     );
+    // fetchVersion intentionally referenced to invalidate when in-flight fetches complete
+    // without changing Recoil state (e.g. dedup'd joins of in-flight requests)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transactionHistory, walletId, currentCluster, fetchVersion]);
 
   const hasCachedList = useMemo(

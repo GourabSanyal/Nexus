@@ -1,47 +1,30 @@
-import {
-  useState,
-  useEffect,
-  useCallback,
-  useRef,
-  useReducer,
-} from "react";
+import { useState, useEffect, useCallback, useRef, useReducer } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { NetworkEnum } from "@my-org/store";
 import {
   transactionHistoryState,
   transactionHistoryLoadingState,
 } from "@repo/store/src/atoms/transactionHistoryState";
-import { IWalletAdapter } from "@/app/lib/adapters/IWalletAdapter";
-import type { EthereumWallet, SolanaWallet } from "@my-org/zod";
+import { TransactionHistoryStore } from "@api-types/TransactionTypes";
 import {
   hasCachedTransactions,
   hasHistoryChanged,
   historyCacheKey,
   readCachedTransactions,
-  TransactionHistoryStore,
 } from "../utils/transactionHistoryCache";
 import {
   fetchWalletTransactionHistory,
   getInFlightTransactionHistoryFetch,
   subscribeTransactionHistoryUpdated,
+  hasMoreTransactions,
 } from "@/app/lib/services/transactionHistoryFetch";
 import { showTransactionFetchError } from "./transactionHistoryResolve";
-
-type WalletRef = SolanaWallet | EthereumWallet | undefined;
-
-type FetchOptions = {
-  forceRefresh?: boolean;
-  refreshBalanceOnChange?: boolean;
-};
-
-type UseTransactionHistoryFetchParams = {
-  walletId: number;
-  isOpen: boolean;
-  currentCluster: NetworkEnum;
-  wallet: WalletRef;
-  adapter: IWalletAdapter | null;
-  onRefreshBalance?: () => void;
-};
+import { useLoadMoreTransactions } from "./useLoadMoreTransactions";
+import type {
+  FetchOptions,
+  UseTransactionHistoryFetchParams,
+  TransactionHistoryFetchResult,
+} from "@/app/types/components/UseTransactionHistoryFetchTypes";
 
 const shouldSkipFetch = (
   history: TransactionHistoryStore,
@@ -50,8 +33,7 @@ const shouldSkipFetch = (
   forceRefresh: boolean
 ): boolean => {
   if (forceRefresh) return false;
-  const cached = readCachedTransactions(history, walletId, cluster);
-  return hasCachedTransactions(cached);
+  return hasCachedTransactions(readCachedTransactions(history, walletId, cluster));
 };
 
 export const useTransactionHistoryFetch = ({
@@ -61,34 +43,36 @@ export const useTransactionHistoryFetch = ({
   wallet,
   adapter,
   onRefreshBalance,
-}: UseTransactionHistoryFetchParams) => {
+}: UseTransactionHistoryFetchParams): TransactionHistoryFetchResult => {
   const transactionHistory = useRecoilValue(transactionHistoryState);
   const loadingStates = useRecoilValue(transactionHistoryLoadingState);
   const setTransactionHistory = useSetRecoilState(transactionHistoryState);
   const setLoadingStates = useSetRecoilState(transactionHistoryLoadingState);
+
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [fetchVersion, incrementFetchVersion] = useReducer((x) => x + 1, 0);
-  const prevLoadingRef = useRef(false);
+
   const cacheKey = historyCacheKey(walletId, currentCluster);
+  const loadMoreKey = `${cacheKey}:loadMore`;
   const isCurrentlyLoading = loadingStates[cacheKey] || false;
+  const isCurrentlyLoadingMore = loadingStates[loadMoreKey] || false;
+  const canLoadMore = hasMoreTransactions(walletId, currentCluster);
 
   const transactionHistoryRef = useRef(transactionHistory);
   const walletRef = useRef(wallet);
   const adapterRef = useRef(adapter);
   const onRefreshBalanceRef = useRef(onRefreshBalance);
+  const prevLoadingRef = useRef(false);
 
   useEffect(() => {
     transactionHistoryRef.current = transactionHistory;
   }, [transactionHistory]);
-
   useEffect(() => {
     walletRef.current = wallet;
   }, [wallet]);
-
   useEffect(() => {
     adapterRef.current = adapter;
   }, [adapter]);
-
   useEffect(() => {
     onRefreshBalanceRef.current = onRefreshBalance;
   }, [onRefreshBalance]);
@@ -110,33 +94,25 @@ export const useTransactionHistoryFetch = ({
         return;
       }
 
-      const cachedData = readCachedTransactions(
-        transactionHistoryRef.current as TransactionHistoryStore,
-        walletId,
-        cluster
-      );
+      const currentHistory = transactionHistoryRef.current as TransactionHistoryStore;
+      if (shouldSkipFetch(currentHistory, walletId, cluster, forceRefresh)) return;
 
-      if (shouldSkipFetch(
-        transactionHistoryRef.current as TransactionHistoryStore,
-        walletId,
-        cluster,
-        forceRefresh
-      )) {
-        return;
-      }
-
+      const cached = readCachedTransactions(currentHistory, walletId, cluster);
       try {
-        const fetchedTransactions = await fetchWalletTransactionHistory({
+        const fetched = await fetchWalletTransactionHistory({
           walletId,
           publicKey: currentWallet.publicKey,
           cluster,
           adapter: currentAdapter,
           setTransactionHistory,
           setLoadingStates,
+          currentHistory,
         });
-
-        const historyChanged = hasHistoryChanged(cachedData, fetchedTransactions);
-        if (refreshBalanceOnChange && historyChanged && onRefreshBalanceRef.current) {
+        if (
+          refreshBalanceOnChange &&
+          hasHistoryChanged(cached, fetched) &&
+          onRefreshBalanceRef.current
+        ) {
           onRefreshBalanceRef.current();
         }
       } catch (error: unknown) {
@@ -155,42 +131,38 @@ export const useTransactionHistoryFetch = ({
 
   useEffect(() => {
     if (!isOpen) return;
-    return subscribeTransactionHistoryUpdated(walletId, currentCluster, () => {
-      incrementFetchVersion();
-    });
+    return subscribeTransactionHistoryUpdated(walletId, currentCluster, () =>
+      incrementFetchVersion()
+    );
   }, [isOpen, walletId, currentCluster]);
 
   useEffect(() => {
     if (!isOpen || !wallet || !adapter) return;
 
     const cluster = currentCluster;
-
-    const runOnOpen = async () => {
+    void (async () => {
       const inFlight = getInFlightTransactionHistoryFetch(walletId, cluster);
       if (inFlight) {
         try {
           await inFlight;
         } catch {
-          // Errors surfaced by the fetch originator.
+          // errors surfaced by originating fetch
         }
         incrementFetchVersion();
         return;
       }
-
-      const cachedData = readCachedTransactions(
+      const cached = readCachedTransactions(
         transactionHistoryRef.current as TransactionHistoryStore,
         walletId,
         cluster
       );
-      if (!hasCachedTransactions(cachedData)) {
+      if (!hasCachedTransactions(cached)) {
         await runFetchRef.current(cluster, {
           forceRefresh: true,
-          refreshBalanceOnChange: false,
+          refreshBalanceOnChange: true,
         });
       }
-    };
-
-    void runOnOpen();
+    })();
   }, [isOpen, walletId, wallet, adapter, currentCluster]);
 
   const handleRefresh = useCallback(async () => {
@@ -201,5 +173,22 @@ export const useTransactionHistoryFetch = ({
     });
   }, [currentCluster]);
 
-  return { isRefreshing, fetchVersion, handleRefresh };
+  const { isLoadingMore, handleLoadMore } = useLoadMoreTransactions({
+    walletId,
+    currentCluster,
+    walletRef,
+    adapterRef,
+    historyRef: transactionHistoryRef,
+    onSuccess: incrementFetchVersion,
+    onRefreshBalance: onRefreshBalanceRef,
+  });
+
+  return {
+    isRefreshing,
+    isLoadingMore: isLoadingMore || isCurrentlyLoadingMore,
+    canLoadMore,
+    fetchVersion,
+    handleRefresh,
+    handleLoadMore,
+  };
 };
