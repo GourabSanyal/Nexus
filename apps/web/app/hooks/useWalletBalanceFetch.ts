@@ -15,17 +15,24 @@ import { toast } from "sonner";
 import { WalletAdapterFactory } from "@/app/lib/adapters/WalletAdapterFactory";
 import { Wallet } from "@/app/types/wallet/wallet";
 import { fetchWalletTransactionHistory } from "@/app/lib/services/transactionHistoryFetch";
+import { TransactionHistoryStore } from "@api-types/TransactionTypes";
 
 export function useWalletBalanceFetch(wallets: Wallet[]) {
   const { getBalance, setBalance } = useWalletBalances();
   const globalNetworks = useRecoilValue(globalNetworkState);
   const overrides = useRecoilValue(walletNetworkOverrideState);
+  const transactionHistory = useRecoilValue(transactionHistoryState);
   const setTransactionHistory = useSetRecoilState(transactionHistoryState);
   const setLoadingStates = useSetRecoilState(transactionHistoryLoadingState);
   const [refreshingById, setRefreshingById] = useState<Record<number, boolean>>(
     {}
   );
   const fetchedWalletsRef = useRef<Set<number>>(new Set());
+  const transactionHistoryRef = useRef(transactionHistory);
+  
+  useEffect(() => {
+    transactionHistoryRef.current = transactionHistory;
+  }, [transactionHistory]);
 
   const fetchTransactionsForWallet = useCallback(
     async (wallet: Wallet, cluster: NetworkEnum) => {
@@ -38,6 +45,7 @@ export function useWalletBalanceFetch(wallets: Wallet[]) {
           adapter,
           setTransactionHistory,
           setLoadingStates,
+          currentHistory: transactionHistoryRef.current as TransactionHistoryStore,
         });
       } catch (error: unknown) {
         console.error(
