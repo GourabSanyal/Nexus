@@ -15,6 +15,12 @@ pub struct WalletRequestBody {
     pub cluster: Option<String>,
     #[serde(default)]
     pub limit: Option<usize>,
+    /// Fetch transactions older than this signature (for "load more" pagination)
+    #[serde(default)]
+    pub cursor: Option<String>,
+    /// Stop fetching when this signature is found (for incremental sync - fetch only new txs)
+    #[serde(alias = "untilSignature", default)]
+    pub until_signature: Option<String>,
     #[serde(default)]
     pub to: Option<String>,
     #[serde(default)]
