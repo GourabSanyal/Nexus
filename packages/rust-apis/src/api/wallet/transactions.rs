@@ -2,6 +2,7 @@
 
 use serde_json::json;
 
+use crate::chains::transaction_options::TransactionFetchOptions;
 use crate::chains::ChainRegistry;
 
 use super::body::{
@@ -30,10 +31,15 @@ pub async fn handle_transactions(req: &web_sys::Request, chain: &str) -> (u16, S
     let cluster = parsed.cluster.as_deref();
     let env_rpc_override = resolve_rpc_override_from_headers(req, adapter, cluster);
     let rpc_override = parsed.rpc_url.as_deref().or(env_rpc_override.as_deref());
-    let limit = parsed.limit;
+
+    let options = TransactionFetchOptions {
+        limit: parsed.limit,
+        cursor: parsed.cursor.as_deref(),
+        until_signature: parsed.until_signature.as_deref(),
+    };
 
     match adapter
-        .get_transactions(address, cluster, limit, rpc_override)
+        .get_transactions(address, cluster, options, rpc_override)
         .await
     {
         Ok(result) => (
