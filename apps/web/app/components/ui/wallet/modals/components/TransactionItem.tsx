@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { TransactionInfo } from "@api-types/TransactionTypes";
 import {
   formatAmount,
@@ -14,7 +15,7 @@ interface TransactionItemProps {
   adapter: IWalletAdapter;
 }
 
-export const TransactionItem = ({
+const TransactionItemImpl = ({
   transaction: tx,
   cluster,
   adapter,
@@ -81,6 +82,19 @@ export const TransactionItem = ({
     </div>
   );
 };
+
+export const TransactionItem = memo(
+  TransactionItemImpl,
+  (prev, next) =>
+    prev.transaction.signature === next.transaction.signature &&
+    prev.transaction.status === next.transaction.status &&
+    prev.transaction.amount === next.transaction.amount &&
+    prev.transaction.fee === next.transaction.fee &&
+    prev.transaction.direction === next.transaction.direction &&
+    prev.transaction.block_time === next.transaction.block_time &&
+    prev.cluster === next.cluster &&
+    prev.adapter === next.adapter
+);
 
 const StatusRow = ({ tx }: { tx: TransactionInfo }) => (
   <div className="flex items-center gap-2">

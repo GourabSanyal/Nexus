@@ -15,7 +15,11 @@ import { Button } from "../../button/button";
 import { useTransactionHistory } from "./hooks/useTransactionHistory";
 import { TransactionItem } from "./components/TransactionItem";
 import { HistoryModalProps } from "@/app/types/components/HistoryModalProps";
-const listItemTransition = { duration: 0.28, ease: [0.25, 0.1, 0.25, 1] as const };
+const listItemTransition = {
+  layout: { type: "spring" as const, stiffness: 220, damping: 28, mass: 0.9 },
+  height: { duration: 0.42, ease: [0.32, 0.72, 0, 1] as const },
+  opacity: { duration: 0.5, ease: [0.32, 0.72, 0, 1] as const },
+};
 
 const HistoryModal = ({ isOpen, onClose, walletId, onRefreshBalance }: HistoryModalProps) => {
   const {
@@ -76,17 +80,17 @@ const HistoryModal = ({ isOpen, onClose, walletId, onRefreshBalance }: HistoryMo
               No transactions yet.
             </div>
           ) : (
-            <motion.div layout className="flex flex-col gap-3">
-              <AnimatePresence initial={false} mode="popLayout">
+            <div className="flex flex-col gap-3">
+              <AnimatePresence initial={false}>
                 {currentTransactions.map((tx) => (
                   <motion.div
                     key={tx.signature}
-                    layout
-                    initial={{ opacity: 0, y: -12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
+                    layout="position"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
                     transition={listItemTransition}
-                    className="overflow-hidden"
+                    style={{ overflow: "hidden" }}
                   >
                     <TransactionItem
                       transaction={tx}
@@ -96,7 +100,7 @@ const HistoryModal = ({ isOpen, onClose, walletId, onRefreshBalance }: HistoryMo
                   </motion.div>
                 ))}
               </AnimatePresence>
-            </motion.div>
+            </div>
           )}
         </div>
       </DialogContent>
