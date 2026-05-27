@@ -2,19 +2,17 @@ import { ChainEnum, NetworkEnum } from "@repo/store/src/enums/network";
 import { TransactionResponse } from "@api-types/TransactionTypes";
 import { getSolTransactions } from "@/app/lib/utils/getSolTransactions";
 import { getEthTransactions } from "@/app/lib/utils/ethereum/transactions/getEthTransactions";
+import type { FetchTransactionsParams } from "@/app/types/components/FetchTransactionsParams";
 
-interface FetchTransactionsParams {
-  chain: ChainEnum;
-  address: string;
-  cluster: NetworkEnum;
-  limit?: number;
-}
+export type { FetchTransactionsParams };
 
 export const fetchTransactions = async ({
   chain,
   address,
   cluster,
   limit = 20,
+  cursor,
+  untilSignature,
 }: FetchTransactionsParams): Promise<TransactionResponse> => {
   switch (chain) {
     case ChainEnum.Solana:
@@ -22,6 +20,8 @@ export const fetchTransactions = async ({
         address,
         cluster: cluster as NetworkEnum.Mainnet | NetworkEnum.Devnet,
         limit,
+        cursor,
+        untilSignature,
       });
 
     case ChainEnum.Ethereum: {
@@ -29,6 +29,8 @@ export const fetchTransactions = async ({
         address,
         cluster: cluster as NetworkEnum.Mainnet | NetworkEnum.Sepolia,
         limit,
+        cursor,
+        untilSignature,
       });
     }
 
