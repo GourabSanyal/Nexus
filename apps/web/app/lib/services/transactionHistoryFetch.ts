@@ -1,100 +1,74 @@
 import { NetworkEnum } from "@repo/store/src/enums/network";
 import { TransactionInfo } from "@api-types/TransactionTypes";
-import { IWalletAdapter } from "@/app/lib/adapters/IWalletAdapter";
+import { historyCacheKey } from "@/app/components/ui/wallet/modals/utils/transactionHistoryCache";
+import type {
+  FetchWalletTransactionHistoryParams,
+  LoadMoreTransactionsParams,
+} from "@/app/types/components/TransactionHistoryFetchTypes";
 import {
-  historyCacheKey,
-  mergeTransactionsIntoHistory,
-  TransactionHistoryStore,
-} from "@/app/components/ui/wallet/modals/utils/transactionHistoryCache";
+  runIncrementalFetch,
+  runLoadMore,
+} from "./transactionHistoryRunners";
 
-type SetTransactionHistory = (
-  updater: (prev: TransactionHistoryStore) => TransactionHistoryStore
-) => void;
+export {
+  getLatestTransactions,
+  getLatestPagination,
+  hasMoreTransactions,
+  subscribeTransactionHistoryUpdated,
+} from "./transactionHistorySubscriptions";
 
-type SetLoadingStates = (
-  updater: (prev: Record<string, boolean>) => Record<string, boolean>
-) => void;
-
-type HistoryUpdateListener = (transactions: TransactionInfo[]) => void;
+export type {
+  FetchWalletTransactionHistoryParams,
+  LoadMoreTransactionsParams,
+} from "@/app/types/components/TransactionHistoryFetchTypes";
 
 const inFlightByKey = new Map<string, Promise<TransactionInfo[]>>();
-const updatedListenersByKey = new Map<string, Set<HistoryUpdateListener>>();
-/** Latest fetch result per wallet+cluster — sync read for open modals (avoids Recoil/persist lag). */
-const latestTransactionsByKey = new Map<string, TransactionInfo[]>();
+const loadMoreInFlightByKey = new Map<string, Promise<TransactionInfo[]>>();
 
-const notifyHistoryUpdated = (
+/** Dedupe + run an in-flight promise per cache key. */
+const dedupePromise = (
+  store: Map<string, Promise<TransactionInfo[]>>,
   cacheKey: string,
-  transactions: TransactionInfo[]
-) => {
-  latestTransactionsByKey.set(cacheKey, transactions);
-  updatedListenersByKey.get(cacheKey)?.forEach((listener) =>
-    listener(transactions)
-  );
-};
-
-export type FetchWalletTransactionHistoryParams = {
-  walletId: number;
-  publicKey: string;
-  cluster: NetworkEnum;
-  adapter: IWalletAdapter;
-  setTransactionHistory: SetTransactionHistory;
-  setLoadingStates: SetLoadingStates;
-};
-
-const runFetch = async ({
-  walletId,
-  publicKey,
-  cluster,
-  adapter,
-  setTransactionHistory,
-  setLoadingStates,
-}: FetchWalletTransactionHistoryParams): Promise<TransactionInfo[]> => {
-  const cacheKey = historyCacheKey(walletId, cluster);
-  setLoadingStates((prev) => ({ ...prev, [cacheKey]: true }));
-
-  try {
-    const response = await adapter.fetchTransactions({
-      address: publicKey,
-      cluster: cluster as string,
-      limit: 20,
-    });
-    const transactions = response.transactions ?? [];
-
-    setTransactionHistory((prev) =>
-      mergeTransactionsIntoHistory(prev, walletId, cluster, transactions)
-    );
-    notifyHistoryUpdated(cacheKey, transactions);
-
-    return transactions;
-  } finally {
-    setLoadingStates((prev) => ({ ...prev, [cacheKey]: false }));
-  }
-};
-
-/** Deduplicated fetch shared by header refresh and history modal. */
-export const fetchWalletTransactionHistory = (
-  params: FetchWalletTransactionHistoryParams
+  factory: () => Promise<TransactionInfo[]>
 ): Promise<TransactionInfo[]> => {
-  const cacheKey = historyCacheKey(params.walletId, params.cluster);
-  const existing = inFlightByKey.get(cacheKey);
-  if (existing) {
-    return existing;
-  }
-
-  const promise = runFetch(params).finally(() => {
-    if (inFlightByKey.get(cacheKey) === promise) {
-      inFlightByKey.delete(cacheKey);
-    }
+  const existing = store.get(cacheKey);
+  if (existing) return existing;
+  const promise = factory().finally(() => {
+    if (store.get(cacheKey) === promise) store.delete(cacheKey);
   });
-
-  inFlightByKey.set(cacheKey, promise);
+  store.set(cacheKey, promise);
   return promise;
 };
+
+/** Deduplicated incremental fetch shared by header refresh and history modal. */
+export const fetchWalletTransactionHistory = (
+  params: FetchWalletTransactionHistoryParams
+): Promise<TransactionInfo[]> =>
+  dedupePromise(
+    inFlightByKey,
+    historyCacheKey(params.walletId, params.cluster),
+    () => runIncrementalFetch(params)
+  );
+
+/** Deduplicated pagination ("load more") fetch. */
+export const loadMoreTransactionHistory = (
+  params: LoadMoreTransactionsParams
+): Promise<TransactionInfo[]> =>
+  dedupePromise(
+    loadMoreInFlightByKey,
+    historyCacheKey(params.walletId, params.cluster),
+    () => runLoadMore(params)
+  );
 
 export const isTransactionHistoryFetchInFlight = (
   walletId: number,
   cluster: NetworkEnum
 ): boolean => inFlightByKey.has(historyCacheKey(walletId, cluster));
+
+export const isLoadMoreInFlight = (
+  walletId: number,
+  cluster: NetworkEnum
+): boolean => loadMoreInFlightByKey.has(historyCacheKey(walletId, cluster));
 
 /** Join an in-flight fetch started elsewhere (e.g. header balance refresh). */
 export const getInFlightTransactionHistoryFetch = (
@@ -102,31 +76,3 @@ export const getInFlightTransactionHistoryFetch = (
   cluster: NetworkEnum
 ): Promise<TransactionInfo[]> | undefined =>
   inFlightByKey.get(historyCacheKey(walletId, cluster));
-
-export const getLatestTransactions = (
-  walletId: number,
-  cluster: NetworkEnum
-): TransactionInfo[] | undefined =>
-  latestTransactionsByKey.get(historyCacheKey(walletId, cluster));
-
-/** Notified with merged transactions after each successful fetch for wallet+cluster. */
-export const subscribeTransactionHistoryUpdated = (
-  walletId: number,
-  cluster: NetworkEnum,
-  listener: HistoryUpdateListener
-): (() => void) => {
-  const cacheKey = historyCacheKey(walletId, cluster);
-  if (!updatedListenersByKey.has(cacheKey)) {
-    updatedListenersByKey.set(cacheKey, new Set());
-  }
-  updatedListenersByKey.get(cacheKey)!.add(listener);
-
-  const latest = latestTransactionsByKey.get(cacheKey);
-  if (latest) {
-    listener(latest);
-  }
-
-  return () => {
-    updatedListenersByKey.get(cacheKey)?.delete(listener);
-  };
-};
