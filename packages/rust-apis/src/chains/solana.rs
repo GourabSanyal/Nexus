@@ -1,5 +1,6 @@
 use serde_json::json;
 
+use crate::chains::errors::WalletError;
 use crate::chains::traits::{
     BalanceFuture, BalanceResult, BlockchainAdapter, SendFuture, SendPrepareFuture,
     SendPrepareResult, SendResult, TransactionsFuture, TransactionsResult,
@@ -13,19 +14,23 @@ impl SolanaAdapter {
     fn resolve_rpc(
         cluster: Option<&str>,
         rpc_override: Option<&str>,
-    ) -> Result<(String, String), String> {
+    ) -> Result<(String, String), WalletError> {
         let cluster_value = cluster.unwrap_or("mainnet-beta");
 
         if let Some(url) = rpc_override {
             return Ok((cluster_value.to_string(), url.to_string()));
         }
 
-        // fallback rps
         let rpc_url = match cluster_value {
             "mainnet" | "mainnet-beta" => "https://api.mainnet-beta.solana.com",
             "devnet" => "https://api.devnet.solana.com",
             "testnet" => "https://api.testnet.solana.com",
-            _ => return Err(format!("Unsupported Solana cluster: {cluster_value}")),
+            _ => {
+                return Err(WalletError::UnsupportedCluster {
+                    chain: "solana",
+                    cluster: cluster_value.to_string(),
+                })
+            }
         };
 
         Ok((cluster_value.to_string(), rpc_url.to_string()))
@@ -53,11 +58,7 @@ impl BlockchainAdapter for SolanaAdapter {
     ) -> BalanceFuture<'a> {
         Box::pin(async move {
             let (_, rpc_url) = Self::resolve_rpc(cluster, rpc_override)?;
-
-            let lamports = services::solana_rpc::get_balance(address, &rpc_url)
-                .await
-                .map_err(|e| e.to_string())?;
-
+            let lamports = services::solana_rpc::get_balance(address, &rpc_url).await?;
             Ok(BalanceResult {
                 balance: lamports.to_string(),
             })
@@ -80,9 +81,7 @@ impl BlockchainAdapter for SolanaAdapter {
                 until: options.until_signature,
             };
             let (transactions, has_more, next_cursor) =
-                services::solana_rpc::get_transactions(address, &rpc_url, fetch_options)
-                    .await
-                    .map_err(|e| e.to_string())?;
+                services::solana_rpc::get_transactions(address, &rpc_url, fetch_options).await?;
 
             Ok(TransactionsResult {
                 transactions,
@@ -103,9 +102,7 @@ impl BlockchainAdapter for SolanaAdapter {
     ) -> SendPrepareFuture<'a> {
         Box::pin(async move {
             let (cluster_value, rpc_url) = Self::resolve_rpc(cluster, rpc_override)?;
-            let blockhash_payload = services::solana_rpc::get_latest_blockhash(&rpc_url)
-                .await
-                .map_err(|e| e.to_string())?;
+            let blockhash_payload = services::solana_rpc::get_latest_blockhash(&rpc_url).await?;
             let payload = json!({
                 "chain": "solana",
                 "cluster": cluster_value,
@@ -125,10 +122,8 @@ impl BlockchainAdapter for SolanaAdapter {
     ) -> SendFuture<'a> {
         Box::pin(async move {
             let (_, rpc_url) = Self::resolve_rpc(cluster, rpc_override)?;
-            let signature = services::solana_rpc::send_transaction(&rpc_url, signed_transaction)
-                .await
-                .map_err(|e| e.to_string())?;
-
+            let signature =
+                services::solana_rpc::send_transaction(&rpc_url, signed_transaction).await?;
             Ok(SendResult { signature })
         })
     }

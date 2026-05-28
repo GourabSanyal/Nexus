@@ -1,3 +1,4 @@
+use crate::chains::errors::WalletError;
 use crate::chains::traits::{
     BalanceFuture, BalanceResult, BlockchainAdapter, SendFuture, SendPrepareFuture,
     SendPrepareResult, SendResult, TransactionsFuture, TransactionsResult,
@@ -11,17 +12,21 @@ impl EthereumAdapter {
     fn resolve_rpc(
         cluster: Option<&str>,
         rpc_override: Option<&str>,
-    ) -> Result<(String, String), String> {
+    ) -> Result<(String, String), WalletError> {
         let cluster_value = cluster.unwrap_or("mainnet");
         if let Some(rpc) = rpc_override {
             return Ok((cluster_value.to_string(), rpc.to_string()));
         }
 
         let rpc_url = match cluster_value {
-            // fallback rps
             "mainnet" => "https://eth.llamarpc.com",
             "sepolia" => "https://rpc.sepolia.org",
-            _ => return Err(format!("Unsupported Ethereum cluster: {cluster_value}")),
+            _ => {
+                return Err(WalletError::UnsupportedCluster {
+                    chain: "ethereum",
+                    cluster: cluster_value.to_string(),
+                })
+            }
         };
 
         Ok((cluster_value.to_string(), rpc_url.to_string()))
@@ -48,9 +53,7 @@ impl BlockchainAdapter for EthereumAdapter {
     ) -> BalanceFuture<'a> {
         Box::pin(async move {
             let (_, rpc) = Self::resolve_rpc(cluster, rpc_override)?;
-            let balance = services::ethereum_rpc::get_balance(address, &rpc)
-                .await
-                .map_err(|e| e.to_string())?;
+            let balance = services::ethereum_rpc::get_balance(address, &rpc).await?;
             Ok(BalanceResult { balance })
         })
     }
@@ -71,9 +74,7 @@ impl BlockchainAdapter for EthereumAdapter {
                 until_hash: options.until_signature,
             };
             let (transactions, has_more, next_cursor) =
-                services::ethereum_rpc::get_transactions(address, &rpc, fetch_options)
-                    .await
-                    .map_err(|e| e.to_string())?;
+                services::ethereum_rpc::get_transactions(address, &rpc, fetch_options).await?;
             Ok(TransactionsResult {
                 transactions,
                 has_more,
@@ -93,14 +94,10 @@ impl BlockchainAdapter for EthereumAdapter {
     ) -> SendPrepareFuture<'a> {
         Box::pin(async move {
             let (_, rpc) = Self::resolve_rpc(cluster, rpc_override)?;
-            let (from, to, value) = (
-                from.ok_or("Sender address is required")?,
-                to.ok_or("Recipient address is required")?,
-                value.ok_or("Transaction value is required")?,
-            );
-            let payload = services::ethereum_rpc::prepare_send(from, to, value, &rpc)
-                .await
-                .map_err(|e| e.to_string())?;
+            let from = from.ok_or(WalletError::MissingField("Sender address"))?;
+            let to = to.ok_or(WalletError::MissingField("Recipient address"))?;
+            let value = value.ok_or(WalletError::MissingField("Transaction value"))?;
+            let payload = services::ethereum_rpc::prepare_send(from, to, value, &rpc).await?;
             Ok(SendPrepareResult { payload })
         })
     }
@@ -113,9 +110,8 @@ impl BlockchainAdapter for EthereumAdapter {
     ) -> SendFuture<'a> {
         Box::pin(async move {
             let (_, rpc) = Self::resolve_rpc(cluster, rpc_override)?;
-            let signature = services::ethereum_rpc::send_raw_transaction(&rpc, signed_transaction)
-                .await
-                .map_err(|e| e.to_string())?;
+            let signature =
+                services::ethereum_rpc::send_raw_transaction(&rpc, signed_transaction).await?;
             Ok(SendResult { signature })
         })
     }

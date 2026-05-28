@@ -1,6 +1,7 @@
 use std::future::Future;
 use std::pin::Pin;
 
+use crate::chains::errors::WalletError;
 use crate::chains::transaction_options::TransactionFetchOptions;
 use crate::models::transaction::TransactionInfo;
 
@@ -8,12 +9,13 @@ pub struct BalanceResult {
     pub balance: String,
 }
 
-pub type BalanceFuture<'a> = Pin<Box<dyn Future<Output = Result<BalanceResult, String>> + 'a>>;
+pub type BalanceFuture<'a> =
+    Pin<Box<dyn Future<Output = Result<BalanceResult, WalletError>> + 'a>>;
 pub type TransactionsFuture<'a> =
-    Pin<Box<dyn Future<Output = Result<TransactionsResult, String>> + 'a>>;
+    Pin<Box<dyn Future<Output = Result<TransactionsResult, WalletError>> + 'a>>;
 pub type SendPrepareFuture<'a> =
-    Pin<Box<dyn Future<Output = Result<SendPrepareResult, String>> + 'a>>;
-pub type SendFuture<'a> = Pin<Box<dyn Future<Output = Result<SendResult, String>> + 'a>>;
+    Pin<Box<dyn Future<Output = Result<SendPrepareResult, WalletError>> + 'a>>;
+pub type SendFuture<'a> = Pin<Box<dyn Future<Output = Result<SendResult, WalletError>> + 'a>>;
 
 pub struct TransactionsResult {
     pub transactions: Vec<TransactionInfo>,
