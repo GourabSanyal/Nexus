@@ -39,6 +39,7 @@ pub async fn route_request(
             api::wallet::handle_prepare_send(req, "ethereum").await
         }
         ("POST", "wallet/ethereum/send") => api::wallet::handle_send(req, "ethereum").await,
+        ("POST", "wallet/import-data") => api::wallet::handle_import_data(req).await,
         _ => (404, json!({"error": "Not Found"}).to_string()),
     }
 }
