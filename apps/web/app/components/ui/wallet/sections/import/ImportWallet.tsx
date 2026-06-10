@@ -1,15 +1,21 @@
-import React from 'react';
+import React from "react";
 import { FormProvider } from "react-hook-form";
-import { ImportWalletHeader } from './components/ImportWalletHeader';
-import { SeedPhraseForm } from './components/SeedPhraseForm';
-import { useImportWalletForm } from './hooks/useImportWalletForm';
+import { ImportWalletHeader } from "./components/ImportWalletHeader";
+import { SeedPhraseForm } from "./components/SeedPhraseForm";
+import { useImportWalletForm } from "./hooks/useImportWalletForm";
 
 type ImportWalletProps = {
   onBack?: () => void;
-}
+};
 
 const ImportWallet = ({ onBack }: ImportWalletProps) => {
-  const { methods, handleKeyDown, onSubmit } = useImportWalletForm();
+  const {
+    methods,
+    handleKeyDown,
+    handlePaste,
+    handleSeedPhraseLengthChange,
+    onSubmit,
+  } = useImportWalletForm();
 
   return (
     <FormProvider {...methods}>
@@ -17,10 +23,12 @@ const ImportWallet = ({ onBack }: ImportWalletProps) => {
         <ImportWalletHeader onBack={onBack} />
         <SeedPhraseForm
           handleKeyDown={handleKeyDown}
+          handlePaste={handlePaste}
+          onSeedPhraseLengthChange={handleSeedPhraseLengthChange}
         />
       </form>
     </FormProvider>
   );
-}
+};
 
 export default ImportWallet;
