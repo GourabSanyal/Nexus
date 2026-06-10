@@ -1,37 +1,84 @@
+import { validateMnemonic } from "bip39";
 import { z } from "zod";
+import { walletImportPreviewSchema } from "./importPreviewSchema";
 import { walletSchema } from "./walletSchema";
 
-export const seedPhraseWordSchema = z.string()
-  .transform(str => str.trim())
-  .refine(val => !val || /^[a-zA-Z]+$/.test(val), {
-    message: 'Word must contain only letters'
+export const SEED_PHRASE_LENGTHS = [12, 24] as const;
+export type SeedPhraseLength = (typeof SEED_PHRASE_LENGTHS)[number];
+
+export const seedPhraseLengthSchema = z.union([
+  z.literal(12),
+  z.literal(24),
+]);
+
+export const seedPhraseWordSchema = z
+  .string()
+  .transform((str) => str.trim().toLowerCase())
+  .refine((val) => !val || /^[a-z]+$/.test(val), {
+    message: "Word must contain only letters",
   });
 
+export const createEmptySeedPhraseWords = (
+  length: SeedPhraseLength
+): string[] => Array.from({ length }, () => "");
+
 export const seedPhraseSchema = z.object({
-  seedPhraseWords: z.array(seedPhraseWordSchema)
-    .length(12, 'Seed phrase must contain exactly 12 words')
-    .default(Array(12).fill('')),
+  seedPhraseLength: seedPhraseLengthSchema.default(12),
+  seedPhraseWords: z.array(seedPhraseWordSchema),
 });
 
+export const importWalletInputSchema = z
+  .object({
+    seedPhrase: z.string().optional().default(""),
+    seedPhraseLength: seedPhraseLengthSchema.default(12),
+    seedPhraseWords: z
+      .array(seedPhraseWordSchema)
+      .default(() => createEmptySeedPhraseWords(12)),
+    privateKey: z.string().optional().default(""),
+    password: z.string().optional().default(""),
+  })
+  .superRefine((data, ctx) => {
+    const { seedPhraseLength, seedPhraseWords } = data;
+
+    if (seedPhraseWords.length !== seedPhraseLength) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["seedPhraseWords"],
+        message: `Seed phrase must contain exactly ${seedPhraseLength} words`,
+      });
+      return;
+    }
+
+    const allFilled = seedPhraseWords.every((word) => word.length > 0);
+    if (!allFilled) {
+      return;
+    }
+
+    const mnemonic = seedPhraseWords.join(" ");
+    if (!validateMnemonic(mnemonic)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["seedPhraseWords"],
+        message: "Invalid seed phrase. Check spelling and word order.",
+      });
+    }
+  });
+
 export const importWalletSchema = z.object({
-    isImporting: z.boolean().default(false),
-    currentPhase: z.enum(['input', 'validation', 'confirmation', 'complete']).default('input'),
-    inputData: z.object({
-        seedPhrase: z.string().optional().default(''),
-        seedPhraseWords: z.array(seedPhraseWordSchema)
-          .length(12, 'Seed phrase must contain exactly 12 words')
-          .optional()
-          .default(() => Array(12).fill('')),
-        privateKey: z.string().optional().default(''),
-        password: z.string().optional().default(''),
-    }).default(() => ({
-        seedPhrase: '',
-        seedPhraseWords: Array(12).fill(''),
-        privateKey: '',
-        password: '',
-    })),
-    validationErrors: z.array(z.string()).default([]),
-    importedWallet: walletSchema.partial().optional(),
+  isImporting: z.boolean().default(false),
+  currentPhase: z
+    .enum(["input", "validation", "confirmation", "complete"])
+    .default("input"),
+  inputData: importWalletInputSchema.default(() => ({
+    seedPhrase: "",
+    seedPhraseLength: 12 as SeedPhraseLength,
+    seedPhraseWords: createEmptySeedPhraseWords(12),
+    privateKey: "",
+    password: "",
+  })),
+  validationErrors: z.array(z.string()).default([]),
+  discoveredWallets: walletImportPreviewSchema.optional(),
+  importedWallet: walletSchema.partial().optional(),
 });
 
 export type ImportWalletSchema = z.infer<typeof importWalletSchema>;
