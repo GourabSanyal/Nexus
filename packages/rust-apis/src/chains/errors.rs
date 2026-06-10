@@ -56,8 +56,7 @@ impl From<anyhow::Error> for WalletError {
 }
 
 fn is_insufficient_funds(message: &str) -> bool {
-    message.contains("InsufficientFundsForRent")
-        || message.contains("insufficient funds for rent")
+    message.contains("InsufficientFundsForRent") || message.contains("insufficient funds for rent")
 }
 
 const INSUFFICIENT_FUNDS_HINT: &str =
