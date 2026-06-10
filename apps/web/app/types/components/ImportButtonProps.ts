@@ -4,6 +4,5 @@ export interface ImportButtonProps {
   hasValidationErrors: boolean;
   hasIndividualErrors: boolean;
   hasNumberErrors: boolean;
-  seedPhraseLength: number;
-  onSubmit: () => Promise<void>;
+  expectedWordCount: number;
 }
