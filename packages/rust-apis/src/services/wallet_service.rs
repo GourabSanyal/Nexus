@@ -18,14 +18,8 @@ pub fn derive_import_candidates(
 }
 
 fn import_candidate_to_derived(candidate: &ImportCandidate) -> Result<DerivedCandidate> {
-    let chain = match candidate.chain.as_str() {
-        "solana" => "solana",
-        "ethereum" => "ethereum",
-        other => return Err(anyhow!("Unsupported chain: {other}")),
-    };
-
     Ok(DerivedCandidate {
-        chain,
+        chain: candidate.chain.as_str(),
         address: candidate.address.clone(),
         derivation_path: candidate.derivation_path.clone(),
         scheme: candidate.scheme,
@@ -37,10 +31,7 @@ fn import_candidate_to_derived(candidate: &ImportCandidate) -> Result<DerivedCan
 pub fn resolve_import_candidates(request: &WalletImportRequest) -> Result<Vec<DerivedCandidate>> {
     if let Some(ref candidates) = request.candidates {
         if !candidates.is_empty() {
-            return candidates
-                .iter()
-                .map(import_candidate_to_derived)
-                .collect();
+            return candidates.iter().map(import_candidate_to_derived).collect();
         }
     }
 
@@ -48,6 +39,8 @@ pub fn resolve_import_candidates(request: &WalletImportRequest) -> Result<Vec<De
         Some(seed) if !seed.trim().is_empty() => {
             derive_import_candidates(seed.trim(), request.max_accounts)
         }
-        _ => Err(anyhow!("Request must include non-empty candidates or seedPhrase")),
+        _ => Err(anyhow!(
+            "Request must include non-empty candidates or seedPhrase"
+        )),
     }
 }
