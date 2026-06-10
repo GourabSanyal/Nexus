@@ -10,11 +10,27 @@ pub enum DerivationScheme {
     NexusLegacy,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum ImportChain {
+    Solana,
+    Ethereum,
+}
+
+impl ImportChain {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            ImportChain::Solana => "solana",
+            ImportChain::Ethereum => "ethereum",
+        }
+    }
+}
+
 /// Address + metadata only — production import scan request item.
 #[derive(Debug, Clone, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct ImportCandidate {
-    pub chain: String,
+    pub chain: ImportChain,
     pub address: String,
     pub derivation_path: String,
     pub scheme: DerivationScheme,
@@ -71,7 +87,9 @@ pub fn balance_has_funds(balance: &str) -> bool {
         return false;
     }
     if let Some(hex) = b.strip_prefix("0x") {
-        return u128::from_str_radix(hex, 16).map(|v| v > 0).unwrap_or(false);
+        return u128::from_str_radix(hex, 16)
+            .map(|v| v > 0)
+            .unwrap_or(false);
     }
     b.parse::<u128>().map(|v| v > 0).unwrap_or(false)
 }
