@@ -1,10 +1,10 @@
+use crate::models::wallet_import::DerivationScheme;
 use anyhow::{anyhow, Result};
 use bip39::{Language, Mnemonic};
 use bs58;
 use ed25519_dalek::SigningKey;
 use hex;
 use sha3::{Digest, Keccak256};
-use crate::models::wallet_import::DerivationScheme;
 use slip10::{derive_key_from_path, BIP32Path, Curve};
 use std::collections::HashSet;
 use std::str::FromStr;
