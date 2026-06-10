@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::models::transaction::TransactionInfo;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum DerivationScheme {
     Standard,
@@ -10,10 +10,25 @@ pub enum DerivationScheme {
     NexusLegacy,
 }
 
+/// Address + metadata only — production import scan request item.
+#[derive(Debug, Clone, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct ImportCandidate {
+    pub chain: String,
+    pub address: String,
+    pub derivation_path: String,
+    pub scheme: DerivationScheme,
+    pub account_index: u32,
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WalletImportRequest {
-    pub seed_phrase: String,
+    #[serde(default)]
+    pub candidates: Option<Vec<ImportCandidate>>,
+    /// Dev-only: derive candidates server-side. Removed in Backend Slice G.
+    #[serde(default)]
+    pub seed_phrase: Option<String>,
     #[serde(default)]
     pub max_accounts: Option<u32>,
 }
