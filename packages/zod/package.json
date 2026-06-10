@@ -4,6 +4,7 @@
     "main": "src/index.ts",
     "private": true,
     "dependencies": {
+        "bip39": "^3.1.0",
         "react-hook-form": "^7.65.0",
         "zod": "^3.23.8"
     }
