@@ -1261,6 +1261,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@my-org/zod@workspace:packages/zod"
   dependencies:
+    bip39: "npm:^3.1.0"
     react-hook-form: "npm:^7.65.0"
     zod: "npm:^3.23.8"
   languageName: unknown
