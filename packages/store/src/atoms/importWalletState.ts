@@ -9,11 +9,13 @@ export const importWalletState = atom<ImportWalletSchema>({
     currentPhase: "input",
     inputData: {
       seedPhrase: '',
+      seedPhraseLength: 12,
       privateKey: '',
       password: '',
       seedPhraseWords: Array(12).fill(''),
     },
     validationErrors: [],
+    discoveredWallets: undefined,
     importedWallet: undefined,
   },
   effects_UNSTABLE: [importWalletPersistAtom],
