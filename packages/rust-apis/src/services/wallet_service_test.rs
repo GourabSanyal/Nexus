@@ -1,9 +1,9 @@
 #[cfg(test)]
 mod tests {
-    use crate::models::wallet_import::{DerivationScheme, ImportCandidate, WalletImportRequest};
-    use crate::services::wallet_service::{
-        derive_import_candidates, resolve_import_candidates,
+    use crate::models::wallet_import::{
+        DerivationScheme, ImportCandidate, ImportChain, WalletImportRequest,
     };
+    use crate::services::wallet_service::{derive_import_candidates, resolve_import_candidates};
 
     #[test]
     fn test_resolve_import_candidates_from_seed_phrase() {
@@ -35,7 +35,7 @@ mod tests {
     fn test_resolve_import_candidates_prefers_candidates_over_seed() {
         let request = WalletImportRequest {
             candidates: Some(vec![ImportCandidate {
-                chain: "ethereum".to_string(),
+                chain: ImportChain::Ethereum,
                 address: "0xabc".to_string(),
                 derivation_path: "m/44'/60'/0'/0/0".to_string(),
                 scheme: DerivationScheme::Standard,
