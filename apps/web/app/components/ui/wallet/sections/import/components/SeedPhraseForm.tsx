@@ -4,61 +4,32 @@ import type { ImportWalletSchema } from "@repo/zod/src/walletSchemas/importWalle
 import { SeedPhraseGrid } from "./SeedPhraseGrid";
 import { SeedPhraseErrors } from "./SeedPhraseErrors";
 import { ImportButton } from "./ImportButton";
+import { SeedPhraseLengthToggle } from "./SeedPhraseLengthToggle";
 
 interface SeedPhraseFormProps {
   handleKeyDown: (e: React.KeyboardEvent, index: number) => void;
+  handlePaste: (e: React.ClipboardEvent) => void;
+  onSeedPhraseLengthChange: (length: 12 | 24) => void;
 }
 
 export const SeedPhraseForm: React.FC<SeedPhraseFormProps> = ({
   handleKeyDown,
+  handlePaste,
+  onSeedPhraseLengthChange,
 }) => {
-  const handlePaste = (e: React.ClipboardEvent) => {
-    e.preventDefault();
-    const pastedText = e.clipboardData.getData("text");
-
-    // Split by spaces, commas, or newlines and clean up
-    const words = pastedText
-      .toLowerCase()
-      .replace(/[\n,]+/g, " ") // replace newlines and commas with spaces
-      .split(" ")
-      .filter((word) => word.trim().length > 0) // remove if value is empty
-      .slice(0, 12); // takes only first 12 words
-
-    if (words.length > 0) {
-      setValue(
-        "inputData",
-        {
-          ...watch("inputData"),
-          seedPhraseWords: Array(12)
-            .fill("")
-            .map((_, i) => words[i] || ""),
-        },
-        {
-          shouldValidate: true,
-        }
-      );
-    }
-  };
-  const [isImporting, setIsImporting] = React.useState(false);
   const {
     formState: { errors },
     watch,
     setValue,
-    handleSubmit,
   } = useFormContext<ImportWalletSchema>();
 
-  const handleImport = async (data: ImportWalletSchema) => {
-    setIsImporting(true);
-    // temporary - simulating import process with setTimeout
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    void data;
-    setIsImporting(false);
-  };
-
   const inputData = watch("inputData");
+  const isImporting = watch("isImporting");
+  const seedPhraseLength = inputData?.seedPhraseLength ?? 12;
   const seedPhraseWords = inputData?.seedPhraseWords ?? [];
+
   const isComplete =
-    seedPhraseWords.length === 12 &&
+    seedPhraseWords.length === seedPhraseLength &&
     seedPhraseWords.every((word) => word?.length > 0);
 
   const rawValidationErrors = errors.inputData?.seedPhraseWords;
@@ -103,11 +74,18 @@ export const SeedPhraseForm: React.FC<SeedPhraseFormProps> = ({
 
   return (
     <div className="w-full max-w-md flex flex-col gap-6">
+      <SeedPhraseLengthToggle
+        value={seedPhraseLength}
+        onChange={onSeedPhraseLengthChange}
+        disabled={isImporting}
+      />
+
       <SeedPhraseGrid
         setValue={setValue}
         watch={watch}
         handleKeyDown={handleKeyDown}
         handlePaste={handlePaste}
+        wordCount={seedPhraseLength}
         individualErrors={individualErrors}
         inputErrors={inputErrors}
         onError={handleInputError}
@@ -119,8 +97,7 @@ export const SeedPhraseForm: React.FC<SeedPhraseFormProps> = ({
         hasValidationErrors={Boolean(validationErrors)}
         hasIndividualErrors={individualErrors.length > 0}
         hasNumberErrors={numberErrors.length > 0}
-        seedPhraseLength={seedPhraseWords.length}
-        onSubmit={async () => await handleSubmit(handleImport)()}
+        expectedWordCount={seedPhraseLength}
       />
 
       <SeedPhraseErrors
