@@ -81,7 +81,10 @@ mod tests {
             .iter()
             .find(|c| c.scheme == DerivationScheme::NexusLegacy && c.chain == "solana")
             .expect("legacy sol");
-        assert_eq!(legacy_sol.address, "cBXvXnd8cUdyuNaUjdeakEWZ42Wbh5bhwpeMC5FSdRP");
+        assert_eq!(
+            legacy_sol.address,
+            "cBXvXnd8cUdyuNaUjdeakEWZ42Wbh5bhwpeMC5FSdRP"
+        );
 
         let nexus_eth: Vec<_> = candidates
             .iter()
