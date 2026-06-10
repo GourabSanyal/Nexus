@@ -9,8 +9,7 @@ pub struct BalanceResult {
     pub balance: String,
 }
 
-pub type BalanceFuture<'a> =
-    Pin<Box<dyn Future<Output = Result<BalanceResult, WalletError>> + 'a>>;
+pub type BalanceFuture<'a> = Pin<Box<dyn Future<Output = Result<BalanceResult, WalletError>> + 'a>>;
 pub type TransactionsFuture<'a> =
     Pin<Box<dyn Future<Output = Result<TransactionsResult, WalletError>> + 'a>>;
 pub type SendPrepareFuture<'a> =
