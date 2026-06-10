@@ -7,25 +7,24 @@ export const SeedPhraseGrid = ({
   watch,
   handleKeyDown,
   handlePaste,
+  wordCount,
   individualErrors,
   inputErrors,
   onError,
 }: SeedPhraseGridProps) => {
   return (
     <div className="grid grid-cols-3 gap-4" onPaste={handlePaste}>
-      {Array(12)
-        .fill(0)
-        .map((_, index) => (
-          <SeedPhraseInput
-            key={index}
-            index={index}
-            setValue={setValue}
-            watch={watch}
-            onKeyDown={handleKeyDown}
-            error={!!individualErrors[index]?.message || inputErrors[index]}
-            onError={onError}
-          />
-        ))}
+      {Array.from({ length: wordCount }, (_, index) => (
+        <SeedPhraseInput
+          key={index}
+          index={index}
+          setValue={setValue}
+          watch={watch}
+          onKeyDown={handleKeyDown}
+          error={!!individualErrors[index]?.message || inputErrors[index]}
+          onError={onError}
+        />
+      ))}
     </div>
   );
 };
