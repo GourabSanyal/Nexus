@@ -32,7 +32,7 @@ pub struct WalletRequestBody {
     pub rpc_url: Option<String>,
 }
 
-pub async fn parse_wallet_body(req: &web_sys::Request) -> Result<WalletRequestBody, (u16, String)> {
+pub async fn read_request_body(req: &web_sys::Request) -> Result<String, (u16, String)> {
     let body_promise = req.text().map_err(|_| {
         (
             500,
@@ -42,15 +42,38 @@ pub async fn parse_wallet_body(req: &web_sys::Request) -> Result<WalletRequestBo
     let body_value = JsFuture::from(body_promise).await.map_err(|_| {
         (
             500,
-            json!({"error": "Failed to read request body"}).to_string(),
+            json!({"error": "Failed to resolve request body"}).to_string(),
         )
     })?;
-    let body_str = body_value
-        .as_string()
-        .ok_or_else(|| (400, json!({"error": "Invalid request body"}).to_string()))?;
 
+    body_value.as_string().ok_or_else(|| {
+        (
+            400,
+            json!({"error": "Invalid request body format"}).to_string(),
+        )
+    })
+}
+
+pub async fn parse_json_body<T>(req: &web_sys::Request) -> Result<T, (u16, String)>
+where
+    T: for<'de> Deserialize<'de>,
+{
+    let body_str = read_request_body(req).await?;
     serde_json::from_str(&body_str)
-        .map_err(|_| (400, json!({"error": "Invalid request payload"}).to_string()))
+        .map_err(|_| (400, json!({"error": "Invalid JSON payload"}).to_string()))
+}
+
+pub async fn parse_wallet_body(req: &web_sys::Request) -> Result<WalletRequestBody, (u16, String)> {
+    parse_json_body(req).await.map_err(|(status, body)| {
+        if status == 400 {
+            (
+                status,
+                json!({"error": "Invalid request payload"}).to_string(),
+            )
+        } else {
+            (status, body)
+        }
+    })
 }
 
 pub fn map_wallet_error(error: WalletError) -> (u16, String) {
