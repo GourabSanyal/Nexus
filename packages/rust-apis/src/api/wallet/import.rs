@@ -4,7 +4,7 @@ use wasm_bindgen_futures::JsFuture;
 use crate::api::wallet::import_scan::scan_network;
 use crate::chains::ChainRegistry;
 use crate::models::wallet_import::{ChainImportData, WalletImportRequest, WalletImportResponse};
-use crate::services::wallet_service::derive_import_candidates;
+use crate::services::wallet_service::resolve_import_candidates;
 
 pub async fn handle_import_data(req: &web_sys::Request) -> (u16, String) {
     let body_promise = match req.text() {
@@ -27,10 +27,7 @@ pub async fn handle_import_data(req: &web_sys::Request) -> (u16, String) {
         Err(_) => return (400, json!({"error": "Invalid JSON payload"}).to_string()),
     };
 
-    let candidates = match derive_import_candidates(
-        &request_data.seed_phrase,
-        request_data.max_accounts,
-    ) {
+    let candidates = match resolve_import_candidates(&request_data) {
         Ok(c) => c,
         Err(e) => return (400, json!({"error": e.to_string()}).to_string()),
     };
