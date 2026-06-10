@@ -1,123 +1,177 @@
-import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useRecoilState } from 'recoil';
-import { importWalletState } from '@repo/store/src/atoms/importWalletState';
-import { importWalletSchema, type ImportWalletSchema } from '@repo/zod/src/walletSchemas/importWalletSchema';
+import { useCallback, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRecoilState } from "recoil";
+import { importWalletState } from "@repo/store/src/atoms/importWalletState";
+import {
+  createEmptySeedPhraseWords,
+  importWalletSchema,
+  SEED_PHRASE_LENGTHS,
+  type ImportWalletSchema,
+  type SeedPhraseLength,
+} from "@repo/zod/src/walletSchemas/importWalletSchema";
+import { useImportWalletFlow } from "./useImportWalletFlow";
+
+const parsePastedWords = (text: string): string[] =>
+  text
+    .toLowerCase()
+    .replace(/[\n,]+/g, " ")
+    .split(" ")
+    .map((word) => word.replace(/[^a-z]/g, ""))
+    .filter((word) => word.length > 0);
+
+const isSeedPhraseLength = (count: number): count is SeedPhraseLength =>
+  (SEED_PHRASE_LENGTHS as readonly number[]).includes(count);
+
+/** Recoil persist can freeze nested state; RHF needs mutable copies. */
+const cloneImportFormValues = (
+  values: ImportWalletSchema
+): ImportWalletSchema => ({
+  ...values,
+  validationErrors: [...values.validationErrors],
+  inputData: {
+    ...values.inputData,
+    seedPhraseWords: [...values.inputData.seedPhraseWords],
+  },
+});
 
 export const useImportWalletForm = () => {
   const [importState, setImportState] = useRecoilState(importWalletState);
-  const [isFormValid, setIsFormValid] = useState(false);
-  
+  const { runImportFlow } = useImportWalletFlow();
+
   const methods = useForm<ImportWalletSchema>({
     resolver: zodResolver(importWalletSchema),
-    defaultValues: {
-      isImporting: false,
-      currentPhase: 'input',
-      inputData: {
-        seedPhraseWords: Array.from({ length: 12 }, () => ''),
-        seedPhrase: '',
-        privateKey: '',
-        password: '',
-      },
-      validationErrors: [],
-    },
-    mode: 'onChange',
-    reValidateMode: 'onChange',
+    defaultValues: cloneImportFormValues(importState),
+    mode: "onChange",
+    reValidateMode: "onChange",
   });
 
-   // sync from persisted state to form on load or change
   useEffect(() => {
-    if (importState.currentPhase !== methods.getValues('currentPhase')) {
-      methods.reset(importState);
+    if (importState.currentPhase !== methods.getValues("currentPhase")) {
+      methods.reset(cloneImportFormValues(importState));
     }
   }, [importState, methods]);
 
-  // persistance update on change in form values
   useEffect(() => {
     const subscription = methods.watch((formData) => {
-      setImportState(formData as ImportWalletSchema);
-      
-      // validity checking of words filled
-      const words = formData.inputData?.seedPhraseWords || [];
-      const isValid = words.length === 12 && 
-        words.every(word => word && /^[a-z]+$/.test(word)) &&
-        Object.keys(methods.formState.errors).length === 0;
-      
-      setIsFormValid(isValid);
+      if (!formData.inputData?.seedPhraseWords) {
+        return;
+      }
+      setImportState(
+        cloneImportFormValues(formData as ImportWalletSchema)
+      );
     });
     return () => subscription.unsubscribe();
   }, [methods, setImportState]);
 
-  const handlePaste = (e: React.ClipboardEvent) => {
-    e.preventDefault();
-    const pastedText = e.clipboardData.getData('text');
-    const words = pastedText.trim().toLowerCase().split(/\s+/);
-    
-    if (words.length > 12) {
-      methods.setError('inputData.seedPhraseWords', {
-        type: 'manual',
-        message: 'Invalid seed phrase length'
-      });
-      return;
-    }
+  const handleSeedPhraseLengthChange = useCallback(
+    (length: SeedPhraseLength) => {
+      const inputData = methods.getValues("inputData");
+      const currentWords = [...(inputData.seedPhraseWords ?? [])];
+      const resizedWords = createEmptySeedPhraseWords(length).map(
+        (_, index) => currentWords[index] ?? ""
+      );
 
-    // clear existing errors before setting new values
-    methods.clearErrors();
+      methods.setValue(
+        "inputData",
+        {
+          ...inputData,
+          seedPhraseLength: length,
+          seedPhraseWords: resizedWords,
+        },
+        { shouldValidate: true }
+      );
+      methods.clearErrors("inputData.seedPhraseWords");
+    },
+    [methods]
+  );
 
-    // Fill array with existing words or empty strings
-    const newWords = Array(12).fill('');
-    words.forEach((word, index) => {
-      if (index < 12) {
-        // accept letters only
-        const cleanWord = word.replace(/[^a-zA-Z]/g, '');
-        if (cleanWord) {
-          newWords[index] = cleanWord;
-        }
+  const handlePaste = useCallback(
+    (e: React.ClipboardEvent) => {
+      e.preventDefault();
+      const words = parsePastedWords(e.clipboardData.getData("text"));
+      if (words.length === 0) {
+        return;
       }
-    });
 
-    methods.setValue('inputData.seedPhraseWords', newWords, {
-      shouldValidate: true
-    });
-  };
+      const targetLength = isSeedPhraseLength(words.length)
+        ? words.length
+        : methods.getValues("inputData.seedPhraseLength") ?? 12;
 
-  const handleKeyDown = (e: React.KeyboardEvent, index: number) => {
-    const currentValue = methods.getValues(`inputData.seedPhraseWords.${index}`);
-    
-    if (e.key === 'Backspace' && !currentValue && index > 0) {
-      e.preventDefault();
-      const prevInput = document.querySelector(`input[placeholder="Word ${index}"]`) as HTMLInputElement;
-      prevInput?.focus();
-    } else if (e.key === 'ArrowLeft' && index > 0) {
-      e.preventDefault();
-      const prevInput = document.querySelector(`input[placeholder="Word ${index}"]`) as HTMLInputElement;
-      prevInput?.focus();
-    } else if (e.key === 'ArrowRight' && index < 11) {
-      e.preventDefault();
-      const nextInput = document.querySelector(`input[placeholder="Word ${index + 2}"]`) as HTMLInputElement;
-      nextInput?.focus();
-    }
-  };
+      if (words.length > targetLength) {
+        methods.setError("inputData.seedPhraseWords", {
+          type: "manual",
+          message: `Paste contains ${words.length} words. Use ${targetLength} or switch length.`,
+        });
+        return;
+      }
+
+      methods.clearErrors("inputData.seedPhraseWords");
+
+      const inputData = methods.getValues("inputData");
+      const newWords = createEmptySeedPhraseWords(targetLength).map(
+        (_, index) => words[index] ?? ""
+      );
+
+      methods.setValue(
+        "inputData",
+        {
+          ...inputData,
+          seedPhraseLength: isSeedPhraseLength(words.length)
+            ? words.length
+            : inputData.seedPhraseLength,
+          seedPhraseWords: newWords,
+        },
+        { shouldValidate: true }
+      );
+    },
+    [methods]
+  );
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent, index: number) => {
+      const currentValue = methods.getValues(
+        `inputData.seedPhraseWords.${index}`
+      );
+      const wordCount = methods.getValues("inputData.seedPhraseLength") ?? 12;
+      const lastIndex = wordCount - 1;
+
+      const focusWord = (wordIndex: number) => {
+        const input = document.querySelector(
+          `input[placeholder="Word ${wordIndex + 1}"]`
+        ) as HTMLInputElement | null;
+        input?.focus();
+      };
+
+      if (e.key === "Backspace" && !currentValue && index > 0) {
+        e.preventDefault();
+        focusWord(index - 1);
+      } else if (e.key === "ArrowLeft" && index > 0) {
+        e.preventDefault();
+        focusWord(index - 1);
+      } else if (e.key === "ArrowRight" && index < lastIndex) {
+        e.preventDefault();
+        focusWord(index + 1);
+      }
+    },
+    [methods]
+  );
 
   const onSubmit = methods.handleSubmit(async (data) => {
+    const mnemonic = data.inputData.seedPhraseWords.join(" ").trim();
+    setImportState((prev) => ({
+      ...prev,
+      ...data,
+      inputData: {
+        ...data.inputData,
+        seedPhrase: mnemonic,
+      },
+    }));
+
     try {
-      setImportState(prev => ({
-        ...prev,
-        isImporting: true,
-        currentPhase: 'validation',
-      }));
-
-      // TODO: Implement actual wallet import logic
-      void data;
-
-    } catch (error) {
-      setImportState(prev => ({
-        ...prev,
-        validationErrors: [error instanceof Error ? error.message : 'Unknown error'],
-        currentPhase: 'input',
-        isImporting: false,
-      }));
+      await runImportFlow(mnemonic);
+    } catch {
+      // useImportWalletFlow updates validationErrors and phase
     }
   });
 
@@ -125,7 +179,7 @@ export const useImportWalletForm = () => {
     methods,
     handlePaste,
     handleKeyDown,
+    handleSeedPhraseLengthChange,
     onSubmit,
-    isFormValid
   };
 };
