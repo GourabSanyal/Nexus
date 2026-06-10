@@ -3,20 +3,12 @@ import { derivePath } from "ed25519-hd-key";
 import { HDNodeWallet } from "ethers";
 import { Keypair } from "@solana/web3.js";
 import nacl from "tweetnacl";
+import type { DerivationScheme, ImportCandidate } from "@my-org/zod";
+
+export type { DerivationScheme, ImportCandidate } from "@my-org/zod";
 
 export const DEFAULT_MAX_ACCOUNTS = 5;
 export const MAX_ACCOUNTS_CAP = 10;
-
-export type DerivationScheme = "standard" | "nexus" | "nexusLegacy";
-export type ImportChain = "solana" | "ethereum";
-
-export type ImportCandidate = {
-  chain: ImportChain;
-  address: string;
-  derivationPath: string;
-  scheme: DerivationScheme;
-  accountIndex: number;
-};
 
 export type KeyedImportCandidate = ImportCandidate & {
   privateKey: string;
@@ -77,7 +69,8 @@ const dedupeCandidates = (
       continue;
     }
     seen.add(key);
-    const { privateKey: _privateKey, ...candidate } = entry;
+    const { privateKey, ...candidate } = entry;
+    void privateKey;
     candidates.push(candidate);
     uniqueKeyed.push(entry);
   }
