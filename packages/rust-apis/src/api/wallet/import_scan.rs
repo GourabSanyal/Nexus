@@ -1,6 +1,6 @@
 use crate::api::wallet::body::resolve_rpc_override_from_headers;
-use crate::chains::transaction_options::TransactionFetchOptions;
 use crate::chains::traits::BlockchainAdapter;
+use crate::chains::transaction_options::TransactionFetchOptions;
 use crate::models::wallet_import::{balance_has_funds, NetworkImportData, WalletImportEntry};
 use crate::services::wallet_derivation::DerivedCandidate;
 
