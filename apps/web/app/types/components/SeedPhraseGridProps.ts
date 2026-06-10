@@ -7,6 +7,7 @@ export interface SeedPhraseGridProps {
   watch: UseFormWatch<ImportWalletSchema>;
   handleKeyDown: (e: React.KeyboardEvent, index: number) => void;
   handlePaste: (e: React.ClipboardEvent) => void;
+  wordCount: number;
   individualErrors: (SeedPhraseFieldError | undefined)[];
   inputErrors: { [key: number]: boolean };
   onError: (hasError: boolean, index: number) => void;
