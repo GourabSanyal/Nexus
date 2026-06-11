@@ -10,7 +10,7 @@ import {
   type ImportWalletSchema,
   type SeedPhraseLength,
 } from "@repo/zod/src/walletSchemas/importWalletSchema";
-import { useImportWalletFlow } from "./useImportWalletFlow";
+import { useImportWalletSession } from "../ImportWalletSessionContext";
 
 const parsePastedWords = (text: string): string[] =>
   text
@@ -29,6 +29,7 @@ const cloneImportFormValues = (
 ): ImportWalletSchema => ({
   ...values,
   validationErrors: [...values.validationErrors],
+  selectedImportWallets: [...values.selectedImportWallets],
   inputData: {
     ...values.inputData,
     seedPhraseWords: [...values.inputData.seedPhraseWords],
@@ -37,7 +38,7 @@ const cloneImportFormValues = (
 
 export const useImportWalletForm = () => {
   const [importState, setImportState] = useRecoilState(importWalletState);
-  const { runImportFlow } = useImportWalletFlow();
+  const { runImportFlow } = useImportWalletSession();
 
   const methods = useForm<ImportWalletSchema>({
     resolver: zodResolver(importWalletSchema),
