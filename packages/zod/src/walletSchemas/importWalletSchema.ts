@@ -1,6 +1,9 @@
 import { validateMnemonic } from "bip39";
 import { z } from "zod";
-import { walletImportPreviewSchema } from "./importPreviewSchema";
+import {
+  flatImportWalletEntrySchema,
+  walletImportPreviewSchema,
+} from "./importPreviewSchema";
 import { walletSchema } from "./walletSchema";
 
 export const SEED_PHRASE_LENGTHS = [12, 24] as const;
@@ -78,6 +81,7 @@ export const importWalletSchema = z.object({
   })),
   validationErrors: z.array(z.string()).default([]),
   discoveredWallets: walletImportPreviewSchema.optional(),
+  selectedImportWallets: z.array(flatImportWalletEntrySchema).default([]),
   importedWallet: walletSchema.partial().optional(),
 });
 
