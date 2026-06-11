@@ -16,6 +16,7 @@ export const importWalletState = atom<ImportWalletSchema>({
     },
     validationErrors: [],
     discoveredWallets: undefined,
+    selectedImportWallets: [],
     importedWallet: undefined,
   },
   effects_UNSTABLE: [importWalletPersistAtom],
