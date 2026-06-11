@@ -1,9 +1,10 @@
 import { useCallback, useState } from "react";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useSetRecoilState } from "recoil";
 import { toast } from "sonner";
 import type { FlatImportWalletEntry } from "@my-org/zod";
 import { walletState } from "@my-org/store";
 import { importWalletState } from "@repo/store/src/atoms/importWalletState";
+import { walletFlowState } from "@repo/store/src/atoms/walletFlowState";
 import {
   createEmptySeedPhraseWords,
   type SeedPhraseLength,
@@ -31,6 +32,7 @@ export const useImportPersist = () => {
   const { keyedCandidatesRef, clearSecrets } = useImportWalletSession();
   const [wallet, setWallet] = useRecoilState(walletState);
   const [importState, setImportState] = useRecoilState(importWalletState);
+  const setCurrentFlow = useSetRecoilState(walletFlowState);
   const [isPersisting, setIsPersisting] = useState(false);
 
   const persistSelection = useCallback(
@@ -60,6 +62,7 @@ export const useImportPersist = () => {
 
         clearSecrets();
         setImportState(resetImportWalletState());
+        setCurrentFlow("entry");
 
         const previousSolCount = wallet.solanaWallets?.length ?? 0;
         const previousEthCount = wallet.ethereumWallets?.length ?? 0;
@@ -79,6 +82,7 @@ export const useImportPersist = () => {
       clearSecrets,
       importState.inputData.seedPhrase,
       keyedCandidatesRef,
+      setCurrentFlow,
       setImportState,
       setWallet,
       wallet.ethereumWallets,
