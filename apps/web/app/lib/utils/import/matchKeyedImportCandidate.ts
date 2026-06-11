@@ -1,5 +1,6 @@
 import type { FlatImportWalletEntry } from "@my-org/zod";
 import type { KeyedImportCandidate } from "./deriveImportCandidates";
+import { importAddressesMatch } from "./importAddressMatch";
 
 export const matchKeyedImportCandidate = (
   entry: Pick<FlatImportWalletEntry, "chain" | "address" | "derivationPath">,
@@ -8,6 +9,6 @@ export const matchKeyedImportCandidate = (
   keyed.find(
     (candidate) =>
       candidate.chain === entry.chain &&
-      candidate.address === entry.address &&
-      candidate.derivationPath === entry.derivationPath
+      candidate.derivationPath === entry.derivationPath &&
+      importAddressesMatch(candidate.address, entry.address, entry.chain)
   );
