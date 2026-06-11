@@ -24,6 +24,7 @@ export const useImportWalletFlow = () => {
         isImporting: true,
         currentPhase: "validation",
         validationErrors: [],
+        selectedImportWallets: [],
       }));
 
       try {
