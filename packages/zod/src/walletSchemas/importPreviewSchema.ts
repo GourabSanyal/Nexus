@@ -57,6 +57,13 @@ export const walletImportPreviewRequestSchema = z.object({
   candidates: z.array(importCandidateSchema).min(1),
 });
 
+export const importPreviewNetworkTierSchema = z.enum(["mainnet", "devnet"]);
+
+export const flatImportWalletEntrySchema = walletImportEntrySchema.extend({
+  chain: z.enum(["solana", "ethereum"]),
+  networkTier: importPreviewNetworkTierSchema,
+});
+
 export type DerivationScheme = z.infer<typeof derivationSchemeSchema>;
 export type ImportCandidate = z.infer<typeof importCandidateSchema>;
 export type WalletImportEntry = z.infer<typeof walletImportEntrySchema>;
@@ -64,3 +71,7 @@ export type WalletImportPreview = z.infer<typeof walletImportPreviewSchema>;
 export type WalletImportPreviewRequest = z.infer<
   typeof walletImportPreviewRequestSchema
 >;
+export type ImportPreviewNetworkTier = z.infer<
+  typeof importPreviewNetworkTierSchema
+>;
+export type FlatImportWalletEntry = z.infer<typeof flatImportWalletEntrySchema>;
