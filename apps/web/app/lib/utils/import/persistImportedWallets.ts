@@ -6,6 +6,7 @@ import type {
 } from "@my-org/zod";
 import type { KeyedImportCandidate } from "./deriveImportCandidates";
 import { dedupeImportSelections } from "./dedupeImportSelections";
+import { importAddressesMatch } from "./importAddressMatch";
 import { matchKeyedImportCandidate } from "./matchKeyedImportCandidate";
 
 export type PersistImportedWalletsInput = {
@@ -20,11 +21,6 @@ export type PersistImportedWalletsResult = Pick<
   "mnemonicState" | "solanaWallets" | "ethereumWallets" | "activeTab"
 >;
 
-const addressesMatch = (left: string, right: string, chain: "solana" | "ethereum") =>
-  chain === "ethereum"
-    ? left.toLowerCase() === right.toLowerCase()
-    : left === right;
-
 const walletExists = (
   entry: FlatImportWalletEntry,
   solanaWallets: SolanaWallet[],
@@ -32,12 +28,12 @@ const walletExists = (
 ): boolean => {
   if (entry.chain === "solana") {
     return solanaWallets.some((wallet) =>
-      addressesMatch(wallet.publicKey, entry.address, "solana")
+      importAddressesMatch(wallet.publicKey, entry.address, "solana")
     );
   }
 
   return ethereumWallets.some((wallet) =>
-    addressesMatch(wallet.publicKey, entry.address, "ethereum")
+    importAddressesMatch(wallet.publicKey, entry.address, "ethereum")
   );
 };
 
