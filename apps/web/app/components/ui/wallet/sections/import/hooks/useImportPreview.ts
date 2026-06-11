@@ -101,6 +101,11 @@ export const useImportPreview = () => {
       selectedIds.includes(buildImportWalletEntryId(entry))
     );
 
+    setImportState((prev) => ({
+      ...prev,
+      selectedImportWallets: selected,
+    }));
+
     try {
       await persistSelection(selected);
     } catch (error) {
