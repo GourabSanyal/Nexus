@@ -1,3 +1,4 @@
+use futures::future::join4;
 use serde_json::json;
 
 use crate::api::wallet::body::parse_json_body;
@@ -23,11 +24,13 @@ pub async fn handle_import_data(req: &web_sys::Request) -> (u16, String) {
         .adapter("ethereum")
         .expect("Ethereum adapter missing");
 
-    let solana_mainnet =
-        scan_network(solana_adapter, &candidates, "solana", "mainnet-beta", req).await;
-    let solana_devnet = scan_network(solana_adapter, &candidates, "solana", "devnet", req).await;
-    let ethereum_mainnet = scan_network(eth_adapter, &candidates, "ethereum", "mainnet", req).await;
-    let ethereum_devnet = scan_network(eth_adapter, &candidates, "ethereum", "sepolia", req).await;
+    let (solana_mainnet, solana_devnet, ethereum_mainnet, ethereum_devnet) = join4(
+        scan_network(solana_adapter, &candidates, "solana", "mainnet-beta", req),
+        scan_network(solana_adapter, &candidates, "solana", "devnet", req),
+        scan_network(eth_adapter, &candidates, "ethereum", "mainnet", req),
+        scan_network(eth_adapter, &candidates, "ethereum", "sepolia", req),
+    )
+    .await;
 
     let response = WalletImportResponse {
         solana: ChainImportData {
