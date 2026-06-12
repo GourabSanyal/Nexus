@@ -1,14 +1,13 @@
 import { atom } from "recoil";
-import { WalletSchema } from "@my-org/zod";
+import type { WalletPublicSchema } from "@my-org/zod";
 import { persistAtom } from '../persistence/recoilPersistConfig';
 
-export const walletState = atom<WalletSchema>({
-  key: "walletState",   
+export const walletState = atom<WalletPublicSchema>({
+  key: "walletState",
   default: {
-    mnemonicState: "",
     solanaWallets: [],
     ethereumWallets: [],
-    activeTab: "solana" as "solana" | "ethereum",
+    activeTab: "solana",
   },
   effects_UNSTABLE: [persistAtom],
 });

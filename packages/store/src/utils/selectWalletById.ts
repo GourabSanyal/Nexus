@@ -1,12 +1,16 @@
-import type { EthereumWallet, SolanaWallet, WalletSchema } from "@my-org/zod";
+import type {
+  PublicEthereumWallet,
+  PublicSolanaWallet,
+  WalletPublicSchema,
+} from "@my-org/zod";
 
-type WalletListSlice = Pick<WalletSchema, "solanaWallets" | "ethereumWallets">;
+type WalletListSlice = Pick<WalletPublicSchema, "solanaWallets" | "ethereumWallets">;
 
 /** Resolve a wallet by numeric id across Solana + Ethereum lists (ids are unique per app). */
 export function selectWalletById(
   state: WalletListSlice,
   id: number
-): SolanaWallet | EthereumWallet | undefined {
+): PublicSolanaWallet | PublicEthereumWallet | undefined {
   const solana = state.solanaWallets ?? [];
   const ethereum = state.ethereumWallets ?? [];
   return [...solana, ...ethereum].find((w) => w.id === id);
