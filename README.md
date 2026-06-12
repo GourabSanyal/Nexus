@@ -1,8 +1,27 @@
-Nexus — Multi-Chain Wallet Infrastructure
-Nexus is a production-grade, open-source web based wallet platform built for the modern multi-chain world. It delivers seamless Ethereum and Solana support, letting you send, receive, and manage assets across both networks from a single, unified interface.
+<h1 align="center">Nexus</h1>
 
-Overview
-Built as a TypeScript monorepo with a high-performance Rust backend, powered by Turborepo, Nexus enforces strict separation of concerns across every layer. Designed from the ground up for scalability, security, and clean developer ergonomics. Whether you're integrating wallet infrastructure into your product or evaluating how modern Web3 architecture should be structured, Nexus is built to production standards.
+<p align="center">
+  <strong>A self custodial multi chain wallet for Ethereum and Solana</strong>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-111111?style=flat-square&logo=nextdotjs&logoColor=white" alt="Next.js" />
+  <img src="https://img.shields.io/badge/Rust-000000?style=flat-square&logo=rust&logoColor=white" alt="Rust" />
+  <img src="https://img.shields.io/badge/Cloudflare%20Workers-F38020?style=flat-square&logo=cloudflareworkers&logoColor=white" alt="Cloudflare Workers" />
+  <img src="https://img.shields.io/badge/BIP39%20%2F%20BIP44-1f2937?style=flat-square&logoColor=white" alt="BIP39 and BIP44" />
+</p>
+
+<p align="center">
+  Secure key management in the browser, fast chain operations at the edge, and one clean interface for multi chain wallet flows.
+</p>
+
+---
+
+## Overview
+
+Nexus is a TypeScript monorepo with a Rust backend, wired together with Turborepo and deployed on Cloudflare Workers.  
+The codebase is structured with clear separation of concerns and a focus on scalability, security, and developer experience.  
+It works both as wallet infrastructure you can integrate into your own product and as a reference for building production‑grade Web3 systems.
 
 ## Architecture
 
@@ -98,13 +117,12 @@ flowchart LR
 |-------|------------|
 | Frontend | Next.js 14, React 18, TypeScript, Tailwind CSS, Framer Motion |
 | State Management | Recoil |
-| API Layer | Express.js (TypeScript), Rust (Axum), Alchemy gRPCs | 
 | Blockchain | Solana SDK, Ethers.js |
 | Build Tools | Turborepo, Yarn Workspaces |
 
 ## Key Features
 
-- **Multi-chain Support**: Ethereum (Mainnet, Sepolia, Holesky) and Solana (Mainnet, Devnet)
+- **Multi-chain Support**: Ethereum (Mainnet, Sepolia) and Solana (Mainnet, Devnet)
 - **Wallet Generation**: BIP-39 seed phrase based wallet creation
 - **Balance Fetching**: Real-time on-chain balance queries
 - **Transaction History**: View past transactions on both chains
@@ -124,34 +142,33 @@ flowchart LR
 ```bash
 # Root workspace
 yarn install
+
+# apps/web
+yarn install
+
+# packages/rust-apis
+yarn install
+
+# In packages/rust-apis, verify the Rust backend
+cargo test    # run the full Rust test suite and confirm all tests pass
 ```
 
 ### 2. Configure Environment Variables
 
 Create `.env` files in the following locations:
 
-**`packages/api/.env`**
-```env
-NODE_ENV=development
-CORS_ORIGIN=http://localhost:3000
-NEXT_PUBLIC_RUST_API_URL=http://localhost:9000
-NEXT_PUBLIC_API_URL=http://localhost:3001
-ETHEREUM_MAINNET=<your-alchemy-url>
-ETHEREUM_SEPOLIA=<your-alchemy-url>
-ETHEREUM_HOLESKY=<your-alchemy-url>
-```
-
 **`packages/rust-apis/.env`**
 ```env
 PORT=9000
 CORS_ORIGIN=http://localhost:3000
-SOLANA_MAINNET_RPC=<your-alchemy-url>
-SOLANA_DEVNET_RPC=<your-alchemy-url>
+SOLANA_MAINNET_RPC=https://solana-mainnet.g.alchemy.com/v2/<api-key>
+SOLANA_DEVNET_RPC=https://solana-devnet.g.alchemy.com/v2/<api-key>
+ETHEREUM_MAINNET=https://eth-mainnet.g.alchemy.com/v2/<api-key>
+ETHEREUM_SEPOLIA=https://eth-sepolia.g.alchemy.com/v2/<api-key>
 ```
 
 **`apps/web/.env`**
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:3001
 NEXT_PUBLIC_RUST_API_URL=http://localhost:9000
 ```
 
@@ -161,12 +178,9 @@ NEXT_PUBLIC_RUST_API_URL=http://localhost:9000
 
 ```bash
 # Terminal 1 - Rust API (Solana)
-cd packages/rust-apis && wranger dev
+cd packages/rust-apis && yarn dev
 
-# Terminal 2 - TypeScript API (Ethereum)
-cd packages/api && yarn start
-
-# Terminal 3 - Frontend
+# Terminal 2 - Frontend
 cd apps/web && yarn dev
 ```
 
@@ -175,8 +189,7 @@ cd apps/web && yarn dev
 | Service | Port | URL |
 |---------|------|-----|
 | Frontend | 3000 | http://localhost:3000 |
-| TypeScript API | 3001 | http://localhost:3001 |
-| Rust API | 9000 | http://localhost:9000 |
+| Rust Backend | 9000 | http://localhost:9000 |
 
 ## Project Structure
 
@@ -184,8 +197,8 @@ cd apps/web && yarn dev
 ├── apps/
 │   └── web/                 # Next.js frontend
 ├── packages/
-│   ├── api/                 # Express.js API (Ethereum)
-│   ├── rust-apis/           # Axum Rust API (Solana)
+│   ├── api/                 # Express.js API (Deprecated in latest version)
+│   ├── rust-apis/           # Axum Rust API (Solana/Ethereum gRPCs)
 │   ├── store/               # Shared Recoil state
 │   ├── ui/                  # Shared UI components
 │   └── zod/                 # Validation schemas
