@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { FlatImportWalletEntry } from "@my-org/zod";
-import type { KeyedImportCandidate } from "./deriveImportCandidates";
-import { persistImportedWallets } from "./persistImportedWallets";
+import type { KeyedImportCandidate } from "@/app/lib/utils/import/deriveImportCandidates";
+import { persistImportedWallets } from "@/app/lib/utils/import/persistImportedWallets";
 
 const solEntry = (
   address: string,

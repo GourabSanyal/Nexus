@@ -4,7 +4,8 @@ import {
   buildExplorerTransactionUrl,
   buildReceivePaymentUri,
   chainLabelFor,
-} from "./chainPresentation";
+} from "@/app/lib/adapters/chainPresentation";
+
 describe("chainPresentation (adapter internals)", () => {
   it("builds Solana explorer URLs", () => {
     const url = buildExplorerTransactionUrl(

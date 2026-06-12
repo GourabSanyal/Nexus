@@ -39,6 +39,7 @@ Source of truth for architecture, complexity, and change discipline in `apps/web
 
 - `yarn lint` (or `npm run lint` from `apps/web`)
 - `yarn build`
+- `yarn test` — Vitest; tests live under `tests/` and **mirror** `app/` paths (e.g. `app/lib/crypto/walletVault.ts` → `tests/app/lib/crypto/walletVault.test.ts`). Import source via `@/app/...`.
 - Prefer adding tests when touching send/balance/history logic (establish minimal harness if missing).
 
 ## Change management

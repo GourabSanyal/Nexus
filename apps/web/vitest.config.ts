@@ -5,7 +5,7 @@ const repoRoot = path.resolve(__dirname, "../..");
 
 export default defineConfig({
   test: {
-    include: ["app/**/*.test.ts"],
+    include: ["tests/**/*.test.ts"],
     environment: "node",
     globals: true,
     clearMocks: true,
@@ -13,6 +13,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "."),
+      "@api-types": path.join(repoRoot, "packages/api/src/types"),
       "@repo/store/src/enums/network": path.join(
         repoRoot,
         "packages/store/src/enums/network.ts"

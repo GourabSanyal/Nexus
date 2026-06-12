@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { deriveImportCandidates } from "./deriveImportCandidates";
+import { deriveImportCandidates } from "@/app/lib/utils/import/deriveImportCandidates";
 
 const ABANDON_MNEMONIC =
   "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about";

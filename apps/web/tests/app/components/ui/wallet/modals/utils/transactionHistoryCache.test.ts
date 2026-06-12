@@ -11,7 +11,7 @@ import {
   appendTransactionsToHistory,
   getNewestCachedSignature,
   getOldestCachedSignature,
-} from "./transactionHistoryCache";
+} from "@/app/components/ui/wallet/modals/utils/transactionHistoryCache";
 
 const makeTx = (signature: string): TransactionInfo => ({
   signature,
@@ -49,33 +49,33 @@ describe("transactionHistoryCache", () => {
     expect(hasHistoryChanged(previous, fetched)).toBe(true);
     expect(hasHistoryChanged(fetched, [...fetched])).toBe(false);
   });
-  
+
   it("prepends new transactions and deduplicates", () => {
     const existing = [makeTx("tx2"), makeTx("tx1")];
     const store = setTransactionsInHistory({}, 1, NetworkEnum.Mainnet, existing, null);
-    
-    const newTxs = [makeTx("tx3"), makeTx("tx2")]; // tx2 is duplicate
+
+    const newTxs = [makeTx("tx3"), makeTx("tx2")];
     const updated = prependTransactionsToHistory(store, 1, NetworkEnum.Mainnet, newTxs);
-    
+
     const result = readCachedTransactions(updated, 1, NetworkEnum.Mainnet);
-    expect(result.map(t => t.signature)).toEqual(["tx3", "tx2", "tx1"]);
+    expect(result.map((t) => t.signature)).toEqual(["tx3", "tx2", "tx1"]);
   });
-  
+
   it("appends older transactions and deduplicates", () => {
     const existing = [makeTx("tx3"), makeTx("tx2")];
     const store = setTransactionsInHistory({}, 1, NetworkEnum.Mainnet, existing, null);
-    
-    const olderTxs = [makeTx("tx2"), makeTx("tx1")]; // tx2 is duplicate
+
+    const olderTxs = [makeTx("tx2"), makeTx("tx1")];
     const updated = appendTransactionsToHistory(store, 1, NetworkEnum.Mainnet, olderTxs, null);
-    
+
     const result = readCachedTransactions(updated, 1, NetworkEnum.Mainnet);
-    expect(result.map(t => t.signature)).toEqual(["tx3", "tx2", "tx1"]);
+    expect(result.map((t) => t.signature)).toEqual(["tx3", "tx2", "tx1"]);
   });
-  
+
   it("gets newest and oldest cached signatures", () => {
     const txs = [makeTx("newest"), makeTx("middle"), makeTx("oldest")];
     const store = setTransactionsInHistory({}, 1, NetworkEnum.Devnet, txs, null);
-    
+
     expect(getNewestCachedSignature(store, 1, NetworkEnum.Devnet)).toBe("newest");
     expect(getOldestCachedSignature(store, 1, NetworkEnum.Devnet)).toBe("oldest");
   });

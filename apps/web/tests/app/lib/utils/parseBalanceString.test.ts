@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseBalanceString } from "./parseBalanceString";
+import { parseBalanceString } from "@/app/lib/utils/parseBalanceString";
 
 describe("parseBalanceString", () => {
   it("returns 0 for empty input", () => {

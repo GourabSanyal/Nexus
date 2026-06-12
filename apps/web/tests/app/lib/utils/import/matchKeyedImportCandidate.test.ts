@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { KeyedImportCandidate } from "./deriveImportCandidates";
-import { matchKeyedImportCandidate } from "./matchKeyedImportCandidate";
+import type { KeyedImportCandidate } from "@/app/lib/utils/import/deriveImportCandidates";
+import { matchKeyedImportCandidate } from "@/app/lib/utils/import/matchKeyedImportCandidate";
 
 const keyedEth = (
   address: string,

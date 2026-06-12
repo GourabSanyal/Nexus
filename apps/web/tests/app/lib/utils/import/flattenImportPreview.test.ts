@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { WalletImportPreview } from "@my-org/zod";
-import { flattenImportPreview } from "./flattenImportPreview";
+import { flattenImportPreview } from "@/app/lib/utils/import/flattenImportPreview";
 
 const basePreview = (): WalletImportPreview => ({
   solana: { mainnet: { wallets: [] }, devnet: { wallets: [] } },
