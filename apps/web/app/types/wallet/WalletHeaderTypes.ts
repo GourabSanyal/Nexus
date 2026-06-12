@@ -1,7 +1,7 @@
-import { EthereumWallet, SolanaWallet } from "@my-org/zod";
+import type { PublicEthereumWallet, PublicSolanaWallet } from "@my-org/zod";
 
 export interface WalletHeaderProps {
-  wallet: SolanaWallet | EthereumWallet;
+  wallet: PublicSolanaWallet | PublicEthereumWallet;
   balance?: string | bigint;
   isRefreshing: boolean;
   onRefresh: () => void;

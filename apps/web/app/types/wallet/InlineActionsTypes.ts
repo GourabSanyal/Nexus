@@ -1,7 +1,7 @@
-import { EthereumWallet, SolanaWallet } from "@my-org/zod";
+import type { PublicEthereumWallet, PublicSolanaWallet } from "@my-org/zod";
 
 export interface InlineActionsProps {
-  wallet: SolanaWallet | EthereumWallet;
+  wallet: PublicSolanaWallet | PublicEthereumWallet;
   onEditName: (newName: string) => void;
   onDelete: () => void;
 }

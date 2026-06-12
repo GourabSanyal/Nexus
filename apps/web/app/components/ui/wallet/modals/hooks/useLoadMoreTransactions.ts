@@ -7,14 +7,14 @@ import {
 } from "@repo/store/src/atoms/transactionHistoryState";
 import { TransactionHistoryStore } from "@api-types/TransactionTypes";
 import { IWalletAdapter } from "@/app/lib/adapters/IWalletAdapter";
-import type { EthereumWallet, SolanaWallet } from "@my-org/zod";
+import type { PublicEthereumWallet, PublicSolanaWallet } from "@my-org/zod";
 import {
   loadMoreTransactionHistory,
   isLoadMoreInFlight,
 } from "@/app/lib/services/transactionHistoryFetch";
 import { showTransactionFetchError } from "./transactionHistoryResolve";
 
-type WalletRef = SolanaWallet | EthereumWallet | undefined;
+type WalletRef = PublicSolanaWallet | PublicEthereumWallet | undefined;
 
 interface UseLoadMoreTransactionsParams {
   walletId: number;

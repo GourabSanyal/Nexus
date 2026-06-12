@@ -1,8 +1,8 @@
 import { NetworkEnum } from "@my-org/store";
-import type { EthereumWallet, SolanaWallet } from "@my-org/zod";
+import type { PublicEthereumWallet, PublicSolanaWallet } from "@my-org/zod";
 import { IWalletAdapter } from "@/app/lib/adapters/IWalletAdapter";
 
-export type WalletRef = SolanaWallet | EthereumWallet | undefined;
+export type WalletRef = PublicSolanaWallet | PublicEthereumWallet | undefined;
 
 export interface FetchOptions {
   forceRefresh?: boolean;

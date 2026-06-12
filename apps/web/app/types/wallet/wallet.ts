@@ -1,9 +1,3 @@
-export interface Wallet {
-    id: number;
-    name: string;
-    publicKey: string;
-    privateKey: string;
-    mnemonic?: string;
-    path?: string;
-    type: 'solana' | 'ethereum';
-  }
+import type { PublicEthereumWallet, PublicSolanaWallet } from "@my-org/zod";
+
+export type Wallet = PublicSolanaWallet | PublicEthereumWallet;
