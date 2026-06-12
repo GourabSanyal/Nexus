@@ -1,4 +1,5 @@
 export { walletState } from "./atoms/walletState";
+export { walletVaultEnvelopeState } from "./atoms/walletVaultEnvelopeState";
 
 export * from "./atoms/solanaWalletState";
 export * from "./atoms/ethereumWalletState";
