@@ -1,40 +1,56 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Eye, EyeOff, Copy, LogOut } from "lucide-react";
+import { Eye, EyeOff, Copy, LogOut, Download } from "lucide-react";
 import { Button } from "../button/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "../card/card";
-import {
-  TooltipProvider,
-} from "../tooltip";
+import { TooltipProvider } from "../tooltip";
 import { copyToClipboard } from "@/app/lib/utils/clipboard";
 import { SeedPhraseContainerPropTypes } from "@/app/types/components";
-import { useSetRecoilState } from "recoil";
-import { walletState } from "@repo/store/src/atoms/walletState";
-
 import { Dialog } from "../dialog/dialog";
 import LogoutConfirmationModal from "@components/ui/wallet/sections/password/LogoutConfirmationModal";
+import PasswordInput from "./sections/password/PasswordInput";
+import { useWalletVault } from "@/app/lib/contexts/WalletVaultContext";
+import { toast } from "sonner";
 
 const SeedPhraseContainer = ({
-  mnemonic,
   activeTab,
   setActiveTab,
+  onImportMore,
 }: SeedPhraseContainerPropTypes) => {
   const [showSeedPhrase, setShowSeedPhrase] = useState<boolean>(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState<boolean>(false);
-  const setWalletState = useSetRecoilState(walletState);
+  const [seedDialogOpen, setSeedDialogOpen] = useState<boolean>(false);
+  const vault = useWalletVault();
 
   const handleLogout = () => {
-    setWalletState({
-      mnemonicState: "",
-      solanaWallets: [],
-      ethereumWallets: [],
-      activeTab: "solana",
-    });
+    vault.clearWallet();
     setIsLogoutModalOpen(false);
+    setShowSeedPhrase(false);
   };
+
+  const handleToggleSeedPhrase = useCallback(() => {
+    if (showSeedPhrase) {
+      setShowSeedPhrase(false);
+      return;
+    }
+    setSeedDialogOpen(true);
+  }, [showSeedPhrase]);
+
+  const onSeedPasswordSubmit = async ({ password }: { password: string }) => {
+    const valid = await vault.verifyPassword(password);
+    if (!valid) {
+      toast.error("Incorrect password");
+      return;
+    }
+
+    setShowSeedPhrase(true);
+    setSeedDialogOpen(false);
+  };
+
+  const mnemonic = vault.mnemonic ?? "";
 
   return (
     <TooltipProvider>
@@ -47,16 +63,28 @@ const SeedPhraseContainer = ({
         >
           <Card className="mb-6 bg-card text-card-foreground">
             <CardHeader>
-              <CardTitle className="flex justify-between items-center">
+              <CardTitle className="flex justify-between items-center gap-2">
                 <span>Crypto Wallet Generator</span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-red-500 hover:text-red-700"
-                  onClick={() => setIsLogoutModalOpen(true)}
-                >
-                  <LogOut size={20} />
-                </Button>
+                <div className="flex items-center gap-1">
+                  {onImportMore ? (
+                    <Button
+                      variant="ghost"
+                      className="text-muted-foreground hover:text-foreground text-sm px-2"
+                      onClick={onImportMore}
+                    >
+                      <Download className="h-4 w-4 mr-1" />
+                      Import
+                    </Button>
+                  ) : null}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-red-500 hover:text-red-700"
+                    onClick={() => setIsLogoutModalOpen(true)}
+                  >
+                    <LogOut size={20} />
+                  </Button>
+                </div>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -65,6 +93,9 @@ const SeedPhraseContainer = ({
                   onConfirm={handleLogout}
                   onCancel={() => setIsLogoutModalOpen(false)}
                 />
+              </Dialog>
+              <Dialog open={seedDialogOpen} onOpenChange={setSeedDialogOpen}>
+                <PasswordInput onSubmit={onSeedPasswordSubmit} />
               </Dialog>
               <div className="mb-4">
                 {mnemonic && (
@@ -87,7 +118,7 @@ const SeedPhraseContainer = ({
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => setShowSeedPhrase(!showSeedPhrase)}
+                          onClick={handleToggleSeedPhrase}
                           className="text-muted-foreground hover:text-foreground"
                         >
                           {showSeedPhrase ? (
