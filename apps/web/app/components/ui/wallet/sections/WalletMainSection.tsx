@@ -1,18 +1,19 @@
 import { CardContent } from "../../card/card";
 import { Button } from "../../button/button";
 import { Copy, Eye, EyeOff } from "lucide-react";
-import { SolanaWallet, EthereumWallet } from "@my-org/zod";
+import type { PublicEthereumWallet, PublicSolanaWallet } from "@my-org/zod";
 import { copyToClipboard } from "@/app/lib/utils/clipboard";
 import ReceiveButton from "../actions/ReceiveButton";
 import SendButton from "../actions/SendButton";
 import HistoryButton from "../actions/HistoryButton";
 import { Dialog } from "../../dialog/dialog";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import WarningModal from "@components/ui/wallet/sections/password/WarningModal";
-
 import PasswordInput from "./password/PasswordInput";
+import { useWalletVault } from "@/app/lib/contexts/WalletVaultContext";
+import { toast } from "sonner";
 
-type Wallet = SolanaWallet | EthereumWallet;
+type Wallet = PublicSolanaWallet | PublicEthereumWallet;
 
 export interface WalletMainSectionProps {
   wallet: Wallet;
@@ -29,29 +30,50 @@ export default function WalletMainSection({
 }: WalletMainSectionProps) {
   const [isPrivateVisible, setIsPrivateVisible] = useState<boolean>(false);
   const [warnOpen, setWarnOpen] = useState<boolean>(false);
-  const [step, setStep] = useState<"warn" | "password">("warn");
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState<boolean>(false);
+  const vault = useWalletVault();
 
-  const onPasswordSubmit = (_data: { password: string }) => {
-    setIsPrivateVisible(true);
-    setWarnOpen(false);
-    setStep("warn");
-  };
+  useEffect(() => {
+    if (!vault.isUnlocked) {
+      setIsPrivateVisible(false);
+    }
+  }, [vault.isUnlocked]);
+
+  const resolvedPrivateKey = vault.getPrivateKey(wallet.id, wallet.type);
+
   const handleTogglePrivate = useCallback(() => {
     if (isPrivateVisible) {
       setIsPrivateVisible(false);
       return;
     }
-    setWarnOpen(true);
-  }, [isPrivateVisible]);
 
-  const openPasswordCoursal = useCallback(() => {
-    setStep("password");
-  }, []);
+    if (!vault.isUnlocked) {
+      toast.error("Unlock your wallet to view the private key");
+      return;
+    }
+
+    setWarnOpen(true);
+  }, [isPrivateVisible, vault.isUnlocked]);
 
   const confirmViewPrivate = useCallback(() => {
-    setIsPrivateVisible(true);
     setWarnOpen(false);
+    setPasswordDialogOpen(true);
   }, []);
+
+  const onPrivateKeyPasswordSubmit = async ({
+    password,
+  }: {
+    password: string;
+  }) => {
+    const valid = await vault.verifyPassword(password);
+    if (!valid) {
+      toast.error("Incorrect password");
+      return;
+    }
+
+    setIsPrivateVisible(true);
+    setPasswordDialogOpen(false);
+  };
 
   return (
     <CardContent>
@@ -96,22 +118,32 @@ export default function WalletMainSection({
               onOpenChange={(open) => {
                 if (!open) {
                   setWarnOpen(false);
-                  setStep("warn");
+                }
+              }}
+            >
+              <WarningModal onClick={confirmViewPrivate} />
+            </Dialog>
+            <Dialog
+              open={passwordDialogOpen}
+              onOpenChange={(open) => {
+                setPasswordDialogOpen(open);
+                if (!open) {
                   setIsPrivateVisible(false);
                 }
               }}
             >
-              {step === "warn" ? (
-                <WarningModal onClick={openPasswordCoursal} />
-              ) : (
-                <PasswordInput onSubmit={onPasswordSubmit} />
-              )}
+              <PasswordInput onSubmit={onPrivateKeyPasswordSubmit} />
             </Dialog>
             <Button
               variant="ghost"
               size="icon"
               className="text-muted-foreground hover:text-foreground"
-              onClick={() => copyToClipboard(wallet.privateKey, "private key")}
+              disabled={!isPrivateVisible || !resolvedPrivateKey}
+              onClick={() => {
+                if (resolvedPrivateKey) {
+                  copyToClipboard(resolvedPrivateKey, "private key");
+                }
+              }}
             >
               <Copy className="h-5 w-5" />
             </Button>
@@ -119,7 +151,9 @@ export default function WalletMainSection({
         </div>
         <div className="bg-muted p-3 rounded-md overflow-x-auto">
           <code className="text-xs text-muted-foreground">
-            {isPrivateVisible ? wallet.privateKey : "••••••••••••••••"}
+            {isPrivateVisible && resolvedPrivateKey
+              ? resolvedPrivateKey
+              : "••••••••••••••••"}
           </code>
         </div>
 
@@ -131,4 +165,4 @@ export default function WalletMainSection({
       </div>
     </CardContent>
   );
-}
+};

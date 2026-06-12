@@ -8,17 +8,23 @@ import { WalletPath } from "@repo/constants/src/WalletPaths";
 import { useWalletOperations } from "@my-org/store";
 import { generateWallet } from "@/app/lib/utils/walletGeneration";
 import { WalletRenderer } from "./WalletRenderer";
+import { useWalletVault } from "@/app/lib/contexts/WalletVaultContext";
 
 const SingleWallet = ({ path }: SingleWalletProps) => {
-  const { addWallet, walletState } = useWalletOperations();
+  const { walletState } = useWalletOperations();
+  const { addWallet, mnemonic, isUnlocked } = useWalletVault();
   const [isGenerating, setIsGenerating] = useState(false);
   const solanaWallets = walletState.solanaWallets || [];
   const ethereumWallets = walletState.ethereumWallets || [];
-  const mnemonic = walletState.mnemonicState;
 
   const generateWallets = async () => {
     if (!mnemonic) {
       toast.error("Please generate a mnemonic first");
+      return;
+    }
+
+    if (!isUnlocked) {
+      toast.error("Unlock your wallet to generate accounts");
       return;
     }
 
@@ -30,7 +36,12 @@ const SingleWallet = ({ path }: SingleWalletProps) => {
           : ethereumWallets.length;
 
       const walletData = await generateWallet(mnemonic, path, accountIndex);
-      addWallet(walletData.type, walletData.publicKey, walletData.privateKey);
+      await addWallet(
+        walletData.type,
+        walletData.publicKey,
+        walletData.privateKey,
+        path
+      );
     } catch (error) {
       console.error("Error generating wallet:", error);
       toast.error("Failed to generate wallet. Please try again.");

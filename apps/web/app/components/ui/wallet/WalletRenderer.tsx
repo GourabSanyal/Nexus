@@ -5,9 +5,11 @@ import { WalletRendererProps } from "@/app/types/wallet";
 import { WalletRendererContent } from "./WalletRendererContent";
 import { usePerWalletModalState } from "@/app/hooks/usePerWalletModalState";
 import { useWalletBalanceFetch } from "@/app/hooks/useWalletBalanceFetch";
+import { useWalletVault } from "@/app/lib/contexts/WalletVaultContext";
 
 export const WalletRenderer = ({ wallets }: WalletRendererProps) => {
-  const { editWalletName, deleteWallet } = useWalletOperations();
+  const { editWalletName } = useWalletOperations();
+  const { deleteWallet } = useWalletVault();
   const {
     receiveOpenById,
     sendOpenById,
@@ -45,7 +47,7 @@ export const WalletRenderer = ({ wallets }: WalletRendererProps) => {
                 onEditName={(newName: string) =>
                   editWalletName(wallet.id, newName, wallet.type)
                 }
-                onDelete={() => deleteWallet(wallet.id, wallet.type)}
+                onDelete={() => void deleteWallet(wallet.id, wallet.type)}
                 onReceive={openReceive}
                 onSend={openSend}
                 onHistory={openHistory}
