@@ -36,11 +36,13 @@ describe("persistImportedWallets", () => {
       existing: { solanaWallets: [], ethereumWallets: [] },
     });
 
-    expect(result.mnemonicState).toContain("abandon");
-    expect(result.solanaWallets).toHaveLength(1);
-    expect(result.solanaWallets[0]?.publicKey).toBe("ActiveSol");
-    expect(result.solanaWallets[0]?.path).toBe("m/44'/501'/0'/0'");
-    expect(result.activeTab).toBe("solana");
+    expect(result.mnemonic).toContain("abandon");
+    expect(result.publicState.solanaWallets).toHaveLength(1);
+    expect(result.publicState.solanaWallets[0]?.publicKey).toBe("ActiveSol");
+    expect(result.publicState.solanaWallets[0]?.path).toBe("m/44'/501'/0'/0'");
+    expect(result.publicState.activeTab).toBe("solana");
+    expect(result.vaultEntries).toHaveLength(1);
+    expect(result.vaultEntries[0]?.privateKey).toBe("c2VjcmV0");
   });
 
   it("dedupes the same wallet across network tiers", () => {
@@ -54,7 +56,7 @@ describe("persistImportedWallets", () => {
       existing: { solanaWallets: [], ethereumWallets: [] },
     });
 
-    expect(result.solanaWallets).toHaveLength(1);
+    expect(result.publicState.solanaWallets).toHaveLength(1);
   });
 
   it("throws when private keys are missing", () => {

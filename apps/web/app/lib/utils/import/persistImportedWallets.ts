@@ -1,9 +1,10 @@
 import type {
-  EthereumWallet,
   FlatImportWalletEntry,
-  SolanaWallet,
-  WalletSchema,
+  PublicEthereumWallet,
+  PublicSolanaWallet,
+  WalletPublicSchema,
 } from "@my-org/zod";
+import type { VaultWalletEntry } from "@/app/lib/crypto/walletVault";
 import type { KeyedImportCandidate } from "./deriveImportCandidates";
 import { dedupeImportSelections } from "./dedupeImportSelections";
 import { importAddressesMatch } from "./importAddressMatch";
@@ -13,18 +14,19 @@ export type PersistImportedWalletsInput = {
   mnemonic: string;
   selected: FlatImportWalletEntry[];
   keyed: KeyedImportCandidate[];
-  existing: Pick<WalletSchema, "solanaWallets" | "ethereumWallets">;
+  existing: Pick<WalletPublicSchema, "solanaWallets" | "ethereumWallets">;
 };
 
-export type PersistImportedWalletsResult = Pick<
-  WalletSchema,
-  "mnemonicState" | "solanaWallets" | "ethereumWallets" | "activeTab"
->;
+export type PersistImportedWalletsResult = {
+  publicState: WalletPublicSchema;
+  vaultEntries: VaultWalletEntry[];
+  mnemonic: string;
+};
 
 const walletExists = (
   entry: FlatImportWalletEntry,
-  solanaWallets: SolanaWallet[],
-  ethereumWallets: EthereumWallet[]
+  solanaWallets: PublicSolanaWallet[],
+  ethereumWallets: PublicEthereumWallet[]
 ): boolean => {
   if (entry.chain === "solana") {
     return solanaWallets.some((wallet) =>
@@ -61,6 +63,7 @@ export const persistImportedWallets = ({
 }: PersistImportedWalletsInput): PersistImportedWalletsResult => {
   const solanaWallets = [...(existing.solanaWallets ?? [])];
   const ethereumWallets = [...(existing.ethereumWallets ?? [])];
+  const vaultEntries: VaultWalletEntry[] = [];
   const imported: FlatImportWalletEntry[] = [];
 
   for (const entry of dedupeImportSelections(selected)) {
@@ -76,15 +79,19 @@ export const persistImportedWallets = ({
     }
 
     const id = Date.now() + imported.length;
+    vaultEntries.push({
+      id,
+      chain: entry.chain,
+      privateKey: keyedCandidate.privateKey,
+      path: entry.derivationPath,
+    });
 
     if (entry.chain === "solana") {
       solanaWallets.push({
         id,
         name: `Solana Wallet ${solanaWallets.length + 1}`,
         publicKey: entry.address,
-        privateKey: keyedCandidate.privateKey,
         type: "solana",
-        mnemonic,
         path: entry.derivationPath,
       });
     } else {
@@ -92,9 +99,7 @@ export const persistImportedWallets = ({
         id,
         name: `Ethereum Wallet ${ethereumWallets.length + 1}`,
         publicKey: entry.address,
-        privateKey: keyedCandidate.privateKey,
         type: "ethereum",
-        mnemonic,
         path: entry.derivationPath,
       });
     }
@@ -107,9 +112,12 @@ export const persistImportedWallets = ({
   }
 
   return {
-    mnemonicState: mnemonic,
-    solanaWallets,
-    ethereumWallets,
-    activeTab: resolveActiveTab(imported),
+    mnemonic,
+    vaultEntries,
+    publicState: {
+      solanaWallets,
+      ethereumWallets,
+      activeTab: resolveActiveTab(imported),
+    },
   };
 };
