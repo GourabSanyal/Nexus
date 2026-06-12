@@ -13,9 +13,9 @@ export const WalletActionButton = ({
   return (
     <Button
       onClick={onClick}
-      className={`w-full sm:w-[28vw] min-w-[20vw] py-2 sm:py-3 px-4 sm:px-6 ${config!.bgColor} ${config!.textColor} text-sm sm:text-base font-semibold rounded-lg ${config!.hoverColor} transition-all duration-300 shadow-md hover:shadow-lg border ${config!.borderColor} ${className}`}
+      className={`w-full max-w-[280px] sm:max-w-xs py-3 px-6 ${config!.bgColor} ${config!.textColor} text-sm sm:text-base font-semibold rounded-lg ${config!.hoverColor} transition-all duration-300 shadow-md hover:shadow-lg border ${config!.borderColor} ${className}`}
     >
-      <IconComponent className="inline-block mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+      <IconComponent className="inline-block mr-2 h-5 w-5 shrink-0" />
       {config!.text}
     </Button>
   );

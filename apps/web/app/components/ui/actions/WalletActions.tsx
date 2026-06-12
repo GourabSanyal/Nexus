@@ -6,9 +6,9 @@ export const WalletActions = ({
   importWallet,
 }: WalletActionsProps) => {
   return (
-    <div className="flex flex-col sm:flex-row justify-center items-center w-full gap-4 sm:gap-6 mb-6 sm:mb-8">
-      <WalletActionButton actionType="generate" onClick={generateWallet} />
+    <div className="flex flex-col items-center justify-center w-full min-h-[calc(100dvh-10rem)] sm:min-h-[calc(100dvh-12rem)] px-4 gap-4 sm:gap-5">
       <WalletActionButton actionType="import" onClick={importWallet} />
+      <WalletActionButton actionType="generate" onClick={generateWallet} />
     </div>
   );
 };
