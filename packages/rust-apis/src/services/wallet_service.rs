@@ -8,6 +8,8 @@ use super::wallet_derivation::{
 
 pub use super::wallet_derivation::DerivedCandidate;
 
+/// Parity unit tests only; production API accepts pre-derived `candidates`.
+#[allow(dead_code)]
 pub fn derive_import_candidates(
     mnemonic_str: &str,
     max_accounts: Option<u32>,
@@ -27,20 +29,14 @@ fn import_candidate_to_derived(candidate: &ImportCandidate) -> Result<DerivedCan
     })
 }
 
-/// Prefer explicit `candidates` (production); fall back to `seedPhrase` (dev).
 pub fn resolve_import_candidates(request: &WalletImportRequest) -> Result<Vec<DerivedCandidate>> {
-    if let Some(ref candidates) = request.candidates {
-        if !candidates.is_empty() {
-            return candidates.iter().map(import_candidate_to_derived).collect();
-        }
+    if request.candidates.is_empty() {
+        return Err(anyhow!("Request must include non-empty candidates"));
     }
 
-    match request.seed_phrase.as_deref() {
-        Some(seed) if !seed.trim().is_empty() => {
-            derive_import_candidates(seed.trim(), request.max_accounts)
-        }
-        _ => Err(anyhow!(
-            "Request must include non-empty candidates or seedPhrase"
-        )),
-    }
+    request
+        .candidates
+        .iter()
+        .map(import_candidate_to_derived)
+        .collect()
 }

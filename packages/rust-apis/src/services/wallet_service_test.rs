@@ -1,21 +1,7 @@
 #[cfg(test)]
 mod tests {
-    use crate::models::wallet_import::{
-        DerivationScheme, ImportCandidate, ImportChain, WalletImportRequest,
-    };
+    use crate::models::wallet_import::{DerivationScheme, WalletImportRequest};
     use crate::services::wallet_service::{derive_import_candidates, resolve_import_candidates};
-
-    #[test]
-    fn test_resolve_import_candidates_from_seed_phrase() {
-        let request: WalletImportRequest = serde_json::from_str(
-            r#"{"seedPhrase":"athlete reason combine sponsor verb clay ghost melt art invest often saddle","maxAccounts":2}"#,
-        )
-        .expect("valid seed request");
-
-        let candidates = resolve_import_candidates(&request).expect("seed mode");
-        assert!(candidates.iter().any(|c| c.chain == "solana"));
-        assert!(candidates.iter().any(|c| c.chain == "ethereum"));
-    }
 
     #[test]
     fn test_resolve_import_candidates_from_explicit_candidates() {
@@ -32,31 +18,19 @@ mod tests {
     }
 
     #[test]
-    fn test_resolve_import_candidates_prefers_candidates_over_seed() {
-        let request = WalletImportRequest {
-            candidates: Some(vec![ImportCandidate {
-                chain: ImportChain::Ethereum,
-                address: "0xabc".to_string(),
-                derivation_path: "m/44'/60'/0'/0/0".to_string(),
-                scheme: DerivationScheme::Standard,
-                account_index: 0,
-            }]),
-            seed_phrase: Some(
-                "athlete reason combine sponsor verb clay ghost melt art invest often saddle"
-                    .to_string(),
-            ),
-            max_accounts: None,
-        };
-
-        let candidates = resolve_import_candidates(&request).expect("prefer candidates");
-        assert_eq!(candidates.len(), 1);
-        assert_eq!(candidates[0].chain, "ethereum");
+    fn test_resolve_import_candidates_rejects_empty_candidates() {
+        let request: WalletImportRequest =
+            serde_json::from_str(r#"{"candidates":[]}"#).expect("empty candidates deserializes");
+        assert!(resolve_import_candidates(&request).is_err());
     }
 
     #[test]
-    fn test_resolve_import_candidates_rejects_empty_payload() {
-        let request: WalletImportRequest =
-            serde_json::from_str("{}").expect("empty object deserializes");
+    fn test_resolve_import_candidates_rejects_legacy_seed_phrase_body() {
+        let request: WalletImportRequest = serde_json::from_str(
+            r#"{"seedPhrase":"athlete reason combine sponsor verb clay ghost melt art invest often saddle","maxAccounts":3}"#,
+        )
+        .expect("legacy body deserializes without candidates");
+
         assert!(resolve_import_candidates(&request).is_err());
     }
 

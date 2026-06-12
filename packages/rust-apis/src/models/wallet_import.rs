@@ -41,12 +41,7 @@ pub struct ImportCandidate {
 #[serde(rename_all = "camelCase")]
 pub struct WalletImportRequest {
     #[serde(default)]
-    pub candidates: Option<Vec<ImportCandidate>>,
-    /// Dev-only: derive candidates server-side. Removed in Backend Slice G.
-    #[serde(default)]
-    pub seed_phrase: Option<String>,
-    #[serde(default)]
-    pub max_accounts: Option<u32>,
+    pub candidates: Vec<ImportCandidate>,
 }
 
 #[derive(Debug, Serialize)]
