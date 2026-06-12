@@ -11,6 +11,7 @@ import {
 } from "@repo/zod/src/walletSchemas/importWalletSchema";
 import { persistImportedWallets } from "@/app/lib/utils/import/persistImportedWallets";
 import { useImportWalletSession } from "../ImportWalletSessionContext";
+import { useWalletVault } from "@/app/lib/contexts/WalletVaultContext";
 
 const resetImportWalletState = () => ({
   isImporting: false,
@@ -30,7 +31,8 @@ const resetImportWalletState = () => ({
 
 export const useImportPersist = () => {
   const { keyedCandidatesRef, clearSecrets } = useImportWalletSession();
-  const [wallet, setWallet] = useRecoilState(walletState);
+  const { importWallets } = useWalletVault();
+  const [wallet] = useRecoilState(walletState);
   const [importState, setImportState] = useRecoilState(importWalletState);
   const setCurrentFlow = useSetRecoilState(walletFlowState);
   const [isPersisting, setIsPersisting] = useState(false);
@@ -45,7 +47,7 @@ export const useImportPersist = () => {
       setIsPersisting(true);
 
       try {
-        const nextWalletState = persistImportedWallets({
+        const result = persistImportedWallets({
           mnemonic,
           selected,
           keyed: keyedCandidatesRef.current,
@@ -55,10 +57,11 @@ export const useImportPersist = () => {
           },
         });
 
-        setWallet((prev) => ({
-          ...prev,
-          ...nextWalletState,
-        }));
+        await importWallets({
+          mnemonic: result.mnemonic,
+          publicState: result.publicState,
+          vaultEntries: result.vaultEntries,
+        });
 
         clearSecrets();
         setImportState(resetImportWalletState());
@@ -67,9 +70,9 @@ export const useImportPersist = () => {
         const previousSolCount = wallet.solanaWallets?.length ?? 0;
         const previousEthCount = wallet.ethereumWallets?.length ?? 0;
         const importedCount =
-          (nextWalletState.solanaWallets?.length ?? 0) -
+          (result.publicState.solanaWallets?.length ?? 0) -
           previousSolCount +
-          ((nextWalletState.ethereumWallets?.length ?? 0) - previousEthCount);
+          ((result.publicState.ethereumWallets?.length ?? 0) - previousEthCount);
 
         toast.success(
           `Imported ${importedCount} wallet${importedCount === 1 ? "" : "s"} successfully`
@@ -81,10 +84,10 @@ export const useImportPersist = () => {
     [
       clearSecrets,
       importState.inputData.seedPhrase,
+      importWallets,
       keyedCandidatesRef,
       setCurrentFlow,
       setImportState,
-      setWallet,
       wallet.ethereumWallets,
       wallet.solanaWallets,
     ]

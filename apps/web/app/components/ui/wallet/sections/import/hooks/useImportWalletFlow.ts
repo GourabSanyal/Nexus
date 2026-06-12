@@ -6,9 +6,11 @@ import {
   deriveImportCandidates,
   type KeyedImportCandidate,
 } from "@/app/lib/utils/import/deriveImportCandidates";
+import { useWalletVault } from "@/app/lib/contexts/WalletVaultContext";
 
 export const useImportWalletFlow = () => {
   const setImportState = useSetRecoilState(importWalletState);
+  const { persistMnemonic } = useWalletVault();
   const keyedCandidatesRef = useRef<KeyedImportCandidate[]>([]);
 
   const clearSecrets = useCallback(() => {
@@ -19,6 +21,11 @@ export const useImportWalletFlow = () => {
 
   const runImportFlow = useCallback(
     async (mnemonic: string, maxAccounts?: number) => {
+      const trimmed = mnemonic.trim();
+      if (!trimmed) {
+        throw new Error("Seed phrase is required");
+      }
+
       setImportState((prev) => ({
         ...prev,
         isImporting: true,
@@ -28,8 +35,10 @@ export const useImportWalletFlow = () => {
       }));
 
       try {
+        await persistMnemonic(trimmed);
+
         const { candidates, keyed } = await deriveImportCandidates(
-          mnemonic,
+          trimmed,
           maxAccounts
         );
         keyedCandidatesRef.current = keyed;
@@ -56,7 +65,7 @@ export const useImportWalletFlow = () => {
         throw error;
       }
     },
-    [clearSecrets, setImportState]
+    [clearSecrets, persistMnemonic, setImportState]
   );
 
   return { runImportFlow, keyedCandidatesRef, clearSecrets };
