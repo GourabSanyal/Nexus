@@ -28,6 +28,17 @@ const samplePlaintext = (): VaultPlaintext => ({
 });
 
 describe("walletVault", () => {
+  it("round-trips mnemonic-only vault before any chain wallet exists", async () => {
+    const plaintext: VaultPlaintext = {
+      mnemonic:
+        "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
+      wallets: [],
+    };
+    const envelope = await encryptVault(plaintext, "vault-password-123");
+    const decrypted = await decryptVault(envelope, "vault-password-123");
+    expect(decrypted).toEqual(plaintext);
+  });
+
   it("round-trips encrypt and decrypt", async () => {
     const plaintext = samplePlaintext();
     const envelope = await encryptVault(plaintext, "vault-password-123");
