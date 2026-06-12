@@ -66,6 +66,11 @@ const ImportWalletContent = ({ onBack }: ImportWalletProps) => {
     <FormProvider {...methods}>
       <form onSubmit={onSubmit} className="flex flex-col items-center gap-4">
         <ImportWalletHeader onBack={onBack} />
+        {validationErrors.length > 0 ? (
+          <div className="w-full max-w-md rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300">
+            {validationErrors[0]}
+          </div>
+        ) : null}
         <SeedPhraseForm
           handleKeyDown={handleKeyDown}
           handlePaste={handlePaste}
