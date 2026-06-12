@@ -1,3 +1,6 @@
+//! Multi-scheme derivation parity with the frontend (`deriveImportCandidates.ts`).
+//! Used by unit tests; production import derives client-side only.
+
 use crate::models::wallet_import::DerivationScheme;
 use anyhow::{anyhow, Result};
 use bip39::{Language, Mnemonic};

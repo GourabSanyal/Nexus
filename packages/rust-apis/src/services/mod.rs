@@ -5,6 +5,9 @@ pub mod solana_fetch_options;
 pub mod solana_rpc;
 pub mod util;
 pub mod wallet_derivation;
-pub mod wallet_derivation_test;
 pub mod wallet_service;
-pub mod wallet_service_test;
+
+#[cfg(test)]
+mod wallet_derivation_test;
+#[cfg(test)]
+mod wallet_service_test;
