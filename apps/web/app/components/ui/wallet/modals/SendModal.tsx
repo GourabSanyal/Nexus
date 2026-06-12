@@ -18,6 +18,7 @@ import { validateSendInput } from "@my-org/zod";
 import { SendModalProps } from "@/app/types/wallet";
 import { SendModalForm } from "./send/SendModalForm";
 import { getSendErrorMessage } from "./send/getSendErrorMessage";
+import { useWalletVault } from "@/app/lib/contexts/WalletVaultContext";
 
 const SendModal = ({
   isOpen,
@@ -33,6 +34,7 @@ const SendModal = ({
     handleNetworkToggle,
     chainEnum: chainEnumFromHook,
   } = useSendModal({ walletId });
+  const vault = useWalletVault();
 
   const [recipient, setRecipient] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
@@ -80,6 +82,17 @@ const SendModal = ({
   const handleSend = async () => {
     if (!isAmountValid || !isAddressValid || isSending) return;
 
+    if (!vault.isUnlocked) {
+      toast.error("Unlock your wallet to send transactions");
+      return;
+    }
+
+    const privateKey = vault.getPrivateKey(wallet.id, chainEnumFromHook);
+    if (!privateKey) {
+      toast.error("Private key not available. Unlock your wallet and try again.");
+      return;
+    }
+
     setIsSending(true);
 
     try {
@@ -87,7 +100,7 @@ const SendModal = ({
         chain: chainEnumFromHook,
         cluster: currentNetwork,
         from: wallet.publicKey,
-        privateKey: wallet.privateKey,
+        privateKey,
         to: recipient,
         amount,
       });
