@@ -1,0 +1,44 @@
+%%{init: {'theme':'base','themeVariables':{
+  'primaryColor':'#0f172a','primaryTextColor':'#f1f5f9','primaryBorderColor':'#475569',
+  'lineColor':'#94a3b8','clusterBkg':'#111827','clusterBorder':'#334155',
+  'fontFamily':'Inter, system-ui, sans-serif','fontSize':'16px'
+}}}%%
+flowchart LR
+
+    subgraph Vercel["▲  Vercel · apps/web"]
+        direction TB
+        Features["Wallet features<br/><i>generate · import · send · receive<br/>history · balances</i>"]
+        Client["Client layer<br/><i>Recoil + localStorage · client-side signing</i>"]
+        HTTP["rustApiClient"]
+        Features --> Client --> HTTP
+    end
+
+    subgraph CF["☁️  Cloudflare Workers · rust-apis"]
+        direction TB
+        Worker["Rust → WASM worker<br/><i>router · chain adapters · JSON-RPC</i>"]
+        Secrets[["wrangler secrets · RPC URLs"]]
+        Secrets -.-> Worker
+    end
+
+    subgraph RPC["🌐  Upstream RPC · Alchemy"]
+        direction LR
+        ETH[("Ethereum")]
+        SOL[("Solana")]
+    end
+
+    HTTP ==>|"POST /wallet/:chain/*<br/>POST /wallet/import-data"| Worker
+    Worker ==>|JSON-RPC| ETH
+    Worker ==>|JSON-RPC| SOL
+
+    Sec["🛡️  Keys stay in browser · import sends addresses only"]
+    Client -.- Sec
+
+    classDef fe  fill:#0f172a,stroke:#06b6d4,color:#e0f2fe,stroke-width:2px
+    classDef be  fill:#0f172a,stroke:#10b981,color:#d1fae5,stroke-width:2px
+    classDef ext fill:#3f1d1d,stroke:#ef4444,color:#fecaca,stroke-width:2px
+    classDef sec fill:#3f2d0f,stroke:#f59e0b,color:#fef3c7,stroke-width:1.5px
+
+    class Features,Client,HTTP fe
+    class Worker,Secrets be
+    class ETH,SOL ext
+    class Sec sec
