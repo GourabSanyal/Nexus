@@ -1,0 +1,30 @@
+%%{init: {'theme':'base','themeVariables':{
+  'primaryColor':'#0f172a','primaryTextColor':'#f1f5f9','primaryBorderColor':'#475569',
+  'lineColor':'#94a3b8','fontFamily':'Inter, system-ui, sans-serif','fontSize':'18px'
+}}}%%
+flowchart TB
+
+    FE["apps/web · Next.js"]
+    BE["rust-apis · Cloudflare Worker"]
+    Store["packages/store · Recoil"]
+
+    FE --> Store
+    FE ==>|rustApiClient| BE
+
+    subgraph Flows["Feature flows — see dedicated diagrams"]
+        direction LR
+        I["lld-import<br/><i>seed → preview → persist</i>"]
+        S["lld-send-history<br/><i>send · receive · history · balance</i>"]
+        B["lld-backend<br/><i>router → adapters → RPC</i>"]
+    end
+
+    FE --> Flows
+    BE --> B
+
+    classDef fe fill:#0f172a,stroke:#3b82f6,color:#f1f5f9,stroke-width:2px
+    classDef be fill:#0f172a,stroke:#10b981,color:#d1fae5,stroke-width:2px
+    classDef flow fill:#1e293b,stroke:#06b6d4,color:#e0f2fe,stroke-width:1.5px
+
+    class FE,Store fe
+    class BE be
+    class I,S,B flow
