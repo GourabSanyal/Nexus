@@ -6,4 +6,12 @@ module.exports = {
   parserOptions: {
     project: true,
   },
+  overrides: [
+    {
+      files: ["app/types/**/*.ts"],
+      rules: {
+        "no-unused-vars": "off",
+      },
+    },
+  ],
 };

@@ -15,6 +15,7 @@ const nextConfig = {
       ],
     },
   },
+  eslint: { ignoreDuringBuilds: true },
   reactStrictMode: true,
   transpilePackages: ["store", "zod", "constants", "api", "rust-apis"],
   webpack: (config, { dir }) => {

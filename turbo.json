@@ -15,5 +15,5 @@
       "persistent": true
     }
   },
-  "globalEnv": ["NEXT_PUBLIC_API_URL"]
+  "globalEnv": ["NEXT_PUBLIC_RUST_API_URL"]
 }
