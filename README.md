@@ -155,22 +155,35 @@ cargo test    # run the full Rust test suite and confirm all tests pass
 
 ### 2. Configure Environment Variables
 
-Create `.env` files in the following locations:
+Each service owns its own config. **Dev defaults are committed; secrets and production URLs stay on the platform.**
 
-**`packages/rust-apis/.env`**
+| Service | Local dev | Production |
+|---|---|---|
+| **Web** (`apps/web`) | `.env.development` (committed) | Vercel → **Production** env: `RUST_API_URL` |
+| **Worker** (`packages/rust-apis`) | `.dev.vars` (copy from `.dev.vars.example`) | Cloudflare dashboard → RPC secrets |
+
+**Web app — local (zero config if defaults work)**
+
+`apps/web/.env.development` is committed with `RUST_API_URL=http://localhost:9000`. The browser calls `/api/rust` (same-origin proxy); you do not set `NEXT_PUBLIC_RUST_API_URL` or worker `CORS_ORIGIN` for normal usage.
+
+**Web app — Vercel**
+
+Set in the dashboard under **Production** (and **Preview** if needed):
+
 ```env
-PORT=9000
-CORS_ORIGIN=http://localhost:3000
-SOLANA_MAINNET_RPC=https://solana-mainnet.g.alchemy.com/v2/<api-key>
-SOLANA_DEVNET_RPC=https://solana-devnet.g.alchemy.com/v2/<api-key>
-ETHEREUM_MAINNET=https://eth-mainnet.g.alchemy.com/v2/<api-key>
-ETHEREUM_SEPOLIA=https://eth-sepolia.g.alchemy.com/v2/<api-key>
+RUST_API_URL=https://your-worker.workers.dev
 ```
 
-**`apps/web/.env`**
-```env
-NEXT_PUBLIC_RUST_API_URL=http://localhost:9000
+**Rust worker — local**
+
+```bash
+cd packages/rust-apis
+cp .dev.vars.example .dev.vars   # add your Alchemy RPC keys
 ```
+
+**Rust worker — production**
+
+Set RPC URLs in the Cloudflare dashboard (or `wrangler secret put`). No frontend URL or `CORS_ORIGIN` needed when using the web proxy.
 
 > **Note**: Obtain RPC URLs from [Alchemy](https://www.alchemy.com/) or similar providers. Free tiers are available for development.
 

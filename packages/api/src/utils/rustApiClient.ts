@@ -1,10 +1,9 @@
-import { AxiosInstance, AxiosError } from "axios";
+import { AxiosInstance } from "axios";
 import { createSecureAxiosClient } from "./createSecureAxiosClient";
-
-const RUST_API_BASE_URL = process.env.NEXT_PUBLIC_RUST_API_URL;
+import { resolveRustApiBaseUrl } from "./resolveRustApiBaseUrl";
 
 export const rustApiClient = (): AxiosInstance => {
-  const client = createSecureAxiosClient(RUST_API_BASE_URL);
+  const client = createSecureAxiosClient(resolveRustApiBaseUrl());
 
   return client;
 };

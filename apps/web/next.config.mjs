@@ -1,7 +1,17 @@
 /** @type {import('next').NextConfig} */
 import NodePolyfillPlugin from "node-polyfill-webpack-plugin";
 
+const rustApiUrl = process.env.RUST_API_URL ?? "http://localhost:9000";
+
 const nextConfig = {
+  async rewrites() {
+    return [
+      {
+        source: "/api/rust/:path*",
+        destination: `${rustApiUrl}/:path*`,
+      },
+    ];
+  },
   experimental: {
     turbo: {
       resolveExtensions: [

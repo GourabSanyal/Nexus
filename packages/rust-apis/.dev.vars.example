@@ -1,0 +1,11 @@
+# Copy to .dev.vars (gitignored):  cp .dev.vars.example .dev.vars
+# Loaded automatically by `wrangler dev` — local worker only.
+#
+# CORS_ORIGIN is optional when the web app uses the /api/rust proxy (recommended).
+# Only needed if you call the worker directly from the browser during debugging.
+
+CORS_ORIGIN=http://localhost:3000
+SOLANA_MAINNET_RPC=https://solana-mainnet.g.alchemy.com/v2/<api-key>
+SOLANA_DEVNET_RPC=https://solana-devnet.g.alchemy.com/v2/<api-key>
+ETHEREUM_MAINNET=https://eth-mainnet.g.alchemy.com/v2/<api-key>
+ETHEREUM_SEPOLIA=https://eth-sepolia.g.alchemy.com/v2/<api-key>

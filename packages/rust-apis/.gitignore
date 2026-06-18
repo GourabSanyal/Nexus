@@ -1,4 +1,5 @@
 .env
+.dev.vars
 target
 _wasm
 src/_wasm/

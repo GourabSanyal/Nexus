@@ -16,6 +16,8 @@ enabled = true
 invocation_logs = true
 
 # Environment variables / secrets
+# Local:      cp .dev.vars.example .dev.vars  →  wrangler dev
+# Production: Cloudflare dashboard or `wrangler secret put <NAME>`
 # Set these: wrangler secret put SOLANA_MAINNET_RPC
 [env.production]
 # vars = { ENVIRONMENT = "production" }

@@ -22,7 +22,7 @@ This document is the source of truth for maintaining code quality, modularity, a
 - Source RPC URLs from env-driven headers injected by Worker entrypoint:
   - Solana: `SOLANA_MAINNET_RPC`, `SOLANA_DEVNET_RPC`
   - Ethereum: `ETHEREUM_MAINNET` / `ETHEREUM_MAINNET_RPC`, `ETHEREUM_SEPOLIA` / `ETHEREUM_SEPOLIA_RPC`
-- Respect `CORS_ORIGIN` via `x-cors-origin` header.
+- Respect comma-separated `CORS_ORIGIN`; resolve against the request `Origin` in `src/cors.ts` before setting `x-cors-origin`.
 - Request body `rpcUrl` may override env only when explicitly provided.
 
 ## Adding a New Blockchain (Checklist)
