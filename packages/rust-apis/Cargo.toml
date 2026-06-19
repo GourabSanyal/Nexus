@@ -38,7 +38,7 @@ bip32 = "0.5.3"
 futures = { version = "0.3", default-features = false, features = ["alloc"] }
 
 [features]
-default = []
+default = ["console_error_panic_hook"]
 console_error_panic_hook = ["dep:console_error_panic_hook"]
 
 [dev-dependencies]
