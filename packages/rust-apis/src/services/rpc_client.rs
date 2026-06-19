@@ -5,6 +5,10 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{Request, RequestInit, Response};
 
+/// Per-fetch timeout in milliseconds. Prevents hanging RPC calls from blocking
+/// the entire request (e.g. unreliable devnet endpoints).
+const FETCH_TIMEOUT_MS: u32 = 10_000;
+
 pub async fn make_rpc_request(rpc_url: &str, request_body: Value) -> Result<Value> {
     let request = build_request(rpc_url, request_body)?;
     let response_text = execute_fetch(request).await?;
@@ -26,10 +30,33 @@ pub async fn json_rpc_call(rpc_url: &str, method: &str, params: Value) -> Result
         .ok_or_else(|| anyhow::anyhow!("Missing result for {method}"))
 }
 
+/// Attach an `AbortSignal.timeout()` to the fetch so hanging RPCs don't block forever.
+fn attach_abort_timeout(opts: &RequestInit, timeout_ms: u32) {
+    let Ok(abort_signal_class) =
+        js_sys::Reflect::get(&js_sys::global(), &"AbortSignal".into())
+    else {
+        return;
+    };
+
+    let Ok(timeout_fn) = js_sys::Reflect::get(&abort_signal_class, &"timeout".into()) else {
+        return;
+    };
+
+    let Ok(timeout_fn) = timeout_fn.dyn_into::<js_sys::Function>() else {
+        return;
+    };
+
+    if let Ok(signal) = timeout_fn.call1(&abort_signal_class, &timeout_ms.into()) {
+        let _ = js_sys::Reflect::set(opts, &"signal".into(), &signal);
+    }
+}
+
 fn build_request(rpc_url: &str, request_body: Value) -> Result<Request> {
     let opts = RequestInit::new();
     opts.set_method("POST");
     opts.set_mode(web_sys::RequestMode::Cors);
+
+    attach_abort_timeout(&opts, FETCH_TIMEOUT_MS);
 
     let body_str = serde_json::to_string(&request_body)?;
     opts.set_body(&JsValue::from_str(&body_str));
@@ -61,7 +88,13 @@ async fn execute_fetch(request: Request) -> Result<String> {
 
     let resp_value = JsFuture::from(resp_promise)
         .await
-        .map_err(|_| anyhow::anyhow!("Fetch failed"))?;
+        .map_err(|e| {
+            let msg = e
+                .as_string()
+                .or_else(|| js_sys::Reflect::get(&e, &"message".into()).ok()?.as_string())
+                .unwrap_or_else(|| format!("{e:?}"));
+            anyhow::anyhow!("Fetch failed: {msg}")
+        })?;
     let resp: Response = resp_value
         .dyn_into()
         .map_err(|_| anyhow::anyhow!("Failed to convert response"))?;
