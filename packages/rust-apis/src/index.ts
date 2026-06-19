@@ -44,6 +44,9 @@ export default {
       const requestWithEnv = new Request(request, { headers });
       return await wasm.handle_request(requestWithEnv);
     } catch (error) {
+      const url = new URL(request.url);
+      console.error(`[rust-apis] ${url.pathname}:`, error);
+
       const corsOrigin = resolveCorsOrigin(
         request.headers.get("Origin"),
         env.CORS_ORIGIN
