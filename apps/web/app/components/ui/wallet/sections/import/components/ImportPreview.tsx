@@ -1,6 +1,5 @@
 import React from "react";
 import { Button } from "@components/ui/button/button";
-import { ArrowLeft } from "lucide-react";
 import type { ImportPreviewProps } from "@/app/types/components/ImportPreviewTypes";
 import { ImportPreviewWalletRow } from "./ImportPreviewWalletRow";
 
@@ -11,28 +10,17 @@ export const ImportPreview: React.FC<ImportPreviewProps> = ({
   onSelectAll,
   onClearSelection,
   onConfirm,
-  onBack,
   isConfirmDisabled,
   isPersisting = false,
 }) => (
   <div className="flex w-full max-w-md flex-col gap-6">
     <div className="flex items-center gap-4">
-      <Button
-        onClick={onBack}
-        variant="ghost"
-        size="icon"
-        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800"
-        type="button"
-      >
-        <ArrowLeft className="h-4 w-4" />
-      </Button>
       <h2 className="flex-1 text-center text-2xl font-bold">Select Wallets</h2>
-      <div className="w-10" />
     </div>
 
     <p className="text-center text-gray-600 dark:text-gray-400">
-      Choose wallets with on-chain activity to import. Only active wallets are
-      shown.
+      Choose wallets with on-chain activity to import. Only wallets with a
+      balance or transaction history are shown.
     </p>
 
     {wallets.length === 0 ? (
@@ -47,6 +35,7 @@ export const ImportPreview: React.FC<ImportPreviewProps> = ({
             variant="ghost"
             className="flex-1 text-sm"
             onClick={onSelectAll}
+            disabled={isPersisting}
           >
             Select all
           </Button>
@@ -55,6 +44,7 @@ export const ImportPreview: React.FC<ImportPreviewProps> = ({
             variant="ghost"
             className="flex-1 text-sm"
             onClick={onClearSelection}
+            disabled={isPersisting}
           >
             Clear
           </Button>

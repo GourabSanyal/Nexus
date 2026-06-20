@@ -58,9 +58,17 @@ export const useImportWalletForm = () => {
       if (!formData.inputData?.seedPhraseWords) {
         return;
       }
-      setImportState(
-        cloneImportFormValues(formData as ImportWalletSchema)
-      );
+
+      // Only sync seed input fields — never overwrite preview/selection state.
+      setImportState((prev) => ({
+        ...prev,
+        inputData: {
+          ...prev.inputData,
+          ...formData.inputData,
+          seedPhraseWords: [...formData.inputData.seedPhraseWords],
+        },
+        validationErrors: formData.validationErrors ?? prev.validationErrors,
+      }));
     });
     return () => subscription.unsubscribe();
   }, [methods, setImportState]);

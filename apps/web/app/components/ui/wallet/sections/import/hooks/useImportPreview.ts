@@ -9,7 +9,6 @@ import { importPreviewNetworkToEnum } from "@/app/lib/utils/import/importPreview
 import { parseImportBalance } from "@/app/lib/utils/import/parseImportBalance";
 import type { ImportPreviewWalletView } from "@/app/types/components/ImportPreviewTypes";
 import { useImportPersist } from "./useImportPersist";
-import { useImportWalletSession } from "../ImportWalletSessionContext";
 
 const SCHEME_LABELS = {
   standard: "Standard",
@@ -39,12 +38,12 @@ const buildWalletView = (
     formattedAddress: adapter?.formatAddress(entry.address) ?? entry.address,
     schemeLabel: SCHEME_LABELS[entry.scheme],
     transactionCount: entry.transactions.length,
+    hasActivity: entry.hasActivity,
   };
 };
 
 export const useImportPreview = () => {
   const [importState, setImportState] = useRecoilState(importWalletState);
-  const { clearSecrets } = useImportWalletSession();
   const { persistSelection, isPersisting } = useImportPersist();
   const solAdapter = useWalletAdapter("solana");
   const ethAdapter = useWalletAdapter("ethereum");
@@ -84,18 +83,6 @@ export const useImportPreview = () => {
     setSelectedIds([]);
   }, []);
 
-  const handleBack = useCallback(() => {
-    clearSecrets();
-    setSelectedIds([]);
-    setImportState((prev) => ({
-      ...prev,
-      currentPhase: "input",
-      discoveredWallets: undefined,
-      selectedImportWallets: [],
-      validationErrors: [],
-    }));
-  }, [clearSecrets, setImportState]);
-
   const handleConfirm = useCallback(async () => {
     const selected = activeWallets.filter((entry) =>
       selectedIds.includes(buildImportWalletEntryId(entry))
@@ -124,7 +111,6 @@ export const useImportPreview = () => {
     toggleWallet,
     selectAll,
     clearSelection,
-    handleBack,
     handleConfirm,
     isPersisting,
     isConfirmDisabled: selectedIds.length === 0 || isPersisting,
