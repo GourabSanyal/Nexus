@@ -10,13 +10,16 @@ import { SeedPhraseForm } from "./components/SeedPhraseForm";
 import { ImportWalletSessionProvider } from "./ImportWalletSessionContext";
 import { useImportPreview } from "./hooks/useImportPreview";
 import { useImportWalletForm } from "./hooks/useImportWalletForm";
+import { hasImportSessionKey } from "@/app/lib/utils/import/importSessionStorage";
 
 type ImportWalletProps = {
   onBack?: () => void;
+  isBackDisabled?: boolean;
 };
 
-const ImportWalletContent = ({ onBack }: ImportWalletProps) => {
-  const { currentPhase, validationErrors } = useRecoilValue(importWalletState);
+const ImportWalletContent = ({ onBack, isBackDisabled }: ImportWalletProps) => {
+  const { currentPhase, validationErrors, isImporting } =
+    useRecoilValue(importWalletState);
   const {
     methods,
     handleKeyDown,
@@ -31,13 +34,24 @@ const ImportWalletContent = ({ onBack }: ImportWalletProps) => {
     toggleWallet,
     selectAll,
     clearSelection,
-    handleBack,
     handleConfirm,
     isConfirmDisabled,
     isPersisting,
   } = useImportPreview();
 
+  const pendingSession = hasImportSessionKey();
   const showPreview = currentPhase === "confirmation";
+  const backDisabled = isBackDisabled || isImporting;
+  const isRestoringPreview =
+    pendingSession && currentPhase !== "confirmation";
+
+  if (isRestoringPreview) {
+    return (
+      <div className="flex w-full max-w-md flex-col items-center gap-4 py-12 text-center text-sm text-muted-foreground">
+        Restoring wallet import…
+      </div>
+    );
+  }
 
   if (showPreview) {
     return (
@@ -54,7 +68,6 @@ const ImportWalletContent = ({ onBack }: ImportWalletProps) => {
           onSelectAll={selectAll}
           onClearSelection={clearSelection}
           onConfirm={handleConfirm}
-          onBack={handleBack}
           isConfirmDisabled={isConfirmDisabled}
           isPersisting={isPersisting}
         />
@@ -65,7 +78,7 @@ const ImportWalletContent = ({ onBack }: ImportWalletProps) => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={onSubmit} className="flex flex-col items-center gap-4">
-        <ImportWalletHeader onBack={onBack} />
+        <ImportWalletHeader onBack={onBack} backDisabled={backDisabled} />
         {validationErrors.length > 0 ? (
           <div className="w-full max-w-md rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300">
             {validationErrors[0]}

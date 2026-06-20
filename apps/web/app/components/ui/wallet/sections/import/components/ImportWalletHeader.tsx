@@ -4,10 +4,12 @@ import { ArrowLeft } from "lucide-react";
 
 interface ImportWalletHeaderProps {
   onBack?: () => void;
+  backDisabled?: boolean;
 }
 
 export const ImportWalletHeader: React.FC<ImportWalletHeaderProps> = ({
   onBack,
+  backDisabled = false,
 }) => (
   <>
     <div className="flex items-center gap-4 w-full max-w-md">
@@ -16,8 +18,10 @@ export const ImportWalletHeader: React.FC<ImportWalletHeaderProps> = ({
           onClick={onBack}
           variant="ghost"
           size="icon"
-          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800"
+          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:pointer-events-none disabled:opacity-40"
           type="button"
+          disabled={backDisabled}
+          aria-disabled={backDisabled}
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
