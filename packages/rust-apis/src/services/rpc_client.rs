@@ -7,7 +7,7 @@ use web_sys::{Request, RequestInit, Response};
 
 /// Per-fetch timeout in milliseconds. Prevents hanging RPC calls from blocking
 /// the entire request (e.g. unreliable devnet endpoints).
-const FETCH_TIMEOUT_MS: u32 = 10_000;
+const FETCH_TIMEOUT_MS: u32 = 30_000;
 
 pub async fn make_rpc_request(rpc_url: &str, request_body: Value) -> Result<Value> {
     let request = build_request(rpc_url, request_body)?;
