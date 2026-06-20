@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useLayoutEffect, useCallback } from "react";
 import { useRecoilValue, useSetRecoilState, useRecoilState } from "recoil";
 import { walletState } from "@my-org/store";
 import { walletFlowState } from "@repo/store/src/atoms/walletFlowState";
+import { importWalletState } from "@repo/store/src/atoms/importWalletState";
 import { useTheme } from "../../../lib/contexts/ThemeContext";
 import { toast } from "sonner";
 import { AnimatePresence } from "framer-motion";
@@ -20,6 +21,11 @@ import { useWalletVault } from "@/app/lib/contexts/WalletVaultContext";
 import { VaultPasswordSetup } from "./sections/vault/VaultPasswordSetup";
 import { VaultUnlockScreen } from "./sections/vault/VaultUnlockScreen";
 import { Dialog } from "../dialog/dialog";
+import {
+  clearImportSession,
+  hasImportSessionKey,
+  restoreImportSession,
+} from "@/app/lib/utils/import/importSessionStorage";
 
 type PendingFlow = "generate" | "import";
 
@@ -28,6 +34,7 @@ export const CryptoWalletContent = () => {
   const { isDarkMode, toggleTheme } = useTheme();
   const walletStateValue = useRecoilValue(walletState);
   const [currentFlow, setCurrentFlow] = useRecoilState(walletFlowState);
+  const [importState, setImportState] = useRecoilState(importWalletState);
   const { activeTab = "solana" } = walletStateValue;
   const setWallet = useSetRecoilState(walletState);
 
@@ -35,6 +42,7 @@ export const CryptoWalletContent = () => {
   const [passwordGateOpen, setPasswordGateOpen] = useState(false);
   const [pendingFlow, setPendingFlow] = useState<PendingFlow | null>(null);
   const [isPasswordGateLoading, setIsPasswordGateLoading] = useState(false);
+  const [pendingImportRestore, setPendingImportRestore] = useState(false);
 
   const setActiveTab = (tab: "solana" | "ethereum") => {
     setWallet((prev) => ({
@@ -44,6 +52,70 @@ export const CryptoWalletContent = () => {
   };
 
   useEffect(() => setIsHydrated(true), []);
+
+  useEffect(() => {
+    if (!vault.isHydrated) {
+      return;
+    }
+
+    if (!hasImportSessionKey()) {
+      return;
+    }
+
+    if (vault.hasVault && !vault.isUnlocked) {
+      return;
+    }
+
+    if (vault.isUnlocked) {
+      return;
+    }
+
+    setPendingImportRestore(true);
+    setPendingFlow("import");
+    setPasswordGateOpen(true);
+  }, [vault.isHydrated, vault.hasVault, vault.isUnlocked]);
+
+  const restorePendingImport = useCallback(() => {
+    const session = restoreImportSession();
+    if (!session) {
+      return false;
+    }
+
+    setImportState((prev) => ({
+      ...prev,
+      isImporting: false,
+      currentPhase: session.currentPhase,
+      discoveredWallets: session.discoveredWallets,
+      validationErrors: [],
+      inputData: {
+        ...prev.inputData,
+        seedPhrase: session.inputData.seedPhrase,
+        seedPhraseLength: session.inputData.seedPhraseLength,
+      },
+    }));
+    vault.setMnemonic(session.inputData.seedPhrase);
+    setCurrentFlow("import");
+    return true;
+  }, [setCurrentFlow, setImportState, vault.setMnemonic]);
+
+  useLayoutEffect(() => {
+    if (!vault.isHydrated || !vault.isUnlocked) {
+      return;
+    }
+
+    restorePendingImport();
+  }, [restorePendingImport, vault.isHydrated, vault.isUnlocked]);
+
+  const handleVaultUnlock = useCallback(
+    async (password: string) => {
+      const ok = await vault.unlock(password);
+      if (ok) {
+        restorePendingImport();
+      }
+      return ok;
+    },
+    [restorePendingImport, vault.unlock]
+  );
 
   useEffect(() => {
     if (!vault.isHydrated) {
@@ -91,7 +163,12 @@ export const CryptoWalletContent = () => {
   };
 
   const generateWallet = () => openFlow("generate");
-  const importWallet = () => openFlow("import");
+  const importWallet = () => {
+    if (vault.isUnlocked && restorePendingImport()) {
+      return;
+    }
+    openFlow("import");
+  };
 
   const handlePasswordGateSubmit = async (password: string) => {
     setIsPasswordGateLoading(true);
@@ -99,7 +176,13 @@ export const CryptoWalletContent = () => {
       if (pendingFlow === "generate") {
         await startGenerateWithPassword(password);
       } else if (pendingFlow === "import") {
-        startImportWithPassword(password);
+        if (pendingImportRestore) {
+          vault.beginSetup(password);
+          restorePendingImport();
+          setPendingImportRestore(false);
+        } else {
+          startImportWithPassword(password);
+        }
       } else {
         return;
       }
@@ -120,22 +203,54 @@ export const CryptoWalletContent = () => {
     setPasswordGateOpen(open);
     if (!open) {
       setPendingFlow(null);
+      setPendingImportRestore(false);
     }
   };
 
   const handleBackToEntry = () => {
+    if (importState.isImporting) {
+      return;
+    }
+
+    clearImportSession();
+    vault.setMnemonic("");
+    setImportState((prev) => ({
+      ...prev,
+      isImporting: false,
+      currentPhase: "input",
+      discoveredWallets: undefined,
+      selectedImportWallets: [],
+      validationErrors: [],
+      inputData: {
+        ...prev.inputData,
+        seedPhrase: "",
+      },
+    }));
+
     if (!vault.hasVault) {
       vault.lock();
     }
     setCurrentFlow("entry");
   };
 
+  const pendingImportConfirmation =
+    importState.currentPhase === "confirmation" &&
+    Boolean(importState.discoveredWallets);
+
+  const showImportFlow =
+    importState.currentPhase !== "complete" &&
+    (currentFlow === "import" ||
+      pendingImportConfirmation ||
+      (vault.isUnlocked && hasImportSessionKey()));
+
   const showMainWallet =
     vault.isUnlocked && (Boolean(vault.mnemonic) || vault.hasWallets);
 
   const passwordGateDescription =
     pendingFlow === "import"
-      ? "Set a password before importing. Your seed phrase and keys will be encrypted on this device."
+      ? pendingImportRestore
+        ? "Set a password to continue your import. Your seed phrase and keys will be encrypted on this device."
+        : "Set a password before importing. Your seed phrase and keys will be encrypted on this device."
       : "Set a password before generating a wallet. Your seed phrase and keys will be encrypted on this device.";
 
   if (!isHydrated || !vault.isHydrated) {
@@ -155,9 +270,12 @@ export const CryptoWalletContent = () => {
         <AppHeader toggleTheme={toggleTheme} isDarkMode={isDarkMode} />
 
         {vault.hasVault && !vault.isUnlocked ? (
-          <VaultUnlockScreen onUnlock={vault.unlock} />
-        ) : currentFlow === "import" ? (
-          <ImportWallet onBack={handleBackToEntry} />
+          <VaultUnlockScreen onUnlock={handleVaultUnlock} />
+        ) : showImportFlow ? (
+          <ImportWallet
+            onBack={handleBackToEntry}
+            isBackDisabled={importState.isImporting}
+          />
         ) : currentFlow === "generate" ? (
           <>
             <SeedPhraseContainer
@@ -171,17 +289,20 @@ export const CryptoWalletContent = () => {
           </>
         ) : showMainWallet ? (
           <>
-            {vault.mnemonic ? (
-              <SeedPhraseContainer
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
-              />
-            ) : null}
+            <SeedPhraseContainer
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              onImportMore={importWallet}
+            />
             <AnimatePresence mode="wait">
               {activeTab === "solana" && <SolanaWallet />}
               {activeTab === "ethereum" && <EthereumWallet />}
             </AnimatePresence>
           </>
+        ) : pendingImportRestore || (hasImportSessionKey() && !vault.isUnlocked) ? (
+          <div className="flex w-full max-w-md mx-auto flex-col items-center gap-4 py-12 text-center text-sm text-muted-foreground">
+            Restoring wallet import…
+          </div>
         ) : (
           <WalletActions
             generateWallet={generateWallet}
@@ -190,12 +311,22 @@ export const CryptoWalletContent = () => {
         )}
 
         <Dialog open={passwordGateOpen} onOpenChange={handlePasswordGateOpenChange}>
-          <VaultPasswordSetup
-            variant="modal"
-            description={passwordGateDescription}
-            onSubmit={handlePasswordGateSubmit}
-            isLoading={isPasswordGateLoading}
-          />
+          {pendingImportRestore ? (
+            <VaultUnlockScreen
+              variant="modal"
+              title="Continue import"
+              description="Enter your password to continue importing wallets."
+              onUnlock={handlePasswordGateSubmit}
+              isLoading={isPasswordGateLoading}
+            />
+          ) : (
+            <VaultPasswordSetup
+              variant="modal"
+              description={passwordGateDescription}
+              onSubmit={handlePasswordGateSubmit}
+              isLoading={isPasswordGateLoading}
+            />
+          )}
         </Dialog>
       </div>
     </div>
