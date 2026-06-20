@@ -2,8 +2,8 @@ use serde_json::json;
 
 use crate::chains::errors::WalletError;
 use crate::chains::traits::{
-    BalanceFuture, BalanceResult, BlockchainAdapter, SendFuture, SendPrepareFuture,
-    SendPrepareResult, SendResult, TransactionsFuture, TransactionsResult,
+    BalanceFuture, BalanceResult, BatchBalanceFuture, BlockchainAdapter, SendFuture,
+    SendPrepareFuture, SendPrepareResult, SendResult, TransactionsFuture, TransactionsResult,
 };
 use crate::chains::transaction_options::TransactionFetchOptions;
 use crate::services;
@@ -62,6 +62,21 @@ impl BlockchainAdapter for SolanaAdapter {
             Ok(BalanceResult {
                 balance: lamports.to_string(),
             })
+        })
+    }
+
+    fn get_balances_batch<'a>(
+        &'a self,
+        addresses: &'a [&'a str],
+        cluster: Option<&'a str>,
+        rpc_override: Option<&'a str>,
+    ) -> BatchBalanceFuture<'a> {
+        Box::pin(async move {
+            let (_, rpc_url) = Self::resolve_rpc(cluster, rpc_override)?;
+            let balances = services::solana_rpc::get_balances_batch(addresses, &rpc_url)
+                .await
+                .map_err(|e| WalletError::Rpc(e.to_string()))?;
+            Ok(balances)
         })
     }
 

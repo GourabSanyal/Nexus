@@ -1,7 +1,7 @@
 use crate::chains::errors::WalletError;
 use crate::chains::traits::{
-    BalanceFuture, BalanceResult, BlockchainAdapter, SendFuture, SendPrepareFuture,
-    SendPrepareResult, SendResult, TransactionsFuture, TransactionsResult,
+    BalanceFuture, BalanceResult, BatchBalanceFuture, BlockchainAdapter, SendFuture,
+    SendPrepareFuture, SendPrepareResult, SendResult, TransactionsFuture, TransactionsResult,
 };
 use crate::chains::transaction_options::TransactionFetchOptions;
 use crate::services;
@@ -55,6 +55,21 @@ impl BlockchainAdapter for EthereumAdapter {
             let (_, rpc) = Self::resolve_rpc(cluster, rpc_override)?;
             let balance = services::ethereum_rpc::get_balance(address, &rpc).await?;
             Ok(BalanceResult { balance })
+        })
+    }
+
+    fn get_balances_batch<'a>(
+        &'a self,
+        addresses: &'a [&'a str],
+        cluster: Option<&'a str>,
+        rpc_override: Option<&'a str>,
+    ) -> BatchBalanceFuture<'a> {
+        Box::pin(async move {
+            let (_, rpc) = Self::resolve_rpc(cluster, rpc_override)?;
+            let balances = services::ethereum_rpc::get_balances_batch(addresses, &rpc)
+                .await
+                .map_err(|e| WalletError::Rpc(e.to_string()))?;
+            Ok(balances)
         })
     }
 

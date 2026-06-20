@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::future::Future;
 use std::pin::Pin;
 
@@ -9,7 +10,12 @@ pub struct BalanceResult {
     pub balance: String,
 }
 
+/// Result of a batch balance fetch: address -> balance string.
+pub type BatchBalanceResult = HashMap<String, String>;
+
 pub type BalanceFuture<'a> = Pin<Box<dyn Future<Output = Result<BalanceResult, WalletError>> + 'a>>;
+pub type BatchBalanceFuture<'a> =
+    Pin<Box<dyn Future<Output = Result<BatchBalanceResult, WalletError>> + 'a>>;
 pub type TransactionsFuture<'a> =
     Pin<Box<dyn Future<Output = Result<TransactionsResult, WalletError>> + 'a>>;
 pub type SendPrepareFuture<'a> =
@@ -40,6 +46,15 @@ pub trait BlockchainAdapter {
         cluster: Option<&'a str>,
         rpc_override: Option<&'a str>,
     ) -> BalanceFuture<'a>;
+    /// Batch fetch balances for multiple addresses in a single RPC call.
+    /// Returns a map of address -> balance string. Uses JSON-RPC batching
+    /// to reduce subrequest count (important for Cloudflare Workers limits).
+    fn get_balances_batch<'a>(
+        &'a self,
+        addresses: &'a [&'a str],
+        cluster: Option<&'a str>,
+        rpc_override: Option<&'a str>,
+    ) -> BatchBalanceFuture<'a>;
     fn get_transactions<'a>(
         &'a self,
         address: &'a str,
