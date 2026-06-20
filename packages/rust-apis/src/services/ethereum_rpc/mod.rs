@@ -6,6 +6,6 @@ mod send;
 mod transactions;
 
 pub use crate::services::ethereum_fetch_options::EthFetchOptions;
-pub use balance::get_balance;
+pub use balance::{get_balance, get_balances_batch};
 pub use send::{prepare_send, send_raw_transaction};
 pub use transactions::get_transactions;
