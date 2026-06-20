@@ -9,6 +9,8 @@ import {
   createEmptySeedPhraseWords,
   type SeedPhraseLength,
 } from "@repo/zod/src/walletSchemas/importWalletSchema";
+import { deriveImportCandidates } from "@/app/lib/utils/import/deriveImportCandidates";
+import { clearImportSession } from "@/app/lib/utils/import/importSessionStorage";
 import { persistImportedWallets } from "@/app/lib/utils/import/persistImportedWallets";
 import { useImportWalletSession } from "../ImportWalletSessionContext";
 import { useWalletVault } from "@/app/lib/contexts/WalletVaultContext";
@@ -30,7 +32,7 @@ const resetImportWalletState = () => ({
 });
 
 export const useImportPersist = () => {
-  const { keyedCandidatesRef, clearSecrets } = useImportWalletSession();
+  const { keyedCandidatesRef, clearImportCandidates } = useImportWalletSession();
   const { importWallets } = useWalletVault();
   const [wallet] = useRecoilState(walletState);
   const [importState, setImportState] = useRecoilState(importWalletState);
@@ -47,10 +49,16 @@ export const useImportPersist = () => {
       setIsPersisting(true);
 
       try {
+        let keyed = keyedCandidatesRef.current;
+        if (keyed.length === 0) {
+          const derived = await deriveImportCandidates(mnemonic);
+          keyed = derived.keyed;
+        }
+
         const result = persistImportedWallets({
           mnemonic,
           selected,
-          keyed: keyedCandidatesRef.current,
+          keyed,
           existing: {
             solanaWallets: wallet.solanaWallets,
             ethereumWallets: wallet.ethereumWallets,
@@ -63,7 +71,8 @@ export const useImportPersist = () => {
           vaultEntries: result.vaultEntries,
         });
 
-        clearSecrets();
+        clearImportCandidates();
+        clearImportSession();
         setImportState(resetImportWalletState());
         setCurrentFlow("entry");
 
@@ -82,7 +91,7 @@ export const useImportPersist = () => {
       }
     },
     [
-      clearSecrets,
+      clearImportCandidates,
       importState.inputData.seedPhrase,
       importWallets,
       keyedCandidatesRef,

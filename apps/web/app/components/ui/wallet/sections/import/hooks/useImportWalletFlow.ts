@@ -6,18 +6,27 @@ import {
   deriveImportCandidates,
   type KeyedImportCandidate,
 } from "@/app/lib/utils/import/deriveImportCandidates";
+import {
+  clearImportSession,
+  saveImportSession,
+} from "@/app/lib/utils/import/importSessionStorage";
 import { useWalletVault } from "@/app/lib/contexts/WalletVaultContext";
 
 export const useImportWalletFlow = () => {
   const setImportState = useSetRecoilState(importWalletState);
-  const { persistMnemonic } = useWalletVault();
+  const { setMnemonic } = useWalletVault();
   const keyedCandidatesRef = useRef<KeyedImportCandidate[]>([]);
 
-  const clearSecrets = useCallback(() => {
+  const clearImportCandidates = useCallback(() => {
     keyedCandidatesRef.current = [];
   }, []);
 
-  useEffect(() => () => clearSecrets(), [clearSecrets]);
+  const clearSecrets = useCallback(() => {
+    clearImportCandidates();
+    setMnemonic("");
+  }, [clearImportCandidates, setMnemonic]);
+
+  useEffect(() => () => clearImportCandidates(), [clearImportCandidates]);
 
   const runImportFlow = useCallback(
     async (mnemonic: string, maxAccounts?: number) => {
@@ -26,16 +35,20 @@ export const useImportWalletFlow = () => {
         throw new Error("Seed phrase is required");
       }
 
+      clearImportSession();
+
       setImportState((prev) => ({
         ...prev,
         isImporting: true,
         currentPhase: "validation",
         validationErrors: [],
         selectedImportWallets: [],
+        discoveredWallets: undefined,
       }));
 
       try {
-        await persistMnemonic(trimmed);
+        // Keep mnemonic in memory only until the user confirms wallet selection.
+        setMnemonic(trimmed);
 
         const { candidates, keyed } = await deriveImportCandidates(
           trimmed,
@@ -44,6 +57,19 @@ export const useImportWalletFlow = () => {
         keyedCandidatesRef.current = keyed;
 
         const preview = await fetchWalletImportPreview(candidates);
+        const wordCount = trimmed.split(/\s+/).length;
+        const seedPhraseLength = wordCount === 24 ? 24 : 12;
+
+        const nextInputData = {
+          seedPhrase: trimmed,
+          seedPhraseLength: seedPhraseLength as 12 | 24,
+        };
+
+        saveImportSession({
+          currentPhase: "confirmation",
+          discoveredWallets: preview,
+          inputData: nextInputData,
+        });
 
         setImportState((prev) => ({
           ...prev,
@@ -51,9 +77,14 @@ export const useImportWalletFlow = () => {
           currentPhase: "confirmation",
           discoveredWallets: preview,
           validationErrors: [],
+          inputData: {
+            ...prev.inputData,
+            ...nextInputData,
+          },
         }));
       } catch (error) {
         clearSecrets();
+        clearImportSession();
         setImportState((prev) => ({
           ...prev,
           isImporting: false,
@@ -65,8 +96,13 @@ export const useImportWalletFlow = () => {
         throw error;
       }
     },
-    [clearSecrets, persistMnemonic, setImportState]
+    [clearSecrets, setImportState, setMnemonic]
   );
 
-  return { runImportFlow, keyedCandidatesRef, clearSecrets };
+  return {
+    runImportFlow,
+    keyedCandidatesRef,
+    clearImportCandidates,
+    clearSecrets,
+  };
 };
