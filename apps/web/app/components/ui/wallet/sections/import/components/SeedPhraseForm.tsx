@@ -7,12 +7,14 @@ import { ImportButton } from "./ImportButton";
 import { SeedPhraseLengthToggle } from "./SeedPhraseLengthToggle";
 
 interface SeedPhraseFormProps {
+  isImporting: boolean;
   handleKeyDown: (e: React.KeyboardEvent, index: number) => void;
   handlePaste: (e: React.ClipboardEvent) => void;
   onSeedPhraseLengthChange: (length: 12 | 24) => void;
 }
 
 export const SeedPhraseForm: React.FC<SeedPhraseFormProps> = ({
+  isImporting,
   handleKeyDown,
   handlePaste,
   onSeedPhraseLengthChange,
@@ -24,7 +26,6 @@ export const SeedPhraseForm: React.FC<SeedPhraseFormProps> = ({
   } = useFormContext<ImportWalletSchema>();
 
   const inputData = watch("inputData");
-  const isImporting = watch("isImporting");
   const seedPhraseLength = inputData?.seedPhraseLength ?? 12;
   const seedPhraseWords = inputData?.seedPhraseWords ?? [];
 

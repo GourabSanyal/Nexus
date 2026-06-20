@@ -85,6 +85,7 @@ const ImportWalletContent = ({ onBack, isBackDisabled }: ImportWalletProps) => {
           </div>
         ) : null}
         <SeedPhraseForm
+          isImporting={isImporting}
           handleKeyDown={handleKeyDown}
           handlePaste={handlePaste}
           onSeedPhraseLengthChange={handleSeedPhraseLengthChange}
