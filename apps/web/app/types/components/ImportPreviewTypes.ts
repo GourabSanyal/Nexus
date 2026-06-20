@@ -11,6 +11,7 @@ export type ImportPreviewWalletView = {
   formattedAddress: string;
   schemeLabel: string;
   transactionCount: number;
+  hasActivity: boolean;
 };
 
 export type ImportPreviewWalletRowProps = {
@@ -26,7 +27,6 @@ export type ImportPreviewProps = {
   onSelectAll: () => void;
   onClearSelection: () => void;
   onConfirm: () => void | Promise<void>;
-  onBack: () => void;
   isConfirmDisabled: boolean;
   isPersisting?: boolean;
 };
