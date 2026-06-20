@@ -2,6 +2,7 @@
 import NodePolyfillPlugin from "node-polyfill-webpack-plugin";
 
 const rustApiUrl = process.env.RUST_API_URL ?? "http://localhost:9000";
+console.log("[next.config] RUST_API_URL rewrite target:", rustApiUrl);
 
 const nextConfig = {
   async rewrites() {
