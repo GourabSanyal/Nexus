@@ -1,11 +1,12 @@
 use crate::api::wallet::body::resolve_rpc_override_from_headers;
 use crate::chains::traits::BlockchainAdapter;
-use crate::chains::transaction_options::TransactionFetchOptions;
 use crate::models::wallet_import::{balance_has_funds, NetworkImportData, WalletImportEntry};
 use crate::services::wallet_derivation::DerivedCandidate;
 
-const TX_LIMIT: usize = 10;
-
+/// Scan a network for wallet balances using batch RPC calls.
+/// Transactions are NOT fetched during import to stay under Cloudflare's 50 subrequest limit.
+/// This allows scanning 100+ wallets with only 1 subrequest per network.
+/// Transactions can be fetched lazily when viewing individual wallets.
 pub async fn scan_network(
     adapter: &dyn BlockchainAdapter,
     candidates: &[DerivedCandidate],
@@ -15,31 +16,31 @@ pub async fn scan_network(
 ) -> NetworkImportData {
     let env_rpc = resolve_rpc_override_from_headers(req, adapter, Some(cluster));
 
+    // Filter candidates for this chain
+    let chain_candidates: Vec<_> = candidates.iter().filter(|c| c.chain == chain).collect();
+
+    if chain_candidates.is_empty() {
+        return NetworkImportData { wallets: vec![] };
+    }
+
+    // Batch fetch all balances in a single RPC call (reduces subrequests dramatically)
+    // This allows scanning 100+ wallets with only 1 HTTP request per network
+    let addresses: Vec<&str> = chain_candidates.iter().map(|c| c.address.as_str()).collect();
+    let balances = adapter
+        .get_balances_batch(&addresses, Some(cluster), env_rpc.as_deref())
+        .await
+        .unwrap_or_default();
+
     let mut wallets = Vec::new();
-    for candidate in candidates.iter().filter(|c| c.chain == chain) {
-        let tx_opts = TransactionFetchOptions {
-            limit: Some(TX_LIMIT),
-            cursor: None,
-            until_signature: None,
-        };
+    for candidate in chain_candidates {
+        let balance = balances
+            .get(&candidate.address)
+            .cloned()
+            .unwrap_or_else(|| "0".to_string());
 
-        let bal_res = adapter
-            .get_balance(&candidate.address, Some(cluster), env_rpc.as_deref())
-            .await;
-        let tx_res = adapter
-            .get_transactions(
-                &candidate.address,
-                Some(cluster),
-                tx_opts,
-                env_rpc.as_deref(),
-            )
-            .await;
-
-        let balance = bal_res
-            .map(|r| r.balance)
-            .unwrap_or_else(|_| "0".to_string());
-        let transactions = tx_res.map(|r| r.transactions).unwrap_or_default();
-        let has_activity = balance_has_funds(&balance) || !transactions.is_empty();
+        // Skip transaction fetching during import to stay under Cloudflare's 50 subrequest limit.
+        // Transactions can be fetched lazily via /wallet/transactions endpoint when needed.
+        let has_activity = balance_has_funds(&balance);
 
         wallets.push(WalletImportEntry {
             address: candidate.address.clone(),
@@ -47,7 +48,7 @@ pub async fn scan_network(
             scheme: candidate.scheme,
             account_index: candidate.account_index,
             balance,
-            transactions,
+            transactions: vec![],
             has_activity,
         });
     }

@@ -13,7 +13,9 @@ use std::collections::HashSet;
 use std::str::FromStr;
 
 pub const DEFAULT_MAX_ACCOUNTS: u32 = 5;
-pub const MAX_ACCOUNTS_CAP: u32 = 10;
+/// Maximum account indices to scan. With batch RPC calls, we can handle many more
+/// wallets since balance checks are batched into 1 request per network.
+pub const MAX_ACCOUNTS_CAP: u32 = 50;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DerivedCandidate {
