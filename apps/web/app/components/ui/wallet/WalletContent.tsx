@@ -170,7 +170,7 @@ export const CryptoWalletContent = () => {
     openFlow("import");
   };
 
-  const handlePasswordGateSubmit = async (password: string) => {
+  const handlePasswordGateSubmit = async (password: string): Promise<boolean> => {
     setIsPasswordGateLoading(true);
     try {
       if (pendingFlow === "generate") {
@@ -184,16 +184,18 @@ export const CryptoWalletContent = () => {
           startImportWithPassword(password);
         }
       } else {
-        return;
+        return false;
       }
 
       setPasswordGateOpen(false);
       setPendingFlow(null);
+      return true;
     } catch (error) {
       vault.lock();
       toast.error(
         error instanceof Error ? error.message : "Failed to secure wallet"
       );
+      return false;
     } finally {
       setIsPasswordGateLoading(false);
     }
