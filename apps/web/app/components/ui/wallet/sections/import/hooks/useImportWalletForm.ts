@@ -55,19 +55,23 @@ export const useImportWalletForm = () => {
 
   useEffect(() => {
     const subscription = methods.watch((formData) => {
-      if (!formData.inputData?.seedPhraseWords) {
+      const inputData = formData.inputData;
+      if (!inputData?.seedPhraseWords) {
         return;
       }
+
+      const seedPhraseWords = inputData.seedPhraseWords.filter(
+        (word): word is string => word !== undefined
+      );
 
       // Only sync seed input fields — never overwrite preview/selection state.
       setImportState((prev) => ({
         ...prev,
         inputData: {
           ...prev.inputData,
-          ...formData.inputData,
-          seedPhraseWords: [...formData.inputData.seedPhraseWords],
+          ...inputData,
+          seedPhraseWords,
         },
-        validationErrors: formData.validationErrors ?? prev.validationErrors,
       }));
     });
     return () => subscription.unsubscribe();
