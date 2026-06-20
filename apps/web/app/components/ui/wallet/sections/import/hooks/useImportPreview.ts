@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { flushSync } from "react-dom";
 import { useRecoilState } from "recoil";
 import type { FlatImportWalletEntry } from "@my-org/zod";
 import { importWalletState } from "@repo/store/src/atoms/importWalletState";
@@ -63,6 +64,8 @@ export const useImportPreview = () => {
   );
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [isConfirming, setIsConfirming] = useState(false);
+  const isBusy = isPersisting || isConfirming;
 
   useEffect(() => {
     setSelectedIds([]);
@@ -87,10 +90,13 @@ export const useImportPreview = () => {
       selectedIds.includes(buildImportWalletEntryId(entry))
     );
 
-    setImportState((prev) => ({
-      ...prev,
-      selectedImportWallets: selected,
-    }));
+    flushSync(() => {
+      setIsConfirming(true);
+      setImportState((prev) => ({
+        ...prev,
+        selectedImportWallets: selected,
+      }));
+    });
 
     try {
       await persistSelection(selected);
@@ -101,6 +107,8 @@ export const useImportPreview = () => {
           error instanceof Error ? error.message : "Failed to import wallets",
         ],
       }));
+    } finally {
+      setIsConfirming(false);
     }
   }, [activeWallets, persistSelection, selectedIds, setImportState]);
 
@@ -111,7 +119,7 @@ export const useImportPreview = () => {
     selectAll,
     clearSelection,
     handleConfirm,
-    isPersisting,
-    isConfirmDisabled: selectedIds.length === 0 || isPersisting,
+    isPersisting: isBusy,
+    isConfirmDisabled: selectedIds.length === 0 || isBusy,
   };
 };

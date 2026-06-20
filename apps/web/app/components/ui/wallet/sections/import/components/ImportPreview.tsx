@@ -1,7 +1,18 @@
-import React from "react";
+import React, { useCallback, useState } from "react";
+import { flushSync } from "react-dom";
 import { Button } from "@components/ui/button/button";
 import type { ImportPreviewProps } from "@/app/types/components/ImportPreviewTypes";
 import { ImportPreviewWalletRow } from "./ImportPreviewWalletRow";
+
+const LoadingLabel = ({ text }: { text: string }) => (
+  <>
+    <span
+      className="mr-2 inline-block h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-current border-t-transparent"
+      aria-hidden="true"
+    />
+    {text}
+  </>
+);
 
 export const ImportPreview: React.FC<ImportPreviewProps> = ({
   wallets,
@@ -12,7 +23,25 @@ export const ImportPreview: React.FC<ImportPreviewProps> = ({
   onConfirm,
   isConfirmDisabled,
   isPersisting = false,
-}) => (
+}) => {
+  const [isClicked, setIsClicked] = useState(false);
+  const isLoading = isPersisting || isClicked;
+
+  const handleConfirmClick = useCallback(() => {
+    if (isConfirmDisabled || isLoading) {
+      return;
+    }
+
+    flushSync(() => {
+      setIsClicked(true);
+    });
+
+    void Promise.resolve(onConfirm()).finally(() => {
+      setIsClicked(false);
+    });
+  }, [isConfirmDisabled, isLoading, onConfirm]);
+
+  return (
   <div className="flex w-full max-w-md flex-col gap-6">
     <div className="flex items-center gap-4">
       <h2 className="flex-1 text-center text-2xl font-bold">Select Wallets</h2>
@@ -35,7 +64,7 @@ export const ImportPreview: React.FC<ImportPreviewProps> = ({
             variant="ghost"
             className="flex-1 text-sm"
             onClick={onSelectAll}
-            disabled={isPersisting}
+            disabled={isLoading}
           >
             Select all
           </Button>
@@ -44,7 +73,7 @@ export const ImportPreview: React.FC<ImportPreviewProps> = ({
             variant="ghost"
             className="flex-1 text-sm"
             onClick={onClearSelection}
-            disabled={isPersisting}
+            disabled={isLoading}
           >
             Clear
           </Button>
@@ -66,18 +95,22 @@ export const ImportPreview: React.FC<ImportPreviewProps> = ({
     <Button
       type="button"
       className={`w-full px-4 py-2 text-sm font-medium ${
-        isConfirmDisabled
+        isConfirmDisabled || isLoading
           ? "cursor-not-allowed bg-gray-400 opacity-50 dark:bg-gray-600"
           : ""
       }`}
-      disabled={isConfirmDisabled}
-      onClick={onConfirm}
+      disabled={isConfirmDisabled || isLoading}
+      aria-busy={isLoading}
+      onClick={handleConfirmClick}
     >
-      {isPersisting
-        ? "Importing..."
-        : `Continue with ${selectedIds.length} wallet${
-            selectedIds.length === 1 ? "" : "s"
-          }`}
+      {isLoading ? (
+        <LoadingLabel text="Importing..." />
+      ) : (
+        `Continue with ${selectedIds.length} wallet${
+          selectedIds.length === 1 ? "" : "s"
+        }`
+      )}
     </Button>
   </div>
-);
+  );
+};
