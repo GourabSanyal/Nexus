@@ -37,7 +37,6 @@ const buildWalletView = (
     formattedBalance: adapter?.formatBalance(balance) ?? entry.balance,
     formattedAddress: adapter?.formatAddress(entry.address) ?? entry.address,
     schemeLabel: SCHEME_LABELS[entry.scheme],
-    transactionCount: entry.transactions.length,
     hasActivity: entry.hasActivity,
   };
 };

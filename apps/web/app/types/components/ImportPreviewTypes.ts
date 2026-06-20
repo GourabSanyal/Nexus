@@ -10,7 +10,6 @@ export type ImportPreviewWalletView = {
   formattedBalance: string;
   formattedAddress: string;
   schemeLabel: string;
-  transactionCount: number;
   hasActivity: boolean;
 };
 

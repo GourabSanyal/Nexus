@@ -20,7 +20,7 @@ export const ImportPreview: React.FC<ImportPreviewProps> = ({
 
     <p className="text-center text-gray-600 dark:text-gray-400">
       Choose wallets with on-chain activity to import. Only wallets with a
-      balance or transaction history are shown.
+      balance are shown.
     </p>
 
     {wallets.length === 0 ? (

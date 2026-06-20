@@ -45,12 +45,9 @@ export const ImportPreviewWalletRow: React.FC<ImportPreviewWalletRowProps> = ({
           {wallet.formattedAddress}
         </p>
 
-        <div className="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400">
-          <span>
-            Balance: {wallet.formattedBalance} {wallet.currencySymbol}
-          </span>
-          <span>Transactions: {wallet.transactionCount}</span>
-        </div>
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          Balance: {wallet.formattedBalance} {wallet.currencySymbol}
+        </p>
       </div>
     </div>
   </button>
