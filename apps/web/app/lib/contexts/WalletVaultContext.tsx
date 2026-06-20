@@ -38,6 +38,7 @@ import {
   legacyToVaultPlaintext,
   readLegacyWalletState,
 } from "@/app/lib/crypto/legacyWalletMigration";
+import { clearImportSession } from "@/app/lib/utils/import/importSessionStorage";
 
 const IDLE_LOCK_MS = 12 * 60 * 1000;
 
@@ -120,6 +121,7 @@ export const WalletVaultProvider = ({
   const lock = useCallback(() => {
     setPlaintext(null);
     sessionPasswordRef.current = null;
+    clearImportSession();
     if (idleTimerRef.current) {
       clearTimeout(idleTimerRef.current);
       idleTimerRef.current = null;

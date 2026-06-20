@@ -3,6 +3,7 @@
 import React, { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Eye, EyeOff, Copy, LogOut, Download } from "lucide-react";
+import { useSetRecoilState } from "recoil";
 import { Button } from "../button/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "../card/card";
@@ -14,6 +15,8 @@ import LogoutConfirmationModal from "@components/ui/wallet/sections/password/Log
 import PasswordInput from "./sections/password/PasswordInput";
 import { useWalletVault } from "@/app/lib/contexts/WalletVaultContext";
 import { toast } from "sonner";
+import { importWalletState } from "@repo/store/src/atoms/importWalletState";
+import { walletFlowState } from "@repo/store/src/atoms/walletFlowState";
 
 const SeedPhraseContainer = ({
   activeTab,
@@ -24,9 +27,28 @@ const SeedPhraseContainer = ({
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState<boolean>(false);
   const [seedDialogOpen, setSeedDialogOpen] = useState<boolean>(false);
   const vault = useWalletVault();
+  const setImportState = useSetRecoilState(importWalletState);
+  const setCurrentFlow = useSetRecoilState(walletFlowState);
 
   const handleLogout = () => {
     vault.clearWallet();
+    // Reset import state to allow fresh import after re-login
+    setImportState({
+      isImporting: false,
+      currentPhase: "input",
+      inputData: {
+        seedPhrase: "",
+        seedPhraseLength: 12,
+        privateKey: "",
+        password: "",
+        seedPhraseWords: Array(12).fill(""),
+      },
+      validationErrors: [],
+      discoveredWallets: undefined,
+      selectedImportWallets: [],
+      importedWallet: undefined,
+    });
+    setCurrentFlow("entry");
     setIsLogoutModalOpen(false);
     setShowSeedPhrase(false);
   };
