@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
+import { flushSync } from "react-dom";
 import { useSetRecoilState } from "recoil";
 import { importWalletState } from "@repo/store/src/atoms/importWalletState";
 import { fetchWalletImportPreview } from "@/app/lib/services/fetchWalletImportPreview";
@@ -37,14 +38,20 @@ export const useImportWalletFlow = () => {
 
       clearImportSession();
 
-      setImportState((prev) => ({
-        ...prev,
-        isImporting: true,
-        currentPhase: "validation",
-        validationErrors: [],
-        selectedImportWallets: [],
-        discoveredWallets: undefined,
-      }));
+      flushSync(() => {
+        setImportState((prev) => ({
+          ...prev,
+          isImporting: true,
+          validationErrors: [],
+          selectedImportWallets: [],
+          discoveredWallets: undefined,
+        }));
+      });
+
+      // Let the button spinner paint before CPU/network-heavy import work.
+      await new Promise<void>((resolve) => {
+        requestAnimationFrame(() => resolve());
+      });
 
       try {
         // Keep mnemonic in memory only until the user confirms wallet selection.

@@ -1,4 +1,5 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, type FormEvent } from "react";
+import { flushSync } from "react-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRecoilState } from "recoil";
@@ -48,9 +49,17 @@ export const useImportWalletForm = () => {
   });
 
   useEffect(() => {
-    if (importState.currentPhase !== methods.getValues("currentPhase")) {
-      methods.reset(cloneImportFormValues(importState));
+    const formPhase = methods.getValues("currentPhase");
+    if (importState.currentPhase === formPhase) {
+      return;
     }
+
+    // Stay on seed phrase UI while scanning; avoid resetting the form mid-import.
+    if (importState.currentPhase === "validation") {
+      return;
+    }
+
+    methods.reset(cloneImportFormValues(importState));
   }, [importState, methods]);
 
   useEffect(() => {
@@ -170,23 +179,50 @@ export const useImportWalletForm = () => {
     [methods]
   );
 
-  const onSubmit = methods.handleSubmit(async (data) => {
-    const mnemonic = data.inputData.seedPhraseWords.join(" ").trim();
-    setImportState((prev) => ({
-      ...prev,
-      ...data,
-      inputData: {
-        ...data.inputData,
-        seedPhrase: mnemonic,
-      },
-    }));
+  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
 
-    try {
-      await runImportFlow(mnemonic);
-    } catch {
-      // useImportWalletFlow updates validationErrors and phase
-    }
-  });
+    flushSync(() => {
+      setImportState((prev) => ({
+        ...prev,
+        isImporting: true,
+        validationErrors: [],
+      }));
+    });
+
+    void methods.handleSubmit(
+      async (data) => {
+        const mnemonic = data.inputData.seedPhraseWords.join(" ").trim();
+
+        flushSync(() => {
+          setImportState((prev) => ({
+            ...prev,
+            ...data,
+            isImporting: true,
+            validationErrors: [],
+            inputData: {
+              ...data.inputData,
+              seedPhrase: mnemonic,
+            },
+          }));
+        });
+
+        try {
+          await runImportFlow(mnemonic);
+        } catch {
+          // useImportWalletFlow updates validationErrors and phase
+        }
+      },
+      () => {
+        flushSync(() => {
+          setImportState((prev) => ({
+            ...prev,
+            isImporting: false,
+          }));
+        });
+      }
+    )(event);
+  };
 
   return {
     methods,

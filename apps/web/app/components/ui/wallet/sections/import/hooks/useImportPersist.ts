@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { flushSync } from "react-dom";
 import { useRecoilState, useSetRecoilState } from "recoil";
 import { toast } from "sonner";
 import type { FlatImportWalletEntry } from "@my-org/zod";
@@ -46,7 +47,9 @@ export const useImportPersist = () => {
         throw new Error("Import session expired. Enter your seed phrase again.");
       }
 
-      setIsPersisting(true);
+      flushSync(() => {
+        setIsPersisting(true);
+      });
 
       try {
         let keyed = keyedCandidatesRef.current;
