@@ -10,6 +10,8 @@ import { InlineActions } from "./header/InlineActions";
 import { SmallScreenMenu } from "./header/SmallScreenMenu";
 import { WalletHeaderProps } from "@/app/types/wallet/WalletHeaderTypes";
 import { useWalletFeatures } from "@/app/hooks/useWalletFeatures";
+import { useNativeTokenPrices } from "@/app/hooks/useNativeTokenPrices";
+import { formatBalanceUsdDisplay } from "@/app/lib/prices/formatUsdDisplay";
 import { parseBalanceString } from "@/app/lib/utils/parseBalanceString";
 
 export const WalletHeader = ({
@@ -21,28 +23,48 @@ export const WalletHeader = ({
   onDelete,
 }: WalletHeaderProps) => {
   const features = useWalletFeatures(wallet);
-  
+  const { prices } = useNativeTokenPrices();
+
   if (!features) {
     return null;
   }
 
   const chain = features.chain;
 
-  const balanceToShow = useMemo(() => {
-    if (balance === undefined) return "0";
+  const balanceDisplay = useMemo(() => {
+    if (balance === undefined) {
+      return formatBalanceUsdDisplay({
+        chain,
+        network: features.currentNetwork,
+        nativeBalance: 0,
+        formatBalance: features.formatBalance,
+        prices,
+      });
+    }
+
     const balanceValue: number | bigint =
       typeof balance === "string"
         ? parseBalanceString(balance)
         : balance;
-    return features.formatBalance(balanceValue);
-  }, [balance, features]);
+
+    return formatBalanceUsdDisplay({
+      chain,
+      network: features.currentNetwork,
+      nativeBalance: balanceValue,
+      formatBalance: features.formatBalance,
+      prices,
+    });
+  }, [balance, chain, features, prices]);
 
   return (
     <CardHeader className="flex flex-row items-start sm:items-center justify-between space-y-0 pb-4">
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
         <WalletTitle name={wallet.name} />
         <div className="flex items-center gap-2">
-          <BalancePill text={`Balance: ${balanceToShow}`} />
+          <BalancePill
+            text={`Balance: ${balanceDisplay.text}`}
+            title={balanceDisplay.title}
+          />
           <ClusterToggle chain={chain} walletId={wallet.id} />
           <RefreshButton
             onClick={onRefresh}
