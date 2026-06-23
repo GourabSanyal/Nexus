@@ -8,6 +8,8 @@ export type ImportPreviewWalletView = {
   networkColorClass: string;
   currencySymbol: string;
   formattedBalance: string;
+  formattedUsd: string | null;
+  usdTitle?: string;
   formattedAddress: string;
   schemeLabel: string;
   hasActivity: boolean;

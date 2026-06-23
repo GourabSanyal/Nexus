@@ -2,8 +2,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { flushSync } from "react-dom";
 import { useRecoilState } from "recoil";
 import type { FlatImportWalletEntry } from "@my-org/zod";
+import { ChainEnum } from "@repo/store/src/enums/network";
 import { importWalletState } from "@repo/store/src/atoms/importWalletState";
 import { useWalletAdapter } from "@/app/lib/adapters/useWalletAdapter";
+import { useNativeTokenPrices } from "@/app/hooks/useNativeTokenPrices";
+import { formatUsdEquivalent } from "@/app/lib/prices/formatUsdDisplay";
 import { buildImportWalletEntryId } from "@/app/lib/utils/import/buildImportWalletEntryId";
 import { flattenImportPreview } from "@/app/lib/utils/import/flattenImportPreview";
 import { importPreviewNetworkToEnum } from "@/app/lib/utils/import/importPreviewNetwork";
@@ -20,11 +23,20 @@ const SCHEME_LABELS = {
 const buildWalletView = (
   entry: FlatImportWalletEntry,
   solAdapter: ReturnType<typeof useWalletAdapter>,
-  ethAdapter: ReturnType<typeof useWalletAdapter>
+  ethAdapter: ReturnType<typeof useWalletAdapter>,
+  prices: ReturnType<typeof useNativeTokenPrices>["prices"]
 ): ImportPreviewWalletView => {
   const adapter = entry.chain === "solana" ? solAdapter : ethAdapter;
   const network = importPreviewNetworkToEnum(entry.chain, entry.networkTier);
   const balance = parseImportBalance(entry.chain, entry.balance);
+  const chain =
+    entry.chain === "solana" ? ChainEnum.Solana : ChainEnum.Ethereum;
+  const usdEquivalent = formatUsdEquivalent({
+    chain,
+    network,
+    nativeBalance: balance,
+    prices,
+  });
 
   return {
     entry,
@@ -36,6 +48,8 @@ const buildWalletView = (
       "border-muted-foreground/20 text-muted-foreground",
     currencySymbol: adapter?.getCurrencySymbol() ?? "",
     formattedBalance: adapter?.formatBalance(balance) ?? entry.balance,
+    formattedUsd: usdEquivalent.text,
+    usdTitle: usdEquivalent.title,
     formattedAddress: adapter?.formatAddress(entry.address) ?? entry.address,
     schemeLabel: SCHEME_LABELS[entry.scheme],
     hasActivity: entry.hasActivity,
@@ -45,6 +59,7 @@ const buildWalletView = (
 export const useImportPreview = () => {
   const [importState, setImportState] = useRecoilState(importWalletState);
   const { persistSelection, isPersisting } = useImportPersist();
+  const { prices } = useNativeTokenPrices();
   const solAdapter = useWalletAdapter("solana");
   const ethAdapter = useWalletAdapter("ethereum");
 
@@ -58,9 +73,9 @@ export const useImportPreview = () => {
   const walletViews = useMemo(
     () =>
       activeWallets.map((entry) =>
-        buildWalletView(entry, solAdapter, ethAdapter)
+        buildWalletView(entry, solAdapter, ethAdapter, prices)
       ),
-    [activeWallets, solAdapter, ethAdapter]
+    [activeWallets, solAdapter, ethAdapter, prices]
   );
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
