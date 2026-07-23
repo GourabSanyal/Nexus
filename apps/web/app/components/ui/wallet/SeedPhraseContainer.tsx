@@ -88,7 +88,8 @@ const SeedPhraseContainer = ({
               <CardTitle className="flex justify-between items-center gap-2">
                 <span>Crypto Wallet Generator</span>
                 <div className="flex items-center gap-1">
-                  {onImportMore ? (
+                  {/* TODO: left for implementation later on */}
+                  {/* {onImportMore ? (
                     <Button
                       variant="ghost"
                       className="text-muted-foreground hover:text-foreground text-sm px-2"
@@ -97,7 +98,7 @@ const SeedPhraseContainer = ({
                       <Download className="h-4 w-4 mr-1" />
                       Import
                     </Button>
-                  ) : null}
+                  ) : null} */}
                   <Button
                     variant="ghost"
                     size="icon"
