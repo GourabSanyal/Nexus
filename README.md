@@ -211,7 +211,7 @@ cd apps/web && yarn dev
 │   └── web/                 # Next.js frontend
 ├── packages/
 │   ├── api/                 # Express.js API (Deprecated in latest version)
-│   ├── rust-apis/           # Axum Rust API (Solana/Ethereum gRPCs)
+│   ├── rust-apis/           # Rust/WASM API (Solana/Ethereum JSON-RPC)
 │   ├── store/               # Shared Recoil state
 │   ├── ui/                  # Shared UI components
 │   └── zod/                 # Validation schemas
