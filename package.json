@@ -1,5 +1,5 @@
 {
-  "name": "my-turborepo",
+  "name": "nexus",
   "private": true,
   "scripts": {
     "build": "turbo build",

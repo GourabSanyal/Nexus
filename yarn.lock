@@ -9300,17 +9300,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"my-turborepo@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "my-turborepo@workspace:."
-  dependencies:
-    "@hookform/resolvers": "npm:^3.3.4"
-    prettier: "npm:^3.2.5"
-    turbo: "npm:^2.1.1"
-    typescript: "npm:^5.4.5"
-  languageName: unknown
-  linkType: soft
-
 "mylas@npm:^2.1.9":
   version: 2.1.14
   resolution: "mylas@npm:2.1.14"
@@ -9439,6 +9428,17 @@ __metadata:
   checksum: 10c0/262cf21a179f394aedfae36724d3ece46f717d618beebfbb75986be7f4d6093a6cf183c36871462c16d1ec490fd0a765d1944d04d30e282b4cca41b71aaf8eea
   languageName: node
   linkType: hard
+
+"nexus@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "nexus@workspace:."
+  dependencies:
+    "@hookform/resolvers": "npm:^3.3.4"
+    prettier: "npm:^3.2.5"
+    turbo: "npm:^2.1.1"
+    typescript: "npm:^5.4.5"
+  languageName: unknown
+  linkType: soft
 
 "no-case@npm:^2.2.0, no-case@npm:^2.3.2":
   version: 2.3.2
