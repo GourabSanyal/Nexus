@@ -108,7 +108,7 @@ When a new transaction arrives:
 ```json
 {
   "transactions": [ /* only txs newer than 5oPFriZ6... */ ],
-  "pagination": { "has_more": false, "next_cursor": null, "limit": 20 }
+  "pagination": { "hasMore": false, "nextCursor": null, "limit": 20 }
 }
 ```
 
