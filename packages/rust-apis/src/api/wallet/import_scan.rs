@@ -39,7 +39,7 @@ pub async fn scan_network(
             .unwrap_or_else(|| "0".to_string());
 
         // Skip transaction fetching during import to stay under Cloudflare's 50 subrequest limit.
-        // Transactions can be fetched lazily via /wallet/transactions endpoint when needed.
+        // Transactions can be fetched lazily via POST /wallet/<chain>/transactions when needed.
         let has_activity = balance_has_funds(&balance);
 
         wallets.push(WalletImportEntry {
