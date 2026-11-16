@@ -180,7 +180,7 @@ Expected URL pattern: `https://nexus-web-git-dev-<user>.vercel.app`
 | # | Feature | Steps | Pass criteria |
 |---|---|---|---|
 | 5 | Balances | Unlock vault → view SOL/ETH balance | Balances load (may show 0) |
-| 6 | Import wallet | Import → enter seed → preview | `POST /api/rust/wallet/import-data` → 200, preview shows addresses |
+| 6 | Import wallet | Import → enter seed → preview | `POST /api/rust/wallet/import/preview` → 200, preview shows addresses |
 | 7 | Send (testnet) | Send small tx on devnet/sepolia | Tx submits or clear validation error (not network/CORS) |
 | 8 | History | Open history modal | Transactions load or empty state (not CORS/500) |
 | 9 | Network toggle | Switch mainnet ↔ testnet | Balances refresh for selected network |
@@ -189,7 +189,7 @@ Expected URL pattern: `https://nexus-web-git-dev-<user>.vercel.app`
 
 ```
 Network tab — import wallet request:
-  ✅ Request URL:  https://<preview-url>/api/rust/wallet/import-data
+  ✅ Request URL:  https://<preview-url>/api/rust/wallet/import/preview
   ✅ Status:       200 (or meaningful 4xx, not failed/CORS)
   ❌ Should NOT be: https://rust-apis.biz-gourab.workers.dev/...
 

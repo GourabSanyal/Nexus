@@ -26,7 +26,7 @@ flowchart LR
         SOL[("Solana")]
     end
 
-    HTTP ==>|"POST /wallet/:chain/*<br/>POST /wallet/import-data"| Worker
+    HTTP ==>|"POST /wallet/:chain/*<br/>POST /wallet/import/preview"| Worker
     Worker ==>|JSON-RPC| ETH
     Worker ==>|JSON-RPC| SOL
 
