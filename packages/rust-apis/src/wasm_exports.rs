@@ -37,8 +37,8 @@ pub async fn get_solana_transactions(
 
     let result = json!({
         "transactions": transactions,
-        "has_more": has_more,
-        "next_cursor": next_cursor,
+        "hasMore": has_more,
+        "nextCursor": next_cursor,
     });
 
     serde_json::to_string(&result)

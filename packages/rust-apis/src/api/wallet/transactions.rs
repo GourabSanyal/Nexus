@@ -47,8 +47,8 @@ pub async fn handle_transactions(req: &web_sys::Request, chain: &str) -> (u16, S
             json!({
                 "transactions": result.transactions,
                 "pagination": {
-                    "has_more": result.has_more,
-                    "next_cursor": result.next_cursor,
+                    "hasMore": result.has_more,
+                    "nextCursor": result.next_cursor,
                     "limit": result.limit
                 }
             })
