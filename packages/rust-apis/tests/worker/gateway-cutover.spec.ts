@@ -12,7 +12,8 @@ describe("gateway cutover to rust routes", () => {
       "apps/web/app/lib/utils/getEthBalance.ts",
       "apps/web/app/lib/utils/getSolTransactions.ts",
       "apps/web/app/lib/utils/ethereum/transactions/getEthTransactions.ts",
-      "apps/web/app/lib/utils/sendTransaction.ts",
+      "apps/web/app/lib/utils/send/sendSolanaTransaction.ts",
+      "apps/web/app/lib/utils/send/sendEthereumTransaction.ts",
     ];
 
     for (const file of files) {

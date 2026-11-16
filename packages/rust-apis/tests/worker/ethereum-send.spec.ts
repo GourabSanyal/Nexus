@@ -23,7 +23,7 @@ describe("ethereum send parity and frontend wiring", () => {
     const frontendUtilPath = resolve(
       process.cwd(),
       "../..",
-      "apps/web/app/lib/utils/sendTransaction.ts"
+      "apps/web/app/lib/utils/send/sendEthereumTransaction.ts"
     );
     const source = readFileSync(frontendUtilPath, "utf-8");
 
