@@ -32,7 +32,7 @@ const TransactionItemImpl = ({
       <div className="flex items-center justify-between mb-2">
         <StatusRow tx={tx} />
         <span className="text-xs text-muted-foreground">
-          {formatDate(tx.block_time)}
+          {formatDate(tx.blockTime)}
         </span>
       </div>
 
@@ -91,7 +91,7 @@ export const TransactionItem = memo(
     prev.transaction.amount === next.transaction.amount &&
     prev.transaction.fee === next.transaction.fee &&
     prev.transaction.direction === next.transaction.direction &&
-    prev.transaction.block_time === next.transaction.block_time &&
+    prev.transaction.blockTime === next.transaction.blockTime &&
     prev.cluster === next.cluster &&
     prev.adapter === next.adapter
 );

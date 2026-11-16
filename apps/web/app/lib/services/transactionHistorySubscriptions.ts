@@ -36,7 +36,7 @@ export const hasMoreTransactions = (
   walletId: number,
   cluster: NetworkEnum
 ): boolean =>
-  paginationByKey.get(historyCacheKey(walletId, cluster))?.has_more ?? false;
+  paginationByKey.get(historyCacheKey(walletId, cluster))?.hasMore ?? false;
 
 export const subscribeTransactionHistoryUpdated = (
   walletId: number,

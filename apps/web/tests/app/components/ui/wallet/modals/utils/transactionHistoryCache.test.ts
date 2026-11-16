@@ -16,15 +16,15 @@ import {
 const makeTx = (signature: string): TransactionInfo => ({
   signature,
   slot: 0,
-  block_time: Date.now(),
+  blockTime: Date.now(),
   status: "success",
   err: null,
-  confirmation_status: "finalized",
+  confirmationStatus: "finalized",
   amount: null,
   fee: null,
   direction: null,
-  from_address: null,
-  to_address: null,
+  fromAddress: null,
+  toAddress: null,
   memo: null,
 });
 
