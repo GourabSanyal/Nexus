@@ -3,7 +3,7 @@ import {
   TransactionRequest,
 } from "@api-types/TransactionTypes";
 import { rustApiClient } from "@api-utils/rustApiClient";
-import { GetSolTransactionsParams } from "@/app/types/components/GetSolanaTransactionProps";
+import { GetSolTransactionsParams } from "@/app/types/components/GetSolanaTransactionsParams";
 
 export const getSolTransactions = async ({
   address,
