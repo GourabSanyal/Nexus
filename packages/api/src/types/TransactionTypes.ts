@@ -1,21 +1,21 @@
 export interface TransactionInfo {
   signature: string;
   slot: number;
-  block_time: number | null;
+  blockTime: number | null;
   status: string; // "success" | "failed"
   err: any | null;
-  confirmation_status: string | null;
-  amount: number | null; 
-  fee: number | null; 
+  confirmationStatus: string | null;
+  amount: number | null;
+  fee: number | null;
   direction: string | null; // "sent" | "received" | "self"
-  from_address: string | null;
-  to_address: string | null;
+  fromAddress: string | null;
+  toAddress: string | null;
   memo: string | null;
 }
 
 export interface PaginationInfo {
-  has_more: boolean;
-  next_cursor: string | null;
+  hasMore: boolean;
+  nextCursor: string | null;
   limit: number;
 }
 
@@ -45,4 +45,3 @@ export type TransactionHistoryStore = Record<
   string,
   Record<string, CachedTransactionData>
 >;
-

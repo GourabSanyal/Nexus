@@ -10,6 +10,7 @@ pub struct TransactionRequest {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct TransactionInfo {
     pub signature: String,
     pub slot: u64,
@@ -31,6 +32,7 @@ pub struct TransactionInfo {
 
 #[allow(dead_code)]
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct PaginationInfo {
     pub has_more: bool,
     pub next_cursor: Option<String>, // last signature for next page
