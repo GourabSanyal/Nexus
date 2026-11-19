@@ -1,7 +1,7 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { privateKeyPasswordSchema } from "@my-org/zod/src/password/privateKey";
+import { privateKeyPasswordSchema } from "@repo/zod";
 import {
   Form,
   FormField,

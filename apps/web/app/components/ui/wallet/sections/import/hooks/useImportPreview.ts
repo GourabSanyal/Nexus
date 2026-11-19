@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { flushSync } from "react-dom";
 import { useRecoilState } from "recoil";
-import type { FlatImportWalletEntry } from "@my-org/zod";
-import { ChainEnum } from "@repo/store/src/enums/network";
-import { importWalletState } from "@repo/store/src/atoms/importWalletState";
+import type { FlatImportWalletEntry } from "@repo/zod";
+import { ChainEnum } from "@repo/store";
+import { importWalletState } from "@repo/store";
 import { useWalletAdapter } from "@/app/lib/adapters/useWalletAdapter";
 import { useNativeTokenPrices } from "@/app/hooks/useNativeTokenPrices";
 import { formatUsdEquivalent } from "@/app/lib/prices/formatUsdDisplay";

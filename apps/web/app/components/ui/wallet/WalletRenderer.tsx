@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "../card/card";
-import { useWalletOperations } from "@my-org/store";
+import { useWalletOperations } from "@repo/store";
 import { WalletRendererProps } from "@/app/types/wallet";
 import { WalletRendererContent } from "./WalletRendererContent";
 import { usePerWalletModalState } from "@/app/hooks/usePerWalletModalState";

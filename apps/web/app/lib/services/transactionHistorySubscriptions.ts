@@ -1,5 +1,5 @@
-import { NetworkEnum } from "@repo/store/src/enums/network";
-import { TransactionInfo, PaginationInfo } from "@api-types/TransactionTypes";
+import { NetworkEnum } from "@repo/store";
+import { TransactionInfo, PaginationInfo } from "@repo/api/types/TransactionTypes";
 import { historyCacheKey } from "@/app/components/ui/wallet/modals/utils/transactionHistoryCache";
 import type { HistoryUpdateListener } from "@/app/types/components/TransactionHistoryFetchTypes";
 

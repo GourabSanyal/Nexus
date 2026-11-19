@@ -1,5 +1,5 @@
-import { BalanceParams } from "@api-types/BalanceParams";
-import { expressApiClient } from "@api-utils/expressApiClient";
+import { BalanceParams } from "../../../types/BalanceParams.js";
+import { expressApiClient } from "../../../utils/expressApiClient.js";
 
 export const getEthBalance = async ({
   address,

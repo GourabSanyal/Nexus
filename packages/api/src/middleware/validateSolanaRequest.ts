@@ -1,5 +1,5 @@
 import { Response, NextFunction } from "express";
-import { NetworkEnum } from "../types/network.js";
+import { NetworkEnum } from "@repo/constants";
 import { getSolanaRpcUrl } from "../utils/getSolanaRpcUrl.js";
 import { SolanaRequest } from "../types/solana.js";
 

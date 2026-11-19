@@ -1,5 +1,5 @@
 import { formatEther } from "ethers";
-import { WalletPath } from "@repo/constants/src/WalletPaths";
+import { WalletPath } from "@repo/constants";
 import { toast } from "sonner";
 
 export const LAMPORTS_TO_SOL = 1_000_000_000;

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { vaultPasswordSchema } from "@my-org/zod";
+import { vaultPasswordSchema } from "@repo/zod";
 import { z } from "zod";
 import { Button } from "../../../button/button";
 import { Input } from "../../../input";

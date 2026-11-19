@@ -1,5 +1,5 @@
-// import { BalanceParams } from "@api-types/BalanceParams";
-// import { rustApiClient } from "@api-utils/rustApiClient";
+// import { BalanceParams } from "../../../types/BalanceParams.js";
+// import { rustApiClient } from "../../../utils/rustApiClient.js";
 
 // export const getSolBalance = async ({ address, cluster }: BalanceParams) => {
 //   const client = rustApiClient();

@@ -1,4 +1,4 @@
-import type { PublicEthereumWallet, PublicSolanaWallet } from "@my-org/zod";
+import type { PublicEthereumWallet, PublicSolanaWallet } from "@repo/zod";
 
 export interface WalletHeaderProps {
   wallet: PublicSolanaWallet | PublicEthereumWallet;

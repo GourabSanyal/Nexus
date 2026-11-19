@@ -1,21 +1,21 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
-import { useWalletBalances } from "@my-org/store";
+import { useWalletBalances } from "@repo/store";
 import {
   globalNetworkState,
   walletNetworkOverrideState,
-} from "@repo/store/src/atoms/networkState";
-import { NetworkConnectionEnum, NetworkEnum } from "@repo/store/src/enums/network";
-import { getEffectiveNetworkFromStores } from "@my-org/store";
+} from "@repo/store";
+import { NetworkConnectionEnum, NetworkEnum } from "@repo/store";
+import { getEffectiveNetworkFromStores } from "@repo/store";
 import {
   transactionHistoryState,
   transactionHistoryLoadingState,
-} from "@repo/store/src/atoms/transactionHistoryState";
+} from "@repo/store";
 import { toast } from "sonner";
 import { WalletAdapterFactory } from "@/app/lib/adapters/WalletAdapterFactory";
 import { Wallet } from "@/app/types/wallet/wallet";
 import { fetchWalletTransactionHistory } from "@/app/lib/services/transactionHistoryFetch";
-import { TransactionHistoryStore } from "@api-types/TransactionTypes";
+import { TransactionHistoryStore } from "@repo/api/types/TransactionTypes";
 
 export function useWalletBalanceFetch(wallets: Wallet[]) {
   const { getBalance, setBalance } = useWalletBalances();

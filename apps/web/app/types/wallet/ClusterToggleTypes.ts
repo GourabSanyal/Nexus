@@ -1,4 +1,4 @@
-import { ChainEnum, NetworkEnum } from "@my-org/store";
+import { ChainEnum, NetworkEnum } from "@repo/store";
 
 export interface ClusterToggleProps {
   chain: ChainEnum.Ethereum | ChainEnum.Solana;

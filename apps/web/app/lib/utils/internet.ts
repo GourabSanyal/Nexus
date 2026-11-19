@@ -1,5 +1,5 @@
 import {toast } from 'sonner';
-import {NetworkConnectionEnum} from "@repo/store/src/enums/network"
+import {NetworkConnectionEnum} from "@repo/store"
 
 export const checkInternet = () => {
   if (!navigator.onLine) {

@@ -4,7 +4,7 @@ import React from "react";
 import {
   SEED_PHRASE_LENGTHS,
   type SeedPhraseLength,
-} from "@repo/zod/src/walletSchemas/importWalletSchema";
+} from "@repo/zod";
 
 type SeedPhraseLengthToggleProps = {
   value: SeedPhraseLength;

@@ -1,6 +1,6 @@
 import { useMemo } from "react";
-import { ChainEnum, NetworkEnum } from "@repo/store/src/enums/network";
-import { TransactionResponse } from "@api-types/TransactionTypes";
+import { ChainEnum, NetworkEnum } from "@repo/store";
+import { TransactionResponse } from "@repo/api/types/TransactionTypes";
 import { useWalletAdapter } from "@/app/lib/adapters/useWalletAdapter";
 import type {
   AdapterWalletSendParams,

@@ -1,9 +1,9 @@
-import { rustApiClient } from "@api-utils/rustApiClient";
+import { rustApiClient } from "@repo/api/utils/rustApiClient";
 import { GetEthTransactionsParams } from "@/app/types/components/GetEthTransactionsParams";
 import {
     TransactionResponse,
     TransactionRequest,
-  } from "@api-types/TransactionTypes";
+  } from "@repo/api/types/TransactionTypes";
 
 export const getEthTransactions = async ({
     address,

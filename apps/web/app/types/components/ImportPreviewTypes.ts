@@ -1,4 +1,4 @@
-import type { FlatImportWalletEntry } from "@my-org/zod";
+import type { FlatImportWalletEntry } from "@repo/zod";
 
 export type ImportPreviewWalletView = {
   entry: FlatImportWalletEntry;

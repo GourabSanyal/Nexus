@@ -1,6 +1,6 @@
 "use client";
 
-import { ChainEnum } from "@repo/store/src/enums/network";
+import { ChainEnum } from "@repo/store";
 import { ClusterToggleProps } from "@/app/types/wallet/ClusterToggleTypes";
 import { NetworkToggleProvider } from "@/app/components/ui/wallet/shared/NetworkToggleProvider";
 

@@ -1,4 +1,4 @@
-import { ChainEnum, NetworkEnum } from "@repo/store/src/enums/network";
+import { ChainEnum, NetworkEnum } from "@repo/store";
 import type { NativeTokenPrices, NativeTokenSymbol } from "./types";
 
 export const isTestnetNetwork = (network: NetworkEnum): boolean =>

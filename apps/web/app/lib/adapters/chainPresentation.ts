@@ -1,4 +1,4 @@
-import { ChainEnum, NetworkEnum } from "@my-org/store";
+import { ChainEnum, NetworkEnum } from "@repo/store";
 
 /** Shared chain presentation rules — call via `IWalletAdapter`, not from UI. */
 export function buildExplorerTransactionUrl(

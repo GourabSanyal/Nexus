@@ -2,7 +2,7 @@ import type {
   FlatImportWalletEntry,
   WalletImportEntry,
   WalletImportPreview,
-} from "@my-org/zod";
+} from "@repo/zod";
 
 const CHAINS = ["solana", "ethereum"] as const;
 const NETWORK_TIERS = ["mainnet", "devnet"] as const;

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { NetworkEnum } from "@repo/store/src/enums/network";
+import { NetworkEnum } from "@repo/store";
 import { NetworkToggleProvider as ContextProvider, useNetworkToggleContext } from "@/app/contexts/NetworkToggleContext";
 import { NetworkToggle } from "./NetworkToggle";
 import { WalletAdapterFactory } from "@/app/lib/adapters/WalletAdapterFactory";

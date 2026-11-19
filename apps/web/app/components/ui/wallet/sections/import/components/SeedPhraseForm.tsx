@@ -1,6 +1,6 @@
 import React from "react";
 import { useFormContext } from "react-hook-form";
-import type { ImportWalletSchema } from "@repo/zod/src/walletSchemas/importWalletSchema";
+import type { ImportWalletSchema } from "@repo/zod";
 import { SeedPhraseGrid } from "./SeedPhraseGrid";
 import { SeedPhraseErrors } from "./SeedPhraseErrors";
 import { ImportButton } from "./ImportButton";

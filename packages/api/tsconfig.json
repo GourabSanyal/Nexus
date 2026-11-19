@@ -18,15 +18,10 @@
     "sourceMap": true,
     "baseUrl": ".",
     "paths":{
-      "@repo/*": ["../../packages/*"],
-      "@store/*": ["../../packages/store/src/*"],
-      "@api-types/*": ["src/types/*"],
-      "@api-utils/*": ["src/utils/*"],
-      "@api-configs/*": ["src/configs/*"],
-      "@api-service/solana/*": ["src/services/wallet/solana/*"],
-      "@api-service/ethereum/*": ["src/services/wallet/ethereum/*"]
+      "@repo/constants": ["../constants/index.ts"],
+      "@repo/*": ["../*"]
     }
   },
   "include": ["src"],
-  "exclude": ["node_modules", "dist", "../../packages/store", "../../packages/store/**/*"]
+  "exclude": ["node_modules", "dist"]
 }

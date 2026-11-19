@@ -1,5 +1,5 @@
-import { ChainEnum, NetworkEnum } from "@repo/store/src/enums/network";
-import { TransactionResponse } from "@api-types/TransactionTypes";
+import { ChainEnum, NetworkEnum } from "@repo/store";
+import { TransactionResponse } from "@repo/api/types/TransactionTypes";
 import { getSolTransactions } from "@/app/lib/utils/getSolTransactions";
 import { getEthTransactions } from "@/app/lib/utils/ethereum/transactions/getEthTransactions";
 import type { FetchTransactionsParams } from "@/app/types/components/FetchTransactionsParams";

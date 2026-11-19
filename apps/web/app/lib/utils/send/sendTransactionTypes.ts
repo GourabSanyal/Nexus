@@ -1,4 +1,4 @@
-import { ChainEnum, NetworkEnum } from "@repo/store/src/enums/network";
+import { ChainEnum, NetworkEnum } from "@repo/store";
 
 /** Full send payload including chain (used by `sendTransaction` util). */
 export type WalletSendParams = {

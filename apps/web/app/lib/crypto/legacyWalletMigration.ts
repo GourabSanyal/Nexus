@@ -2,7 +2,7 @@ import type {
   PublicEthereumWallet,
   PublicSolanaWallet,
   WalletPublicSchema,
-} from "@my-org/zod";
+} from "@repo/zod";
 import type { VaultPlaintext } from "@/app/lib/crypto/walletVault";
 
 const LEGACY_STORAGE_KEY = "recoil-persist-wallet-state";

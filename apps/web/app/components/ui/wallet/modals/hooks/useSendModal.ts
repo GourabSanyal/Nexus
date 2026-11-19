@@ -6,7 +6,7 @@ import {
   selectWalletById,
   useWalletBalances,
   walletState,
-} from "@my-org/store";
+} from "@repo/store";
 import { useNetworkManager } from "@/app/hooks/useNetworkManager";
 import { useWalletAdapter } from "@/app/lib/adapters/useWalletAdapter";
 import type { IWalletAdapter } from "@/app/lib/adapters/IWalletAdapter";

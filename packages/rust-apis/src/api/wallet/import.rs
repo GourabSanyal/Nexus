@@ -25,7 +25,8 @@ pub async fn handle_import_data(req: &web_sys::Request) -> (u16, String) {
 
     // Process networks sequentially to stay under Cloudflare's 50 subrequest limit.
     // Each network scan makes ~12-22 subrequests (2 per wallet candidate).
-    let solana_mainnet = scan_network(solana_adapter, &candidates, "solana", "mainnet-beta", req).await;
+    let solana_mainnet =
+        scan_network(solana_adapter, &candidates, "solana", "mainnet-beta", req).await;
     let solana_devnet = scan_network(solana_adapter, &candidates, "solana", "devnet", req).await;
     let ethereum_mainnet = scan_network(eth_adapter, &candidates, "ethereum", "mainnet", req).await;
     let ethereum_devnet = scan_network(eth_adapter, &candidates, "ethereum", "sepolia", req).await;

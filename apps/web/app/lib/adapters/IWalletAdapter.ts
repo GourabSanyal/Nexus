@@ -1,9 +1,9 @@
-import { ChainEnum, NetworkEnum } from "@repo/store/src/enums/network";
-import { BalanceParams } from "@api-types/BalanceParams";
+import { ChainEnum, NetworkEnum } from "@repo/store";
+import { BalanceParams } from "@repo/api/types/BalanceParams";
 import {
   TransactionResponse,
   TransactionRequest,
-} from "@api-types/TransactionTypes";
+} from "@repo/api/types/TransactionTypes";
 import type {
   AdapterWalletSendParams,
   WalletSendResult,

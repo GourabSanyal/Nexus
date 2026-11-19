@@ -1,4 +1,4 @@
-import { NetworkEnum } from "../types/network.js";
+import { NetworkEnum } from "@repo/constants";
 import { RPC_ENDPOINTS } from "../configs/rpcConfigs.js";
 
 export function getSolanaRpcUrl(cluster: NetworkEnum): string | undefined {

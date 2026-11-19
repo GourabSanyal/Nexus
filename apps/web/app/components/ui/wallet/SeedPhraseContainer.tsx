@@ -15,8 +15,8 @@ import LogoutConfirmationModal from "@components/ui/wallet/sections/password/Log
 import PasswordInput from "./sections/password/PasswordInput";
 import { useWalletVault } from "@/app/lib/contexts/WalletVaultContext";
 import { toast } from "sonner";
-import { importWalletState } from "@repo/store/src/atoms/importWalletState";
-import { walletFlowState } from "@repo/store/src/atoms/walletFlowState";
+import { importWalletState } from "@repo/store";
+import { walletFlowState } from "@repo/store";
 
 const SeedPhraseContainer = ({
   activeTab,

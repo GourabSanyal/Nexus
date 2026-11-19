@@ -1,5 +1,5 @@
 import { Request } from "express";
-import { NetworkEnum } from "./network.js";
+import { NetworkEnum } from "@repo/constants";
 
 export interface SolanaRequest extends Request {
   validatedData?: {

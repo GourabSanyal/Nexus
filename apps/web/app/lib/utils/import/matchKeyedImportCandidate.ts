@@ -1,4 +1,4 @@
-import type { FlatImportWalletEntry } from "@my-org/zod";
+import type { FlatImportWalletEntry } from "@repo/zod";
 import type { KeyedImportCandidate } from "./deriveImportCandidates";
 import { importAddressesMatch } from "./importAddressMatch";
 

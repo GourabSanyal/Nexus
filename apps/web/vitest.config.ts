@@ -11,15 +11,24 @@ export default defineConfig({
     clearMocks: true,
   },
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "."),
-      "@api-types": path.join(repoRoot, "packages/api/src/types"),
-      "@repo/store/src/enums/network": path.join(
-        repoRoot,
-        "packages/store/src/enums/network.ts"
-      ),
-      "@my-org/store": path.join(repoRoot, "packages/store/src/index.ts"),
-      "@repo/store": path.join(repoRoot, "packages/store/src"),
-    },
+    alias: [
+      { find: "@", replacement: path.resolve(__dirname, ".") },
+      {
+        find: /^@repo\/api(\/.*)?$/,
+        replacement: `${path.join(repoRoot, "packages/api/src")}$1`,
+      },
+      {
+        find: "@repo/store",
+        replacement: path.join(repoRoot, "packages/store/src/index.ts"),
+      },
+      {
+        find: "@repo/zod",
+        replacement: path.join(repoRoot, "packages/zod/src/index.ts"),
+      },
+      {
+        find: "@repo/constants",
+        replacement: path.join(repoRoot, "packages/constants/index.ts"),
+      },
+    ],
   },
 });

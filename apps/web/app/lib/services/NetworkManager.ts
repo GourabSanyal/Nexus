@@ -1,11 +1,11 @@
-import { ChainEnum, NetworkEnum } from "@repo/store/src/enums/network";
+import { ChainEnum, NetworkEnum } from "@repo/store";
 import {
   getEffectiveNetworkFromStores,
   networkKeyFor,
-} from "@my-org/store";
+} from "@repo/store";
 import { IWalletAdapter } from "@/app/lib/adapters/IWalletAdapter";
 
-export { getEffectiveNetworkFromStores } from "@my-org/store";
+export { getEffectiveNetworkFromStores } from "@repo/store";
 
 type SetGlobals = (
   updater: (prev: Record<ChainEnum, NetworkEnum>) => Record<ChainEnum, NetworkEnum>

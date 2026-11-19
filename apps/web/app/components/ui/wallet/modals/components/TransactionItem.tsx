@@ -1,12 +1,12 @@
 import { memo } from "react";
-import { TransactionInfo } from "@api-types/TransactionTypes";
+import { TransactionInfo } from "@repo/api/types/TransactionTypes";
 import {
   formatAmount,
   formatDate,
   truncateSignature,
 } from "../utils/transactionFormatters";
 import { ExternalLink } from "lucide-react";
-import { NetworkEnum } from "@my-org/store";
+import { NetworkEnum } from "@repo/store";
 import type { IWalletAdapter } from "@/app/lib/adapters/IWalletAdapter";
 
 interface TransactionItemProps {

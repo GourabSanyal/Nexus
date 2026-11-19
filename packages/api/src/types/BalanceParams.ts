@@ -1,4 +1,4 @@
-import { ChainEnum, NetworkEnum } from "./network.js";
+import { ChainEnum, NetworkEnum } from "@repo/constants";
 
 export interface BalanceParams {
   chain: ChainEnum.Solana | ChainEnum.Ethereum;
