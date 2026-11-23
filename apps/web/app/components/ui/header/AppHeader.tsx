@@ -11,6 +11,7 @@ function AppHeader({ toggleTheme, isDarkMode }: AppHeaderProps) {
       <Button
         onClick={toggleTheme}
         size="icon"
+        aria-label="Toggle theme"
         className="rounded-full p-2 w-10 h-10 sm:w-12 sm:h-12"
       >
         {isDarkMode ? (

@@ -5,7 +5,10 @@
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "test": "yarn workspace web test && yarn workspace rust-apis test:ts",
+    "test:e2e": "yarn workspace web test:e2e",
+    "ci:local": "yarn test && yarn workspace web build && yarn test:e2e"
   },
   "devDependencies": {
     "prettier": "^3.2.5",
