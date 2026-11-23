@@ -1,4 +1,4 @@
-import { BalanceParams } from "../types/BalanceParams.js";
+import { BalanceParams } from "../types/BalanceParams";
 
 export const checkMissingParams = (params: BalanceParams) => {
   const missingParams: string[] = [];
