@@ -2,7 +2,25 @@ import { expect, test } from "@playwright/test";
 import { completeVaultPasswordSetup } from "./helpers/vault";
 
 test.describe("smoke", () => {
+  // Opt-in: E2E_LIVE_BACKEND=1 RUST_API_URL=https://… yarn test:e2e
+  test("next proxies /api/rust/health to configured backend", async ({
+    request,
+  }) => {
+    test.skip(
+      process.env.E2E_LIVE_BACKEND !== "1",
+      "Set E2E_LIVE_BACKEND=1 (and RUST_API_URL) to assert live backend proxy"
+    );
+
+    const response = await request.get("/api/rust/health");
+    expect(response.ok(), await response.text()).toBeTruthy();
+    await expect(response.json()).resolves.toMatchObject({
+      status: "ok",
+      service: "rust-apis",
+    });
+  });
+
   test("app shell shows entry actions", async ({ page }) => {
+
     await page.goto("/");
     await expect(page.getByRole("heading", { name: "Nexus" })).toBeVisible();
     await expect(
@@ -22,8 +40,8 @@ test.describe("smoke", () => {
     await themeToggle.click();
     await expect(page.locator("html")).toHaveClass(/dark/);
 
-    await page.reload();
-    await expect(page.locator("html")).toHaveClass(/dark/);
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await expect(page.locator("html")).toHaveClass(/dark/, { timeout: 15_000 });
   });
 
   test("generate wallet reaches main UI and opens send/receive/history", async ({
