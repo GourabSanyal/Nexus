@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback, useRef, useReducer } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
-import { NetworkEnum } from "@my-org/store";
+import { NetworkEnum } from "@repo/store";
 import {
   transactionHistoryState,
   transactionHistoryLoadingState,
-} from "@repo/store/src/atoms/transactionHistoryState";
-import { TransactionHistoryStore } from "@api-types/TransactionTypes";
+} from "@repo/store";
+import { TransactionHistoryStore } from "@repo/api/types/TransactionTypes";
 import {
   hasCachedTransactions,
   hasHistoryChanged,

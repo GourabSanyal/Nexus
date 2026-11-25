@@ -6,14 +6,13 @@
     "skipLibCheck": true,
     "paths": {
       "@/*": ["./*"],
+      "@repo/store": ["../../packages/store/src/index.ts"],
+      "@repo/zod": ["../../packages/zod/src/index.ts"],
+      "@repo/constants": ["../../packages/constants/index.ts"],
+      "@repo/api": ["../../packages/api/src"],
+      "@repo/api/*": ["../../packages/api/src/*"],
       "@repo/*": ["../../packages/*"],
-      "@components/*": ["./app/components/*"],
-      "@api/*": ["../../packages/api/*"],
-      "@repo/constants/*" : ["../../packages/constants/*"],
-      "@api-service/solana/*": ["../../packages/api/src/services/wallet/solana/*"],
-      "@api-service/ethereum/*": ["../../packages/api/src/services/wallet/ethereum/*"],
-      "@api-utils/*": ["../../packages/api/src/utils/*"],
-      "@api-types/*": ["../../packages/api/src/types/*"]
+      "@components/*": ["./app/components/*"]
     },
     "plugins": [
       {

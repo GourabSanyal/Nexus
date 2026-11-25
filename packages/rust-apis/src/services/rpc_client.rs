@@ -32,8 +32,7 @@ pub async fn json_rpc_call(rpc_url: &str, method: &str, params: Value) -> Result
 
 /// Attach an `AbortSignal.timeout()` to the fetch so hanging RPCs don't block forever.
 fn attach_abort_timeout(opts: &RequestInit, timeout_ms: u32) {
-    let Ok(abort_signal_class) =
-        js_sys::Reflect::get(&js_sys::global(), &"AbortSignal".into())
+    let Ok(abort_signal_class) = js_sys::Reflect::get(&js_sys::global(), &"AbortSignal".into())
     else {
         return;
     };
@@ -86,15 +85,17 @@ async fn execute_fetch(request: Request) -> Result<String> {
         .dyn_into()
         .map_err(|_| anyhow::anyhow!("fetch did not return a promise"))?;
 
-    let resp_value = JsFuture::from(resp_promise)
-        .await
-        .map_err(|e| {
-            let msg = e
-                .as_string()
-                .or_else(|| js_sys::Reflect::get(&e, &"message".into()).ok()?.as_string())
-                .unwrap_or_else(|| format!("{e:?}"));
-            anyhow::anyhow!("Fetch failed: {msg}")
-        })?;
+    let resp_value = JsFuture::from(resp_promise).await.map_err(|e| {
+        let msg = e
+            .as_string()
+            .or_else(|| {
+                js_sys::Reflect::get(&e, &"message".into())
+                    .ok()?
+                    .as_string()
+            })
+            .unwrap_or_else(|| format!("{e:?}"));
+        anyhow::anyhow!("Fetch failed: {msg}")
+    })?;
     let resp: Response = resp_value
         .dyn_into()
         .map_err(|_| anyhow::anyhow!("Failed to convert response"))?;

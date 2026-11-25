@@ -1,11 +1,11 @@
-import { NetworkEnum } from "@repo/store/src/enums/network";
+import { NetworkEnum } from "@repo/store";
 import {
   TransactionInfo,
   PaginationInfo,
   TransactionHistoryStore,
-} from "@api-types/TransactionTypes";
+} from "@repo/api/types/TransactionTypes";
 
-export type { TransactionHistoryStore, CachedTransactionData } from "@api-types/TransactionTypes";
+export type { TransactionHistoryStore, CachedTransactionData } from "@repo/api/types/TransactionTypes";
 
 export const historyCacheKey = (walletId: number, cluster: NetworkEnum) =>
   `${walletId}:${cluster}`;

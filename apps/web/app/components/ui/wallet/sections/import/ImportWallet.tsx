@@ -3,7 +3,7 @@
 import React from "react";
 import { FormProvider } from "react-hook-form";
 import { useRecoilValue } from "recoil";
-import { importWalletState } from "@repo/store/src/atoms/importWalletState";
+import { importWalletState } from "@repo/store";
 import { ImportWalletHeader } from "./components/ImportWalletHeader";
 import { ImportPreview } from "./components/ImportPreview";
 import { SeedPhraseForm } from "./components/SeedPhraseForm";

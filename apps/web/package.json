@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
@@ -19,7 +21,11 @@
     "@radix-ui/react-switch": "^1.1.0",
     "@radix-ui/react-tabs": "^1.1.0",
     "@radix-ui/react-tooltip": "^1.2.8",
+    "@repo/api": "*",
+    "@repo/constants": "*",
+    "@repo/store": "*",
     "@repo/ui": "*",
+    "@repo/zod": "*",
     "@solana/web3.js": "^1.95.3",
     "@types/recoil": "^0.0.9",
     "bip32": "^5.0.0",
@@ -47,6 +53,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@playwright/test": "1.65.1",
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
     "@shadcn/ui": "^0.0.4",
@@ -60,7 +67,6 @@
     "eslint-config-next": "14.2.6",
     "minimatch": "^10.1.1",
     "postcss": "^8.4.45",
-    "store": "*",
     "tailwindcss": "^3.4.10",
     "typescript": "^5",
     "vitest": "^4.1.4",

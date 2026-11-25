@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ChainEnum, NetworkEnum, getEffectiveNetworkFromStores } from "@my-org/store";
+import { ChainEnum, NetworkEnum, getEffectiveNetworkFromStores } from "@repo/store";
 
 describe("getEffectiveNetworkFromStores", () => {
   const globals = {

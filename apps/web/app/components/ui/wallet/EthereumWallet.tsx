@@ -1,6 +1,6 @@
 import React from "react";
 import SingleWallet from "./SingleWallet";
-import { WalletPath } from "@repo/constants/src/WalletPaths";
+import { WalletPath } from "@repo/constants";
 
 const EthereumWallet = () => {
   const ethPath: string = WalletPath.ETHEREUM;

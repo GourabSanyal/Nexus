@@ -5,7 +5,13 @@
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "test": "yarn workspace web test && yarn workspace rust-apis test:ts",
+    "test:e2e": "yarn workspace web test:e2e",
+    "ci:local": "yarn test && yarn workspace web build && yarn test:e2e",
+    "ci:local:live": "E2E_LIVE_BACKEND=1 RUST_API_URL=https://rust-apis.biz-gourab.workers.dev yarn ci:local",
+    "test:e2e:solana:local": "E2E_LIVE_TRANSFER=1 RUST_API_URL=http://localhost:9000 yarn workspace web exec playwright test e2e/live-transfer.spec.ts",
+    "test:e2e:solana:live": "E2E_LIVE_TRANSFER=1 RUST_API_URL=https://rust-apis.biz-gourab.workers.dev yarn workspace web exec playwright test e2e/live-transfer.spec.ts"
   },
   "devDependencies": {
     "prettier": "^3.2.5",

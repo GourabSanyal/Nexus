@@ -1,9 +1,9 @@
 import { atom } from "recoil";
 import { persistAtom } from "../persistence/recoilPersistConfig";
-import { TransactionHistoryStore } from "@repo/api/src/types/TransactionTypes";
+import { TransactionHistoryStore } from "@repo/api/types/TransactionTypes";
 
 // Re-export canonical types so external consumers can import from this atom module if desired
-export type { CachedTransactionData, TransactionHistoryStore } from "@repo/api/src/types/TransactionTypes";
+export type { CachedTransactionData, TransactionHistoryStore } from "@repo/api/types/TransactionTypes";
 
 /**
  * Persisted transaction history per wallet+cluster.

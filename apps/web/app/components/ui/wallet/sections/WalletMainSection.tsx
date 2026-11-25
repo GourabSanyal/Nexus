@@ -1,7 +1,7 @@
 import { CardContent } from "../../card/card";
 import { Button } from "../../button/button";
 import { Copy, Eye, EyeOff } from "lucide-react";
-import type { PublicEthereumWallet, PublicSolanaWallet } from "@my-org/zod";
+import type { PublicEthereumWallet, PublicSolanaWallet } from "@repo/zod";
 import { copyToClipboard } from "@/app/lib/utils/clipboard";
 import ReceiveButton from "../actions/ReceiveButton";
 import SendButton from "../actions/SendButton";

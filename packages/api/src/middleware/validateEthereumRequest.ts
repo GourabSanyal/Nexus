@@ -1,5 +1,5 @@
 import { Response, NextFunction } from "express";
-import { NetworkEnum } from "../types/network.js";
+import { NetworkEnum } from "@repo/constants";
 import { getEthereumRpcUrl } from "../utils/getEthereumRpcUrl.js";
 import { EthereumRequest } from "../types/ethereum.js";
 

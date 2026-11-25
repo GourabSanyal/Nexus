@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   createEmptySeedPhraseWords,
   importWalletInputSchema,
-} from "@my-org/zod";
+} from "@repo/zod";
 
 const VALID_12 =
   "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about";

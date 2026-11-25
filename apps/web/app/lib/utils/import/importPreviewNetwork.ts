@@ -1,8 +1,8 @@
-import { NetworkEnum } from "@repo/store/src/enums/network";
+import { NetworkEnum } from "@repo/store";
 import type {
   ImportCandidate,
   ImportPreviewNetworkTier,
-} from "@my-org/zod";
+} from "@repo/zod";
 
 export const importPreviewNetworkToEnum = (
   chain: ImportCandidate["chain"],

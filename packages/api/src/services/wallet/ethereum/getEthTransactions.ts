@@ -1,6 +1,6 @@
 import axios from "axios";
 import { TransactionResponse, TransactionInfo } from "../../../types/TransactionTypes.js";
-import { NetworkEnum } from "../../../types/network.js";
+import { NetworkEnum } from "@repo/constants";
 
 interface GetEthTransactionsParams {
   address: string;

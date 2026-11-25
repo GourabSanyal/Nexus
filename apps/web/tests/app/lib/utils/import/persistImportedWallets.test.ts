@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { FlatImportWalletEntry } from "@my-org/zod";
+import type { FlatImportWalletEntry } from "@repo/zod";
 import type { KeyedImportCandidate } from "@/app/lib/utils/import/deriveImportCandidates";
 import { persistImportedWallets } from "@/app/lib/utils/import/persistImportedWallets";
 

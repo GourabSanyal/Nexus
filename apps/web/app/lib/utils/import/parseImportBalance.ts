@@ -1,4 +1,4 @@
-import type { ImportCandidate } from "@my-org/zod";
+import type { ImportCandidate } from "@repo/zod";
 
 export const parseImportBalance = (
   _chain: ImportCandidate["chain"],

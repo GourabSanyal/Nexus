@@ -3,7 +3,7 @@ import type {
   PublicEthereumWallet,
   PublicSolanaWallet,
   WalletPublicSchema,
-} from "@my-org/zod";
+} from "@repo/zod";
 import type { VaultWalletEntry } from "@/app/lib/crypto/walletVault";
 import type { KeyedImportCandidate } from "./deriveImportCandidates";
 import { dedupeImportSelections } from "./dedupeImportSelections";

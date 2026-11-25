@@ -1,5 +1,5 @@
 {
-    "name": "@my-org/zod",
+    "name": "@repo/zod",
     "version": "1.0.0",
     "main": "src/index.ts",
     "private": true,

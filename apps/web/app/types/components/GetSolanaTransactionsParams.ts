@@ -1,6 +1,6 @@
-import { NetworkEnum } from "@repo/store/src/enums/network";
+import { NetworkEnum } from "@repo/store";
 
-export interface GetSolTransactionsParams {
+export interface GetSolanaTransactionsParams {
   address: string;
   cluster: NetworkEnum.Devnet | NetworkEnum.Mainnet;
   limit?: number;
@@ -9,3 +9,6 @@ export interface GetSolTransactionsParams {
   /** Stop fetching when this signature is found (for incremental sync) */
   untilSignature?: string;
 }
+
+/** @deprecated Use GetSolanaTransactionsParams */
+export type GetSolTransactionsParams = GetSolanaTransactionsParams;

@@ -3,14 +3,14 @@ import { flushSync } from "react-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRecoilState } from "recoil";
-import { importWalletState } from "@repo/store/src/atoms/importWalletState";
+import { importWalletState } from "@repo/store";
 import {
   createEmptySeedPhraseWords,
   importWalletSchema,
   SEED_PHRASE_LENGTHS,
   type ImportWalletSchema,
   type SeedPhraseLength,
-} from "@repo/zod/src/walletSchemas/importWalletSchema";
+} from "@repo/zod";
 import { useImportWalletSession } from "../ImportWalletSessionContext";
 
 const parsePastedWords = (text: string): string[] =>

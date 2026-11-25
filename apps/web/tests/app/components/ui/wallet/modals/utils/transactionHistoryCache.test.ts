@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { NetworkEnum } from "@my-org/store";
-import { TransactionInfo } from "@api-types/TransactionTypes";
+import { NetworkEnum } from "@repo/store";
+import { TransactionInfo } from "@repo/api/types/TransactionTypes";
 import {
   hasCachedTransactions,
   hasHistoryChanged,

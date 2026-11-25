@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { walletImportPreviewRequestSchema } from "@my-org/zod";
+import { walletImportPreviewRequestSchema } from "@repo/zod";
 
 describe("walletImportPreviewRequestSchema", () => {
   it("accepts candidates-only payload", () => {

@@ -1,5 +1,5 @@
 import { atom } from "recoil";
-import { ImportWalletSchema } from "@repo/zod/src/walletSchemas/importWalletSchema";
+import { ImportWalletSchema } from "@repo/zod";
 
 export const importWalletState = atom<ImportWalletSchema>({
   key: "importWalletState",

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ChainEnum, NetworkEnum } from "@repo/store/src/enums/network";
+import { ChainEnum, NetworkEnum } from "@repo/store";
 import {
   formatBalanceUsdDisplay,
   formatUsdEquivalent,

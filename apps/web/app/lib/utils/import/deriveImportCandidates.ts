@@ -3,9 +3,9 @@ import { derivePath } from "ed25519-hd-key";
 import { HDNodeWallet } from "ethers";
 import { Keypair } from "@solana/web3.js";
 import nacl from "tweetnacl";
-import type { DerivationScheme, ImportCandidate } from "@my-org/zod";
+import type { DerivationScheme, ImportCandidate } from "@repo/zod";
 
-export type { DerivationScheme, ImportCandidate } from "@my-org/zod";
+export type { DerivationScheme, ImportCandidate } from "@repo/zod";
 
 export const DEFAULT_MAX_ACCOUNTS = 5;
 export const MAX_ACCOUNTS_CAP = 10;

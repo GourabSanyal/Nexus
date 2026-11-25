@@ -25,7 +25,10 @@ pub async fn scan_network(
 
     // Batch fetch all balances in a single RPC call (reduces subrequests dramatically)
     // This allows scanning 100+ wallets with only 1 HTTP request per network
-    let addresses: Vec<&str> = chain_candidates.iter().map(|c| c.address.as_str()).collect();
+    let addresses: Vec<&str> = chain_candidates
+        .iter()
+        .map(|c| c.address.as_str())
+        .collect();
     let balances = adapter
         .get_balances_batch(&addresses, Some(cluster), env_rpc.as_deref())
         .await

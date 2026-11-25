@@ -1,10 +1,10 @@
-import { rustApiClient } from "@api-utils/rustApiClient";
+import { rustApiClient } from "@repo/api/utils/rustApiClient";
 import {
   walletImportPreviewRequestSchema,
   walletImportPreviewSchema,
   type ImportCandidate,
   type WalletImportPreview,
-} from "@my-org/zod";
+} from "@repo/zod";
 
 /** Import scan hits many RPC endpoints; default axios timeout is too short. */
 const IMPORT_PREVIEW_TIMEOUT_MS = 120_000;

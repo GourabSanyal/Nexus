@@ -1,4 +1,4 @@
-import { NetworkEnum } from "@repo/store/src/enums/network";
+import { NetworkEnum } from "@repo/store";
 
 export interface GetEthTransactionsParams {
   address: string;

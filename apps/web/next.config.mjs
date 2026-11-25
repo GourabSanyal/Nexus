@@ -28,12 +28,23 @@ const nextConfig = {
   },
   eslint: { ignoreDuringBuilds: true },
   reactStrictMode: true,
-  transpilePackages: ["store", "zod", "constants", "api", "rust-apis"],
+  transpilePackages: [
+    "@repo/store",
+    "@repo/zod",
+    "@repo/constants",
+    "@repo/api",
+    "rust-apis",
+  ],
   webpack: (config, { dir }) => {
     config.plugins.push(new NodePolyfillPlugin());
     config.devtool = "source-map";
 
-    // Add resolve aliases so store package can import from web app
+    // packages/api uses Node ESM `.js` import specs that point at `.ts` sources
+    config.resolve.extensionAlias = {
+      ...config.resolve.extensionAlias,
+      ".js": [".ts", ".tsx", ".js"],
+    };
+
     config.resolve.alias = {
       ...config.resolve.alias,
       "@": dir,

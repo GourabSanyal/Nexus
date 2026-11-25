@@ -1,8 +1,8 @@
-import { NetworkEnum } from "@repo/store/src/enums/network";
+import { NetworkEnum } from "@repo/store";
 import {
   TransactionInfo,
   TransactionHistoryStore,
-} from "@api-types/TransactionTypes";
+} from "@repo/api/types/TransactionTypes";
 import { IWalletAdapter } from "@/app/lib/adapters/IWalletAdapter";
 
 export type SetTransactionHistory = (

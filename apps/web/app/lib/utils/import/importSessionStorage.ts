@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { walletImportPreviewSchema } from "@my-org/zod";
+import { walletImportPreviewSchema } from "@repo/zod";
 
 const IMPORT_SESSION_KEY = "nexus:import-wallet-session";
 

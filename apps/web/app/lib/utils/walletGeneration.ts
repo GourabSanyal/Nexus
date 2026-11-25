@@ -1,4 +1,4 @@
-import { WalletPath } from "@repo/constants/src/WalletPaths";
+import { WalletPath } from "@repo/constants";
 import { generateSolanaWallet } from "@/app/lib/utils/generateSolanaWallet";
 import { generateEthWallet } from "@/app/lib/utils/generateEthWallet";
 
