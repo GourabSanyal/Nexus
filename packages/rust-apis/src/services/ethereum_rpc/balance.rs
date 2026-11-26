@@ -72,7 +72,9 @@ pub async fn get_balances_batch(
 
     // Fill in any missing addresses with "0x0"
     for addr in addresses {
-        balances.entry(addr.to_string()).or_insert_with(|| "0x0".to_string());
+        balances
+            .entry(addr.to_string())
+            .or_insert_with(|| "0x0".to_string());
     }
 
     Ok(balances)

@@ -15,7 +15,9 @@ impl SolanaAdapter {
         cluster: Option<&str>,
         rpc_override: Option<&str>,
     ) -> Result<(String, String), WalletError> {
-        let cluster_value = cluster.unwrap_or("mainnet-beta");
+        // Canonical API cluster: "mainnet" | "devnet" | "testnet".
+        // "mainnet-beta" is accepted as an alias for Solana mainnet RPC.
+        let cluster_value = cluster.unwrap_or("mainnet");
 
         if let Some(url) = rpc_override {
             return Ok((cluster_value.to_string(), url.to_string()));
@@ -43,7 +45,7 @@ impl BlockchainAdapter for SolanaAdapter {
     }
 
     fn rpc_override_header(&self, cluster: Option<&str>) -> Option<&'static str> {
-        match cluster.unwrap_or("mainnet-beta") {
+        match cluster.unwrap_or("mainnet") {
             "devnet" => Some("x-solana-devnet-rpc"),
             "mainnet" | "mainnet-beta" | "testnet" => Some("x-solana-mainnet-rpc"),
             _ => Some("x-solana-mainnet-rpc"),

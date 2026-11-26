@@ -45,8 +45,12 @@ export const ImportPreviewWalletRow: React.FC<ImportPreviewWalletRowProps> = ({
           {wallet.formattedAddress}
         </p>
 
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p
+          className="text-sm text-gray-600 dark:text-gray-400"
+          title={wallet.usdTitle}
+        >
           Balance: {wallet.formattedBalance} {wallet.currencySymbol}
+          {wallet.formattedUsd ? ` · ${wallet.formattedUsd}` : null}
         </p>
       </div>
     </div>

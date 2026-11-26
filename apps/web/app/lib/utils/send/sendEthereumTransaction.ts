@@ -1,5 +1,5 @@
 import { Wallet, parseEther } from "ethers";
-import { rustApiClient } from "@api-utils/rustApiClient";
+import { rustApiClient } from "@repo/api/utils/rustApiClient";
 import type { AdapterWalletSendParams, WalletSendResult } from "./sendTransactionTypes";
 import {
   extractApiErrorMessage,

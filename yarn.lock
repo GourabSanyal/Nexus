@@ -1244,29 +1244,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@my-org/store@workspace:packages/store":
-  version: 0.0.0-use.local
-  resolution: "@my-org/store@workspace:packages/store"
-  dependencies:
-    "@my-org/zod": "npm:*"
-    "@types/recoil": "npm:^0.0.9"
-    recoil: "npm:^0.7.7"
-  peerDependencies:
-    react: ^18.3.1
-    react-dom: ^18.3.1
-  languageName: unknown
-  linkType: soft
-
-"@my-org/zod@npm:*, @my-org/zod@workspace:packages/zod":
-  version: 0.0.0-use.local
-  resolution: "@my-org/zod@workspace:packages/zod"
-  dependencies:
-    bip39: "npm:^3.1.0"
-    react-hook-form: "npm:^7.65.0"
-    zod: "npm:^3.23.8"
-  languageName: unknown
-  linkType: soft
-
 "@napi-rs/wasm-runtime@npm:^1.1.4":
   version: 1.1.4
   resolution: "@napi-rs/wasm-runtime@npm:1.1.4"
@@ -1473,6 +1450,17 @@ __metadata:
   version: 0.1.1
   resolution: "@pkgr/core@npm:0.1.1"
   checksum: 10c0/3f7536bc7f57320ab2cf96f8973664bef624710c403357429fbf680a5c3b4843c1dbd389bb43daa6b1f6f1f007bb082f5abcb76bb2b5dc9f421647743b71d3d8
+  languageName: node
+  linkType: hard
+
+"@playwright/test@npm:1.65.1":
+  version: 1.65.1
+  resolution: "@playwright/test@npm:1.65.1"
+  dependencies:
+    playwright: "npm:1.65.1"
+  bin:
+    playwright: cli.js
+  checksum: 10c0/f3c0c6ce1d426c84c2ee370e7b7a81fcd4a7a8eaa9d51a880ec853e98ce437482772a09c58c7fbb4444002b127068f076458bec99cecca60c3b51e9ba93e2cc6
   languageName: node
   linkType: hard
 
@@ -2289,7 +2277,32 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@repo/constants@workspace:packages/constants":
+"@repo/api@npm:*, @repo/api@workspace:packages/api":
+  version: 0.0.0-use.local
+  resolution: "@repo/api@workspace:packages/api"
+  dependencies:
+    "@repo/constants": "npm:*"
+    "@swc/core": "npm:^1.15.2"
+    "@swc/helpers": "npm:^0.5.17"
+    "@types/cors": "npm:^2.8.17"
+    "@types/express": "npm:^4.17.21"
+    "@types/express-rate-limit": "npm:^6.0.2"
+    "@types/node": "npm:^20.10.0"
+    axios: "npm:^1.12.2"
+    cors: "npm:^2.8.5"
+    dotenv: "npm:^16.3.1"
+    express: "npm:^4.18.2"
+    express-rate-limit: "npm:^8.2.1"
+    nodemon: "npm:^3.1.11"
+    ts-node: "npm:^10.9.2"
+    tsc-alias: "npm:^1.8.16"
+    tsconfig-paths: "npm:^4.2.0"
+    tsx: "npm:^4.7.0"
+    typescript: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@repo/constants@npm:*, @repo/constants@workspace:packages/constants":
   version: 0.0.0-use.local
   resolution: "@repo/constants@workspace:packages/constants"
   languageName: unknown
@@ -2308,6 +2321,21 @@ __metadata:
     typescript: "npm:^5.3.3"
   peerDependencies:
     eslint: ^8.0.0
+  languageName: unknown
+  linkType: soft
+
+"@repo/store@npm:*, @repo/store@workspace:packages/store":
+  version: 0.0.0-use.local
+  resolution: "@repo/store@workspace:packages/store"
+  dependencies:
+    "@repo/api": "npm:*"
+    "@repo/constants": "npm:*"
+    "@repo/zod": "npm:*"
+    "@types/recoil": "npm:^0.0.9"
+    recoil: "npm:^0.7.7"
+  peerDependencies:
+    react: ^18.3.1
+    react-dom: ^18.3.1
   languageName: unknown
   linkType: soft
 
@@ -2331,6 +2359,16 @@ __metadata:
     eslint: "npm:^8.57.0"
     react: "npm:^18.2.0"
     typescript: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@repo/zod@npm:*, @repo/zod@workspace:packages/zod":
+  version: 0.0.0-use.local
+  resolution: "@repo/zod@workspace:packages/zod"
+  dependencies:
+    bip39: "npm:^3.1.0"
+    react-hook-form: "npm:^7.65.0"
+    zod: "npm:^3.23.8"
   languageName: unknown
   linkType: soft
 
@@ -4058,30 +4096,6 @@ __metadata:
   checksum: 10c0/57b06ae984bc32a0d22592c87384cd88fe4511b1dd7581497831c56d41939c8a001b28e7b853e1450f2bf61992dfcaa8ae2d0d161a0a90c4fb631ef07098fbac
   languageName: node
   linkType: hard
-
-"api@workspace:packages/api":
-  version: 0.0.0-use.local
-  resolution: "api@workspace:packages/api"
-  dependencies:
-    "@swc/core": "npm:^1.15.2"
-    "@swc/helpers": "npm:^0.5.17"
-    "@types/cors": "npm:^2.8.17"
-    "@types/express": "npm:^4.17.21"
-    "@types/express-rate-limit": "npm:^6.0.2"
-    "@types/node": "npm:^20.10.0"
-    axios: "npm:^1.12.2"
-    cors: "npm:^2.8.5"
-    dotenv: "npm:^16.3.1"
-    express: "npm:^4.18.2"
-    express-rate-limit: "npm:^8.2.1"
-    nodemon: "npm:^3.1.11"
-    ts-node: "npm:^10.9.2"
-    tsc-alias: "npm:^1.8.16"
-    tsconfig-paths: "npm:^4.2.0"
-    tsx: "npm:^4.7.0"
-    typescript: "npm:^5.3.3"
-  languageName: unknown
-  linkType: soft
 
 "arg@npm:^4.1.0":
   version: 4.1.3
@@ -9293,17 +9307,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"my-turborepo@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "my-turborepo@workspace:."
-  dependencies:
-    "@hookform/resolvers": "npm:^3.3.4"
-    prettier: "npm:^3.2.5"
-    turbo: "npm:^2.1.1"
-    typescript: "npm:^5.4.5"
-  languageName: unknown
-  linkType: soft
-
 "mylas@npm:^2.1.9":
   version: 2.1.14
   resolution: "mylas@npm:2.1.14"
@@ -9432,6 +9435,17 @@ __metadata:
   checksum: 10c0/262cf21a179f394aedfae36724d3ece46f717d618beebfbb75986be7f4d6093a6cf183c36871462c16d1ec490fd0a765d1944d04d30e282b4cca41b71aaf8eea
   languageName: node
   linkType: hard
+
+"nexus@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "nexus@workspace:."
+  dependencies:
+    "@hookform/resolvers": "npm:^3.3.4"
+    prettier: "npm:^3.2.5"
+    turbo: "npm:^2.1.1"
+    typescript: "npm:^5.4.5"
+  languageName: unknown
+  linkType: soft
 
 "no-case@npm:^2.2.0, no-case@npm:^2.3.2":
   version: 2.3.2
@@ -10164,6 +10178,26 @@ __metadata:
   version: 4.0.6
   resolution: "pirates@npm:4.0.6"
   checksum: 10c0/00d5fa51f8dded94d7429700fb91a0c1ead00ae2c7fd27089f0c5b63e6eca36197fe46384631872690a66f390c5e27198e99006ab77ae472692ab9c2ca903f36
+  languageName: node
+  linkType: hard
+
+"playwright-core@npm:1.65.1":
+  version: 1.65.1
+  resolution: "playwright-core@npm:1.65.1"
+  bin:
+    playwright-core: cli.js
+  checksum: 10c0/4406d4f8eff668a93aaada8382d25fcce8da5f679e9f31311888178d631ed0270eb40c0288129e41e15709c957a31932cac9753fdb332547a19bc3541d317e44
+  languageName: node
+  linkType: hard
+
+"playwright@npm:1.65.1":
+  version: 1.65.1
+  resolution: "playwright@npm:1.65.1"
+  dependencies:
+    playwright-core: "npm:1.65.1"
+  bin:
+    playwright: cli.js
+  checksum: 10c0/30ce029c9fb2a6e88cf81b150b978fd60edb59b8af5a6460f5576f0fe6e2bb739454109f0ce4904eac63cb2cf10390518d7d71d335fd695b5897734a5af7250d
   languageName: node
   linkType: hard
 
@@ -11699,13 +11733,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"store@npm:*":
-  version: 2.0.12
-  resolution: "store@npm:2.0.12"
-  checksum: 10c0/a25a1461aab251bc4b620c7da9e876fbad7a233817e271514893a922c512ac1e80a938ae3d764aa4432556ef6f32068d46ecd830fe2bfaa591eb4a9587aa3988
-  languageName: node
-  linkType: hard
-
 "stream-browserify@npm:^3.0.0":
   version: 3.0.0
   resolution: "stream-browserify@npm:3.0.0"
@@ -13100,6 +13127,7 @@ __metadata:
   resolution: "web@workspace:apps/web"
   dependencies:
     "@hookform/resolvers": "npm:^3.3.4"
+    "@playwright/test": "npm:1.65.1"
     "@radix-ui/react-dialog": "npm:^1.1.1"
     "@radix-ui/react-icons": "npm:^1.3.0"
     "@radix-ui/react-label": "npm:^2.1.7"
@@ -13107,9 +13135,13 @@ __metadata:
     "@radix-ui/react-switch": "npm:^1.1.0"
     "@radix-ui/react-tabs": "npm:^1.1.0"
     "@radix-ui/react-tooltip": "npm:^1.2.8"
+    "@repo/api": "npm:*"
+    "@repo/constants": "npm:*"
     "@repo/eslint-config": "npm:*"
+    "@repo/store": "npm:*"
     "@repo/typescript-config": "npm:*"
     "@repo/ui": "npm:*"
+    "@repo/zod": "npm:*"
     "@shadcn/ui": "npm:^0.0.4"
     "@solana/web3.js": "npm:^1.95.3"
     "@types/minimatch": "npm:^6.0.0"
@@ -13141,7 +13173,6 @@ __metadata:
     recoil: "npm:^0.7.7"
     recoil-persist: "npm:^5.1.0"
     sonner: "npm:^1.5.0"
-    store: "npm:*"
     tailwind-merge: "npm:^2.5.2"
     tailwindcss: "npm:^3.4.10"
     tailwindcss-animate: "npm:^1.0.7"

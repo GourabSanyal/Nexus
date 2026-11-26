@@ -1,7 +1,7 @@
-import { loadEnv } from "./utils/loadEnv";
-import { validateEnv } from "./configs/envValidation";
+import { loadEnv } from "./utils/loadEnv.js";
+import { validateEnv } from "./configs/envValidation.js";
 import { getCorsOptions } from "./configs/corsConfig.js";
-import { requestLogger, errorHandler } from "./middleware/index";
+import { requestLogger, errorHandler } from "./middleware/index.js";
 import {
   generalRateLimiter,
   walletRateLimiter,
@@ -14,8 +14,8 @@ validateEnv();
 import express from "express";
 import cors from "cors";
 import axios from "axios";
-import { ethereumRoutes } from "./routes/ethereum";
-import { solanaRoutes } from "./routes/solana";
+import { ethereumRoutes } from "./routes/ethereum.js";
+import { solanaRoutes } from "./routes/solana.js";
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3001;

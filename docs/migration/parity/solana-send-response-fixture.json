@@ -4,16 +4,16 @@
   "endpoint_send": "POST /wallet/solana/send",
   "request_prepare": {
     "address": "cBXvXnd8cUdyuNaUjdeakEWZ42Wbh5bhwpeMC5FSdRP",
-    "cluster": "mainnet-beta"
+    "cluster": "mainnet"
   },
   "response_prepare": {
     "chain": "solana",
-    "cluster": "mainnet-beta",
+    "cluster": "mainnet",
     "blockhash": "5R1ExampleBlockhash111111111111111111111111111111111",
     "lastValidBlockHeight": 283800000
   },
   "request_send": {
-    "cluster": "mainnet-beta",
+    "cluster": "mainnet",
     "signedTransaction": "<base64-signed-transaction>"
   },
   "response_send": {
@@ -21,6 +21,7 @@
   },
   "notes": [
     "Fixture records request/response contract shape for Solana send prepare/send endpoints.",
+    "Canonical Solana cluster is \"mainnet\" (\"mainnet-beta\" remains an accepted alias).",
     "Values are representative placeholders for deterministic parity checks.",
     "Edge-case assertions are covered in tests/transaction_api_test.rs."
   ]

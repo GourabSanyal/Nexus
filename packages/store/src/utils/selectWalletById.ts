@@ -2,7 +2,7 @@ import type {
   PublicEthereumWallet,
   PublicSolanaWallet,
   WalletPublicSchema,
-} from "@my-org/zod";
+} from "@repo/zod";
 
 type WalletListSlice = Pick<WalletPublicSchema, "solanaWallets" | "ethereumWallets">;
 

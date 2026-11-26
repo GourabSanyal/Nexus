@@ -1,4 +1,4 @@
-import { ChainEnum, NetworkEnum } from "@my-org/store";
+import { ChainEnum, NetworkEnum } from "@repo/store";
 
 /** Shared chain presentation rules — call via `IWalletAdapter`, not from UI. */
 export function buildExplorerTransactionUrl(
@@ -25,6 +25,7 @@ export function buildReceivePaymentUri(
   network: NetworkEnum
 ): string {
   if (chain === ChainEnum.Solana) {
+    // Solana Pay URI scheme uses "mainnet-beta"; API cluster remains "mainnet".
     const cluster = network === NetworkEnum.Devnet ? "devnet" : "mainnet-beta";
     return `solana:${publicKey}?cluster=${cluster}`;
   }

@@ -1,5 +1,5 @@
-import { BalanceParams } from "@api-types/BalanceParams";
-import { rustApiClient } from "@api-utils/rustApiClient";
+import { BalanceParams } from "@repo/api/types/BalanceParams";
+import { rustApiClient } from "@repo/api/utils/rustApiClient";
 
 export const getSolBalance = async ({
   address,

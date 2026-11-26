@@ -1,10 +1,10 @@
 import { useRecoilState } from "recoil";
 import { useMemo, useCallback } from "react";
-import { ChainEnum, NetworkEnum } from "@repo/store/src/enums/network";
+import { ChainEnum, NetworkEnum } from "@repo/store";
 import {
   globalNetworkState,
   walletNetworkOverrideState,
-} from "@repo/store/src/atoms/networkState";
+} from "@repo/store";
 import { IWalletAdapter } from "@/app/lib/adapters/IWalletAdapter";
 import {
   NetworkManager,

@@ -1,2 +1,2 @@
-export * from "./BalanceParams";
-export * from "./TransactionTypes";
+export * from "./BalanceParams.js";
+export * from "./TransactionTypes.js";

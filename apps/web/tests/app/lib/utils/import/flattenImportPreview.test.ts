@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
-import type { WalletImportPreview } from "@my-org/zod";
+import type { WalletImportPreview } from "@repo/zod";
 import {
   flattenImportPreview,
   walletHasOnChainActivity,
@@ -56,15 +55,15 @@ describe("walletHasOnChainActivity", () => {
           {
             signature: "sig",
             slot: 1,
-            block_time: null,
+            blockTime: null,
             status: "success",
             err: null,
-            confirmation_status: null,
+            confirmationStatus: null,
             amount: null,
             fee: null,
             direction: null,
-            from_address: null,
-            to_address: null,
+            fromAddress: null,
+            toAddress: null,
             memo: null,
           },
         ],
@@ -129,10 +128,56 @@ describe("flattenImportPreview", () => {
     expect(entries[0]?.balance).toBe("1000");
   });
 
-  it("includes all six active wallets from a real import preview", () => {
-    const preview = JSON.parse(
-      readFileSync("/tmp/import-preview.json", "utf8")
-    ) as WalletImportPreview;
+  it("includes all six active wallets across chains and networks", () => {
+    const preview = basePreview();
+    preview.solana.mainnet.wallets = [
+      walletEntry({
+        address: "SolMain0",
+        derivationPath: "m/44'/501'/0'/0'",
+        balance: "1000",
+        hasActivity: true,
+      }),
+      walletEntry({
+        address: "SolMain1",
+        derivationPath: "m/44'/501'/1'/0'",
+        accountIndex: 1,
+        balance: "2000",
+        hasActivity: true,
+      }),
+    ];
+    preview.solana.devnet.wallets = [
+      walletEntry({
+        address: "SolDev0",
+        derivationPath: "m/44'/501'/2'/0'",
+        accountIndex: 2,
+        balance: "3000",
+        hasActivity: true,
+      }),
+    ];
+    preview.ethereum.mainnet.wallets = [
+      walletEntry({
+        address: "0xEthMain0",
+        derivationPath: "m/44'/60'/0'/0/0",
+        balance: "0x1",
+        hasActivity: true,
+      }),
+      walletEntry({
+        address: "0xEthMain1",
+        derivationPath: "m/44'/60'/0'/0/1",
+        accountIndex: 1,
+        balance: "0x2",
+        hasActivity: true,
+      }),
+    ];
+    preview.ethereum.devnet.wallets = [
+      walletEntry({
+        address: "0xEthDev0",
+        derivationPath: "m/44'/60'/0'/0/2",
+        accountIndex: 2,
+        balance: "0x3",
+        hasActivity: true,
+      }),
+    ];
 
     const entries = flattenImportPreview(preview);
     expect(entries).toHaveLength(6);

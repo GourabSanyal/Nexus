@@ -1,5 +1,5 @@
 import { atom } from "recoil";
-import { EthereumWallet } from '@my-org/zod'
+import { EthereumWallet } from '@repo/zod'
 
 export const ethereumWalletsState = atom<EthereumWallet[]>({
     key: "ethereumWalletsState",

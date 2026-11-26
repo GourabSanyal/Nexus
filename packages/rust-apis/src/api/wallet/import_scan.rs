@@ -25,7 +25,10 @@ pub async fn scan_network(
 
     // Batch fetch all balances in a single RPC call (reduces subrequests dramatically)
     // This allows scanning 100+ wallets with only 1 HTTP request per network
-    let addresses: Vec<&str> = chain_candidates.iter().map(|c| c.address.as_str()).collect();
+    let addresses: Vec<&str> = chain_candidates
+        .iter()
+        .map(|c| c.address.as_str())
+        .collect();
     let balances = adapter
         .get_balances_batch(&addresses, Some(cluster), env_rpc.as_deref())
         .await
@@ -39,7 +42,7 @@ pub async fn scan_network(
             .unwrap_or_else(|| "0".to_string());
 
         // Skip transaction fetching during import to stay under Cloudflare's 50 subrequest limit.
-        // Transactions can be fetched lazily via /wallet/transactions endpoint when needed.
+        // Transactions can be fetched lazily via POST /wallet/<chain>/transactions when needed.
         let has_activity = balance_has_funds(&balance);
 
         wallets.push(WalletImportEntry {

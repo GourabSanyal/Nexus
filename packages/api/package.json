@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "name": "api",
+  "name": "@repo/api",
   "packageManager": "yarn@4.5.3",
   "type": "module",
   "main": "dist/api/src/server.js",
@@ -11,6 +11,7 @@
     "start:prod": "NODE_ENV=production tsx --tsconfig tsconfig.json src/server.ts"
   },
   "dependencies": {
+    "@repo/constants": "*",
     "axios": "^1.12.2",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",

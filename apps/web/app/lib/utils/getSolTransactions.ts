@@ -1,9 +1,9 @@
 import {
   TransactionResponse,
   TransactionRequest,
-} from "@api-types/TransactionTypes";
-import { rustApiClient } from "@api-utils/rustApiClient";
-import { GetSolTransactionsParams } from "@/app/types/components/GetSolanaTransactionProps";
+} from "@repo/api/types/TransactionTypes";
+import { rustApiClient } from "@repo/api/utils/rustApiClient";
+import { GetSolanaTransactionsParams } from "@/app/types/components/GetSolanaTransactionsParams";
 
 export const getSolTransactions = async ({
   address,
@@ -11,7 +11,7 @@ export const getSolTransactions = async ({
   limit = 20,
   cursor,
   untilSignature,
-}: GetSolTransactionsParams): Promise<TransactionResponse> => {
+}: GetSolanaTransactionsParams): Promise<TransactionResponse> => {
   const client = rustApiClient();
 
   const requestData: TransactionRequest = {

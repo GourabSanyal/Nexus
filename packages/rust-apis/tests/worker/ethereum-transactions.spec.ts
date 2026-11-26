@@ -9,8 +9,8 @@ describe("ethereum tx-history parity and frontend wiring", () => {
     expect(parityFixture.endpoint).toBe("POST /wallet/ethereum/transactions");
     expect(Array.isArray(parityFixture.response.transactions)).toBe(true);
     expect(parityFixture.response.pagination).toMatchObject({
-      has_more: expect.any(Boolean),
-      next_cursor: expect.any(String),
+      hasMore: expect.any(Boolean),
+      nextCursor: expect.any(String),
       limit: expect.any(Number),
     });
   });

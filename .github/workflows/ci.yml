@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, master, dev]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+      - run: corepack enable
+      - run: yarn install --immutable
+      - run: yarn workspace web test
+      - run: yarn workspace rust-apis test:ts
+
+  build:
+    name: Web build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+      - run: corepack enable
+      - run: yarn install --immutable
+      - run: yarn workspace web build
+        env:
+          RUST_API_URL: http://127.0.0.1:9000
+
+  e2e:
+    name: Playwright e2e
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+      - run: corepack enable
+      - run: yarn install --immutable
+      - run: yarn workspace web exec playwright install --with-deps chromium
+      - run: yarn workspace web build
+        env:
+          RUST_API_URL: http://127.0.0.1:9000
+      - run: yarn workspace web test:e2e
+        env:
+          CI: true
+          RUST_API_URL: http://127.0.0.1:9000
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            apps/web/playwright-report
+            apps/web/test-results
+          retention-days: 7

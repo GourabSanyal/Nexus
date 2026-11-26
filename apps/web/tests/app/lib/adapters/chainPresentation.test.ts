@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ChainEnum, NetworkEnum } from "@my-org/store";
+import { ChainEnum, NetworkEnum } from "@repo/store";
 import {
   buildExplorerTransactionUrl,
   buildReceivePaymentUri,

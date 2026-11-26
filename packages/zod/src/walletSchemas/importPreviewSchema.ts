@@ -17,15 +17,15 @@ export const importCandidateSchema = z.object({
 export const importPreviewTransactionSchema = z.object({
   signature: z.string(),
   slot: z.number(),
-  block_time: z.number().nullable(),
+  blockTime: z.number().nullable(),
   status: z.string(),
   err: z.unknown().nullable(),
-  confirmation_status: z.string().nullable(),
+  confirmationStatus: z.string().nullable(),
   amount: z.number().nullable(),
   fee: z.number().nullable(),
   direction: z.string().nullable(),
-  from_address: z.string().nullable(),
-  to_address: z.string().nullable(),
+  fromAddress: z.string().nullable(),
+  toAddress: z.string().nullable(),
   memo: z.string().nullable(),
 });
 

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { flushSync } from "react-dom";
 import { useSetRecoilState } from "recoil";
-import { importWalletState } from "@repo/store/src/atoms/importWalletState";
+import { importWalletState } from "@repo/store";
 import { fetchWalletImportPreview } from "@/app/lib/services/fetchWalletImportPreview";
 import {
   deriveImportCandidates,

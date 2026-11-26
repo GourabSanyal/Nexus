@@ -1,4 +1,4 @@
-import { ChainEnum } from "@my-org/store";
+import { ChainEnum } from "@repo/store";
 
 const LAMPORTS_PER_SOL = 1_000_000_000;
 

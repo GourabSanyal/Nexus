@@ -2,11 +2,12 @@
 
 import React, { createContext, useContext, useCallback, useMemo } from "react";
 import { useRecoilState } from "recoil";
-import { ChainEnum, NetworkEnum } from "@repo/store/src/enums/network";
 import {
+  ChainEnum,
+  NetworkEnum,
   globalNetworkState,
   walletNetworkOverrideState,
-} from "@repo/store/src/atoms/networkState";
+} from "@repo/store";
 import { IWalletAdapter } from "@/app/lib/adapters/IWalletAdapter";
 import { NetworkToggleContextValueProps } from "@/app/types/common/NetworkToggleContextValueProps";
 import {

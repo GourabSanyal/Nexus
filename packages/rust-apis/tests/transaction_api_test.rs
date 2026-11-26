@@ -37,7 +37,7 @@ async fn solana_transactions_valid_address_default_limit_returns_contract_shape(
         "https://example.com/wallet/solana/transactions",
         json!({
             "address": "cBXvXnd8cUdyuNaUjdeakEWZ42Wbh5bhwpeMC5FSdRP",
-            "cluster": "mainnet-beta",
+            "cluster": "mainnet",
             "rpcUrl": "https://api.mainnet-beta.solana.com"
         }),
     );
@@ -64,10 +64,10 @@ async fn solana_transactions_valid_address_default_limit_returns_contract_shape(
         .expect("pagination should exist in response");
     assert!(
         pagination
-            .get("has_more")
+            .get("hasMore")
             .and_then(Value::as_bool)
             .is_some(),
-        "pagination.has_more should be a bool"
+        "pagination.hasMore should be a bool"
     );
     assert!(
         pagination.get("limit").and_then(Value::as_u64).is_some(),
@@ -80,7 +80,7 @@ async fn solana_transactions_invalid_payload_returns_400() {
     let request = build_post_request(
         "https://example.com/wallet/solana/transactions",
         json!({
-            "cluster": "mainnet-beta",
+            "cluster": "mainnet",
             "limit": 20
         }),
     );
@@ -127,7 +127,7 @@ async fn solana_transactions_rpc_failure_returns_500() {
         "https://example.com/wallet/solana/transactions",
         json!({
             "address": "cBXvXnd8cUdyuNaUjdeakEWZ42Wbh5bhwpeMC5FSdRP",
-            "cluster": "mainnet-beta",
+            "cluster": "mainnet",
             "rpcUrl": "http://127.0.0.1:1"
         }),
     );
@@ -171,10 +171,10 @@ async fn ethereum_transactions_valid_address_returns_contract_shape() {
         .expect("pagination should exist in response");
     assert!(
         pagination
-            .get("has_more")
+            .get("hasMore")
             .and_then(Value::as_bool)
             .is_some(),
-        "pagination.has_more should be a bool"
+        "pagination.hasMore should be a bool"
     );
     assert!(
         pagination.get("limit").and_then(Value::as_u64).is_some(),
@@ -281,7 +281,7 @@ async fn solana_send_prepare_rpc_failure_returns_500() {
         "https://example.com/wallet/solana/send/prepare",
         json!({
             "address": "cBXvXnd8cUdyuNaUjdeakEWZ42Wbh5bhwpeMC5FSdRP",
-            "cluster": "mainnet-beta",
+            "cluster": "mainnet",
             "rpcUrl": "http://127.0.0.1:1"
         }),
     );
@@ -307,7 +307,7 @@ async fn solana_send_missing_signed_transaction_returns_400() {
     let request = build_post_request(
         "https://example.com/wallet/solana/send",
         json!({
-            "cluster": "mainnet-beta"
+            "cluster": "mainnet"
         }),
     );
 

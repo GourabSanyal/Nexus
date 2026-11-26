@@ -9,7 +9,7 @@ use wasm_bindgen_test::*;
 async fn solana_balance_valid_address_returns_200_and_balance_key() {
     let payload = json!({
         "address": "cBXvXnd8cUdyuNaUjdeakEWZ42Wbh5bhwpeMC5FSdRP",
-        "cluster": "mainnet-beta",
+        "cluster": "mainnet",
     })
     .to_string();
 

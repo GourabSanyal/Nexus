@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect, useLayoutEffect, useCallback } from "react";
 import { useRecoilValue, useSetRecoilState, useRecoilState } from "recoil";
-import { walletState } from "@my-org/store";
-import { walletFlowState } from "@repo/store/src/atoms/walletFlowState";
-import { importWalletState } from "@repo/store/src/atoms/importWalletState";
+import { walletState } from "@repo/store";
+import { walletFlowState } from "@repo/store";
+import { importWalletState } from "@repo/store";
 import { useTheme } from "../../../lib/contexts/ThemeContext";
 import { toast } from "sonner";
 import { AnimatePresence } from "framer-motion";

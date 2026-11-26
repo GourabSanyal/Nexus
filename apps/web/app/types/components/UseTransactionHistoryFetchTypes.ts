@@ -1,5 +1,5 @@
-import { NetworkEnum } from "@my-org/store";
-import type { PublicEthereumWallet, PublicSolanaWallet } from "@my-org/zod";
+import { NetworkEnum } from "@repo/store";
+import type { PublicEthereumWallet, PublicSolanaWallet } from "@repo/zod";
 import { IWalletAdapter } from "@/app/lib/adapters/IWalletAdapter";
 
 export type WalletRef = PublicSolanaWallet | PublicEthereumWallet | undefined;

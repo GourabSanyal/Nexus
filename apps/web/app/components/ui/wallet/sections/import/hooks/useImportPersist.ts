@@ -2,14 +2,14 @@ import { useCallback, useState } from "react";
 import { flushSync } from "react-dom";
 import { useRecoilState, useSetRecoilState } from "recoil";
 import { toast } from "sonner";
-import type { FlatImportWalletEntry } from "@my-org/zod";
-import { walletState } from "@my-org/store";
-import { importWalletState } from "@repo/store/src/atoms/importWalletState";
-import { walletFlowState } from "@repo/store/src/atoms/walletFlowState";
+import type { FlatImportWalletEntry } from "@repo/zod";
+import { walletState } from "@repo/store";
+import { importWalletState } from "@repo/store";
+import { walletFlowState } from "@repo/store";
 import {
   createEmptySeedPhraseWords,
   type SeedPhraseLength,
-} from "@repo/zod/src/walletSchemas/importWalletSchema";
+} from "@repo/zod";
 import { deriveImportCandidates } from "@/app/lib/utils/import/deriveImportCandidates";
 import { clearImportSession } from "@/app/lib/utils/import/importSessionStorage";
 import { persistImportedWallets } from "@/app/lib/utils/import/persistImportedWallets";

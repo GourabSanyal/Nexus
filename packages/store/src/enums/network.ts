@@ -1,16 +1,6 @@
-export enum ChainEnum {
-  Solana = "solana",
-  Ethereum = "ethereum",
-}
-
-export enum NetworkEnum {
-  Mainnet = "mainnet",
-  Devnet = "devnet",
-  Sepolia = "sepolia",
-  Holesky = "holesky",
-}
-
-export enum NetworkConnectionEnum {
-  NoInternet = "No Internet"
-}
-
+/** Re-export domain network enums from the shared constants package. */
+export {
+  ChainEnum,
+  NetworkEnum,
+  NetworkConnectionEnum,
+} from "@repo/constants";

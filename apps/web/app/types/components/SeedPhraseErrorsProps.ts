@@ -1,5 +1,5 @@
 import type { FieldError, FieldErrors } from "react-hook-form";
-import type { ImportWalletSchema } from "@repo/zod/src/walletSchemas/importWalletSchema";
+import type { ImportWalletSchema } from "@repo/zod";
 
 export type SeedPhraseWordsFieldError = NonNullable<
   FieldErrors<ImportWalletSchema>["inputData"]

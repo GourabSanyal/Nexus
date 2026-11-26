@@ -1,4 +1,4 @@
-import type { FlatImportWalletEntry } from "@my-org/zod";
+import type { FlatImportWalletEntry } from "@repo/zod";
 
 export type ImportPreviewWalletView = {
   entry: FlatImportWalletEntry;
@@ -8,6 +8,8 @@ export type ImportPreviewWalletView = {
   networkColorClass: string;
   currencySymbol: string;
   formattedBalance: string;
+  formattedUsd: string | null;
+  usdTitle?: string;
   formattedAddress: string;
   schemeLabel: string;
   hasActivity: boolean;

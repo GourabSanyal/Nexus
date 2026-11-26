@@ -1,1 +1,1 @@
-export * from "./index/getBalance";
+export * from "./index/getBalance.js";

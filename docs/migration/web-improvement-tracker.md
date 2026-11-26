@@ -36,7 +36,7 @@ Companion to [`apps/web/Rules.md`](../../apps/web/Rules.md). Work **in slice ord
 | --- | --- | --- | --- | --- |
 | 1 | `web-hooks-conditional-network` | Done | `useWalletFeatures.ts`, `useSendModal.ts`, `useTransactionHistory.ts`, `useNetworkManager.ts`, `NetworkManager.ts` | `useNetworkManager` accepts `adapter: null`; `getEffectiveNetworkFromStores` for read path |
 | 2 | `web-network-authority` | Done | `NetworkManager.ts`, `useNetworkManager.ts`, `NetworkToggleContext.tsx` | Stateless manager; context shares `NetworkManager` + `getEffectiveNetworkFromStores` |
-| 3 | `web-select-wallet-by-id` | Done | `packages/store/.../selectWalletById.ts`, `useSendModal.ts`, `useTransactionHistory.ts` | `selectWalletById` from `@my-org/store` |
+| 3 | `web-select-wallet-by-id` | Done | `packages/store/.../selectWalletById.ts`, `useSendModal.ts`, `useTransactionHistory.ts` | `selectWalletById` from `@repo/store` |
 | 4 | `web-types-send-wallet` | Done | `sendTransaction.ts`, adapters, `useWalletFeatures.ts`, `useSendModal.ts` | Typed send + `TransactionResponse` |
 | 5 | `web-send-modal-props` | Done | `SendModal.tsx`, `SendModalTypes.ts`, `WalletRendererContent.tsx` | Removed redundant `network` prop |
 | 6 | `web-wallet-renderer-split` | Done | `WalletRenderer.tsx`, `useWalletBalanceFetch.ts`, `usePerWalletModalState.ts` | Balance + modal state in hooks |
@@ -226,8 +226,8 @@ Copy and fill when starting a slice.
   - Deleted `packages/store/src/hooks/useNetwork.ts` (removed web imports + dead `fetchBalanceFromAPI`, `fetchAll*Transactions`, placeholder `sendEth`/`sendSol`)
   - `packages/store/tsconfig.json` — removed `@/*` → `apps/web` path alias
   - `packages/store/src/index.ts` — export util instead of `useNetwork`
-  - `apps/web/app/lib/services/NetworkManager.ts` — imports from `@my-org/store`; re-exports read helper
-  - `apps/web/app/hooks/useWalletBalanceFetch.ts` — imports read helper from `@my-org/store`
+  - `apps/web/app/lib/services/NetworkManager.ts` — imports from `@repo/store`; re-exports read helper
+  - `apps/web/app/hooks/useWalletBalanceFetch.ts` — imports read helper from `@repo/store`
 - **Recorded checks:** `npx tsc --noEmit` in `packages/store` Pass / `yarn workspace web build` Pass
 
 ### Slice 12: `web-complexity-history-hook`

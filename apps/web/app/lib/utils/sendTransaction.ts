@@ -1,5 +1,5 @@
-import { ChainEnum } from "@repo/store/src/enums/network";
-import { validateSendInput } from "@my-org/zod";
+import { ChainEnum } from "@repo/store";
+import { validateSendInput } from "@repo/zod";
 import { sendEthereumTransaction } from "./send/sendEthereumTransaction";
 import { sendSolanaTransaction } from "./send/sendSolanaTransaction";
 import type {

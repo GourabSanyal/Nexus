@@ -1,6 +1,6 @@
 import axios from "axios";
 import { TransactionResponse, TransactionInfo } from "../../../types/TransactionTypes.js";
-import { NetworkEnum } from "../../../types/network.js";
+import { NetworkEnum } from "@repo/constants";
 
 interface GetEthTransactionsParams {
   address: string;
@@ -88,15 +88,15 @@ export async function getEthTransactions({
       return {
         signature: t.hash || "",
         slot: parseInt(t.blockNum, 16),
-        block_time: t.metadata?.blockTimestamp ? Math.floor(new Date(t.metadata.blockTimestamp).getTime() / 1000) : null,
+        blockTime: t.metadata?.blockTimestamp ? Math.floor(new Date(t.metadata.blockTimestamp).getTime() / 1000) : null,
         status,
         err: status === "failed" ? "failed" : null,
-        confirmation_status: null,
+        confirmationStatus: null,
         amount: t.value !== undefined ? Number(t.value) : null,
         fee: null,
         direction,
-        from_address: t.from || null,
-        to_address: t.to || null,
+        fromAddress: t.from || null,
+        toAddress: t.to || null,
         memo: null,
       };
     });
@@ -104,8 +104,8 @@ export async function getEthTransactions({
     return {
       transactions,
       pagination: {
-        has_more: mergedTransfers.length > limit,
-        next_cursor: null,
+        hasMore: mergedTransfers.length > limit,
+        nextCursor: null,
         limit,
       },
     };

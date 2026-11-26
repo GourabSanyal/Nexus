@@ -1,13 +1,13 @@
 import { useCallback, useState, MutableRefObject } from "react";
 import { useSetRecoilState } from "recoil";
-import { NetworkEnum } from "@my-org/store";
+import { NetworkEnum } from "@repo/store";
 import {
   transactionHistoryState,
   transactionHistoryLoadingState,
-} from "@repo/store/src/atoms/transactionHistoryState";
-import { TransactionHistoryStore } from "@api-types/TransactionTypes";
+} from "@repo/store";
+import { TransactionHistoryStore } from "@repo/api/types/TransactionTypes";
 import { IWalletAdapter } from "@/app/lib/adapters/IWalletAdapter";
-import type { PublicEthereumWallet, PublicSolanaWallet } from "@my-org/zod";
+import type { PublicEthereumWallet, PublicSolanaWallet } from "@repo/zod";
 import {
   loadMoreTransactionHistory,
   isLoadMoreInFlight,

@@ -37,7 +37,7 @@ router.post("/", validateEthereumRequest, async (req: EthereumRequest, res: Resp
       });
     }
 
-    return res.json({ hash: response.data?.result });
+    return res.json({ signature: response.data?.result });
   } catch (error: any) {
     handleEthereumError(res, error, "Failed to send transaction");
   }
@@ -108,4 +108,4 @@ router.post(
   }
 );
 
-export { router as sendethRouter };
+export { router as sendRouter };

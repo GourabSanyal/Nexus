@@ -1,4 +1,8 @@
 {
   "name": "@repo/constants",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.ts",
+  "types": "index.ts",
   "packageManager": "yarn@4.5.3"
 }

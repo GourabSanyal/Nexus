@@ -45,7 +45,7 @@ Source of truth for architecture, complexity, and change discipline in `apps/web
 ## Change management
 
 - Prefer incremental refactors; keep slices small and reviewable.
-- After behavior changes, update any cross-package contracts (`@api-types`, `@my-org/store`, `@my-org/zod`) in the same change set when needed.
+- After behavior changes, update any cross-package contracts (`@api-types`, `@repo/store`, `@repo/zod`) in the same change set when needed.
 
 ---
 

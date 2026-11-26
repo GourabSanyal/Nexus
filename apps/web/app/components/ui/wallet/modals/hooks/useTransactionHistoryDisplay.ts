@@ -1,11 +1,11 @@
 import { useMemo } from "react";
 import { useRecoilValue } from "recoil";
-import { NetworkEnum } from "@my-org/store";
-import { TransactionInfo } from "@api-types/TransactionTypes";
+import { NetworkEnum } from "@repo/store";
+import { TransactionInfo } from "@repo/api/types/TransactionTypes";
 import {
   transactionHistoryState,
   transactionHistoryLoadingState,
-} from "@repo/store/src/atoms/transactionHistoryState";
+} from "@repo/store";
 import {
   hasCachedTransactions,
   historyCacheKey,

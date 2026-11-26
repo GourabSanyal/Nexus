@@ -10,7 +10,11 @@
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
-      "@repo/*": ["../../packages/*"]
+      "@repo/api": ["../api/src"],
+      "@repo/api/*": ["../api/src/*"],
+      "@repo/constants": ["../constants/index.ts"],
+      "@repo/zod": ["../zod/src/index.ts"],
+      "@repo/*": ["../*"]
     }
   },
   "include": ["src"],

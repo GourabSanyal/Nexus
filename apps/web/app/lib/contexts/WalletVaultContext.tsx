@@ -18,12 +18,12 @@ import {
   walletBalancesState,
   walletNetworkOverrideState,
   clearWalletPersistenceFromStorage,
-} from "@my-org/store";
+} from "@repo/store";
 import type {
   PublicEthereumWallet,
   PublicSolanaWallet,
   WalletPublicSchema,
-} from "@my-org/zod";
+} from "@repo/zod";
 import {
   decryptVault,
   encryptVault,

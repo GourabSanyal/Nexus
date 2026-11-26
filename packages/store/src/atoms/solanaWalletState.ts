@@ -1,5 +1,5 @@
 import { atom } from "recoil";
-import { SolanaWallet } from '@my-org/zod'
+import { SolanaWallet } from '@repo/zod'
 
 export const solanaWalletsState = atom<SolanaWallet[]>({
     key: "solanaWalletsState",

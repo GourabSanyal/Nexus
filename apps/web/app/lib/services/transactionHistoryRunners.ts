@@ -1,9 +1,9 @@
-import { NetworkEnum } from "@repo/store/src/enums/network";
+import { NetworkEnum } from "@repo/store";
 import {
   TransactionInfo,
   PaginationInfo,
   TransactionHistoryStore,
-} from "@api-types/TransactionTypes";
+} from "@repo/api/types/TransactionTypes";
 import {
   historyCacheKey,
   readCachedTransactions,

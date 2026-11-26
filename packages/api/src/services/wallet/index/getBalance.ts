@@ -1,7 +1,7 @@
-import { BalanceParams } from "@api-types/BalanceParams";
-import { checkMissingParams } from "@api-utils/checkMissingParams";
-import { getEthBalance } from "@api-service/ethereum/getEthBalance";
-import { ChainEnum } from "../../../types/network.js";
+import { BalanceParams } from "../../../types/BalanceParams.js";
+import { checkMissingParams } from "../../../utils/checkMissingParams.js";
+import { getEthBalance } from "../ethereum/getEthBalance.js";
+import { ChainEnum } from "@repo/constants";
 
 export const getBalance = async (params: BalanceParams) => {
   checkMissingParams(params);

@@ -6,7 +6,8 @@ use crate::chains::ChainRegistry;
 use crate::models::wallet_import::{ChainImportData, WalletImportRequest, WalletImportResponse};
 use crate::services::wallet_service::resolve_import_candidates;
 
-pub async fn handle_import_data(req: &web_sys::Request) -> (u16, String) {
+/// `POST /wallet/import/preview` — scan candidate addresses for balances/activity.
+pub async fn handle_import_preview(req: &web_sys::Request) -> (u16, String) {
     let request_data = match parse_json_body::<WalletImportRequest>(req).await {
         Ok(data) => data,
         Err(err) => return err,
@@ -25,7 +26,8 @@ pub async fn handle_import_data(req: &web_sys::Request) -> (u16, String) {
 
     // Process networks sequentially to stay under Cloudflare's 50 subrequest limit.
     // Each network scan makes ~12-22 subrequests (2 per wallet candidate).
-    let solana_mainnet = scan_network(solana_adapter, &candidates, "solana", "mainnet-beta", req).await;
+    // Canonical Solana cluster is "mainnet" (alias "mainnet-beta" still accepted by the adapter).
+    let solana_mainnet = scan_network(solana_adapter, &candidates, "solana", "mainnet", req).await;
     let solana_devnet = scan_network(solana_adapter, &candidates, "solana", "devnet", req).await;
     let ethereum_mainnet = scan_network(eth_adapter, &candidates, "ethereum", "mainnet", req).await;
     let ethereum_devnet = scan_network(eth_adapter, &candidates, "ethereum", "sepolia", req).await;

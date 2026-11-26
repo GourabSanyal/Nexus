@@ -9,12 +9,12 @@ import {
 } from "../../dialog/dialog";
 import { Button } from "../../button/button";
 import { useState, useMemo } from "react";
-import { formatDisplayAmount, getChainAmountDecimals } from "@my-org/store";
+import { formatDisplayAmount, getChainAmountDecimals } from "@repo/store";
 import { ClusterToggle } from "../sections/header/ClusterToggle";
 import { useSendModal } from "./hooks/useSendModal";
 import { sendTransaction } from "@/app/lib/utils/sendTransaction";
 import { toast } from "sonner";
-import { validateSendInput } from "@my-org/zod";
+import { validateSendInput } from "@repo/zod";
 import { SendModalProps } from "@/app/types/wallet";
 import { SendModalForm } from "./send/SendModalForm";
 import { getSendErrorMessage } from "./send/getSendErrorMessage";

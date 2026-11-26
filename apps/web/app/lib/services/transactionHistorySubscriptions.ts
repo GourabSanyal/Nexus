@@ -1,5 +1,5 @@
-import { NetworkEnum } from "@repo/store/src/enums/network";
-import { TransactionInfo, PaginationInfo } from "@api-types/TransactionTypes";
+import { NetworkEnum } from "@repo/store";
+import { TransactionInfo, PaginationInfo } from "@repo/api/types/TransactionTypes";
 import { historyCacheKey } from "@/app/components/ui/wallet/modals/utils/transactionHistoryCache";
 import type { HistoryUpdateListener } from "@/app/types/components/TransactionHistoryFetchTypes";
 
@@ -36,7 +36,7 @@ export const hasMoreTransactions = (
   walletId: number,
   cluster: NetworkEnum
 ): boolean =>
-  paginationByKey.get(historyCacheKey(walletId, cluster))?.has_more ?? false;
+  paginationByKey.get(historyCacheKey(walletId, cluster))?.hasMore ?? false;
 
 export const subscribeTransactionHistoryUpdated = (
   walletId: number,

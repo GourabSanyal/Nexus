@@ -1,5 +1,5 @@
 import { UseFormSetValue, UseFormWatch } from "react-hook-form";
-import { ImportWalletSchema } from "@repo/zod/src/walletSchemas/importWalletSchema";
+import { ImportWalletSchema } from "@repo/zod";
 import type { SeedPhraseFieldError } from "./SeedPhraseErrorsProps";
 
 export interface SeedPhraseGridProps {

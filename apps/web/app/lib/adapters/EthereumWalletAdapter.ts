@@ -1,10 +1,10 @@
-import { ChainEnum, NetworkEnum } from "@repo/store/src/enums/network";
+import { ChainEnum, NetworkEnum } from "@repo/store";
 import { IWalletAdapter } from "./IWalletAdapter";
-import { BalanceParams } from "@api-types/BalanceParams";
-import { TransactionResponse, TransactionRequest } from "@api-types/TransactionTypes";
+import { BalanceParams } from "@repo/api/types/BalanceParams";
+import { TransactionResponse, TransactionRequest } from "@repo/api/types/TransactionTypes";
 import { getEthBalance } from "@/app/lib/utils/getEthBalance";
 import { fetchTransactions } from "@/app/lib/utils/fetchTransactions";
-import { validateAddress } from "@my-org/store";
+import { validateAddress } from "@repo/store";
 import {
   sendTransaction,
   type AdapterWalletSendParams,

@@ -1,3 +1,3 @@
-import type { PublicEthereumWallet, PublicSolanaWallet } from "@my-org/zod";
+import type { PublicEthereumWallet, PublicSolanaWallet } from "@repo/zod";
 
 export type Wallet = PublicSolanaWallet | PublicEthereumWallet;
