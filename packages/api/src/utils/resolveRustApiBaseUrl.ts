@@ -4,7 +4,9 @@ export const RUST_API_PROXY_PATH = "/api/rust";
 const LOCAL_RUST_API_URL = "http://localhost:9000";
 
 export function resolveRustApiBaseUrl(): string {
-  if (typeof window !== "undefined") {
+  // `window` is a browser global. The API tsconfig has no DOM lib, so read it
+  // off globalThis instead of naming `window` directly.
+  if (typeof (globalThis as { window?: unknown }).window !== "undefined") {
     return RUST_API_PROXY_PATH;
   }
 
