@@ -24,5 +24,8 @@
   ],
   "dependencies": {
     "@hookform/resolvers": "^3.3.4"
+  },
+  "resolutions": {
+    "@types/minimatch": "5.1.2"
   }
 }

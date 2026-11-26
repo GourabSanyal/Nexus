@@ -16,6 +16,9 @@
     "isolatedModules": true,
     "declaration": true,
     "sourceMap": true,
+    // Do not auto-include every hoisted @types package. @types/minimatch@6 is a
+    // stub with no index.d.ts, and Vercel otherwise fails tsc with TS2688.
+    "types": ["node"],
     "baseUrl": ".",
     "paths":{
       "@repo/constants": ["../constants/index.ts"],
